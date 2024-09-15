@@ -1,0 +1,139 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/header.ejs') %>
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-6">
+            <div class="content-header">
+                <h2 class="content-title">Edit Category</h2>
+                <div>
+                    <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
+                    <button class="btn btn-md rounded font-sm hover-up">Publish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                      <form id="editCategoryForm" action="/admin/editCategory/<%= category._id %>" method="post">
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label" for="name">Category Name</label>
+                                <input type="text"  id="categoryName" name="categoryName" value="<%= category.name %>" class="form-control">
+                                <div id="name-error" class="error-message" style="display:none; color: red;"></div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" for="description">Description</label>
+                                <textarea name="description"id="description" class="form-control" rows="4"><%= category.description %></textarea>
+                                <div id="description-error" class="error-message" style="display:none; color: red;"></div>
+                            </div>
+                            <div class="mb-4 text-center">
+                             
+                                <button type="submit" class="btn btn-md rounded font-sm hover-up w-50">Edit</button>
+                            </div>
+                      </form> <!-- form end -->  
+                    </div> <!-- row.// -->
+                    <!-- <hr class="mb-4 mt-0"> -->
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</section> <!-- content-main end// -->
+
+
+<!-- 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editCategoryForm'); 
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        if (!validateForm()) {
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.error,
+                    icon: 'error'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Category updated successfully',
+                    icon: 'success'
+                }).then(() => {
+                    window.location.href = '/admin/category'; // Redirect after success
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An unexpected error occurred.',
+                icon: 'error'
+            });
+        });
+    });
+
+    function validateForm() {
+        // Your form validation logic
+        clearErrorMessages();
+        let isValid = true;
+        
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+
+        if (name === "") {
+            displayErrorMessage('name-error', 'Please enter a name');
+            isValid = false;
+        }
+        
+        if (description === "") {
+            displayErrorMessage('description-error', 'Please enter a description');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function displayErrorMessage(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.innerText = message;
+        errorElement.style.display = 'block';
+    }
+
+    function clearErrorMessages() {
+        const errorElements = document.getElementsByClassName('error-message');
+        Array.from(errorElements).forEach(element => {
+            element.style.display = 'none';
+            element.innerText = "";
+        });
+    }
+});
+</script>
+ -->
+
+
+
+
+<%- include('../partials/admin/footer.ejs') %>
