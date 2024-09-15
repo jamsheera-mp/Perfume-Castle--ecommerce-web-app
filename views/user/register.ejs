@@ -1,0 +1,211 @@
+<%- include('../partials/user/header.ejs') %>
+
+  <style>
+    .error-message {
+      color: red;
+      font-size: 0.75rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+  </style>
+  <!-- SIGN UP FORM SECTION -->
+  <div class="container my-5 py-5">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-6">
+        <div class="card p-4">
+          <h3 class="text-center mb-4">Sign Up</h3>
+          <form id="reg-form" action="/register" method="POST">
+            <div class="form-group mb-4">
+              <input type="text" class="form-control" id="name" placeholder="Enter your name" name="name" />
+              <div id="error1" class="error-message "></div>
+            </div>
+            <div class="form-group mb-4">
+              <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" />
+
+              <div id="error2" class="error-message"></div>
+            </div>
+            <div class="form-group mb-4">
+              <input type="password" class="form-control" id="password" placeholder="Enter your password"
+                name="password" />
+
+              <div id="error3" class="error-message"></div>
+            </div>
+            <div class="form-group mb-4">
+              <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password"
+                name="confirmPassword" />
+
+              <div id="error4" class="error-message"></div>
+            </div>
+            <% if(locals.message && message.length>0){  %> 
+              <div class="alert alert-danger text-center">
+                  <%=message %>
+              </div>
+         <%}  %> 
+            <div class="text-center d-grid gap-2 mb-4">
+              <button type="submit" class="btn btn-secondary">Sign Up</button>
+            </div>
+          </form>
+
+          <!-- Social Sign Up Buttons -->
+          <div class="text-center">
+            <p class="mb-3">or sign up with</p>
+            <div class="d-grid gap-2">
+              <a href="/auth/google" class="btn btn-outline-danger btn-block mb-2">
+                <i class="fa fa-google"></i> Sign Up with Google
+              </a>
+              <a href="/auth/facebook" class="btn btn-outline-primary btn-block mb-2">
+                <i class="fa fa-facebook"></i> Sign Up with Facebook
+              </a>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <p>
+              Already have an account?
+              <a href="/login" class="text-decoration-none">Log In</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nameId = document.getElementById('name');
+    const emailId = document.getElementById('email');
+    const passwordId = document.getElementById('password');
+    const confirmPasswordId = document.getElementById('confirmPassword');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+    const error4 = document.getElementById('error4');
+    const registerForm = document.getElementById('reg-form')
+
+
+    function nameValidateChecking(e) {
+      const name = document.querySelector('[name="name"]').value;
+      const namePattern = /^[A-Za-z\s]{2,20}$/;
+      if (name === "") {
+        
+        error1.innerHTML = "Name is required"
+        error1.classList.add('show');
+        
+      } else if (!namePattern.test(name)) {
+        
+       error1.innerHTML="Name must be between 2 and 20 characters and contain only letters"
+       error1.classList.add('show');
+      } else {
+        error1.classList.remove('show');
+
+        error1.innerHTML = ""
+      }
+    }
+
+    function emailValidateChecking(e) {
+      const emailVal = emailId.value
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      if (emailVal.trim() === "") {
+        error2.innerHTML = "Email is required"
+        error2.classList.add('show');
+      } else if (!emailPattern.test(emailVal)) {
+       
+        error2.innerHTML = "Invalid email address"
+        error2.classList.add('show');
+      } else {
+        error2.classList.remove('show');
+
+        error2.innerHTML = ""
+
+      }
+    }
+    function passwordValidateChecking(e) {
+      const passwordVal = passwordId.value.trim()
+      const confirmPasswordVal = confirmPasswordId.value.trim();
+      const passwordPattern = /^.{4,20}$/;
+      //const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (passwordVal === "") {
+        error3.innerHTML = "Password is required"
+        error3.classList.add('show');
+      } else if (!passwordPattern.test(passwordVal)) {
+        
+        error3.innerHTML = "Password  must be between 4 and 20 characters long"
+        error3.classList.add('show');
+        //error3.innerHTML = "Password should be at least 8 characters long and should contain at least  one uppercase letter, one lowercase letter, one number and one special character"
+      } else {
+        error3.classList.remove('show');
+
+        error3.innerHTML = ""
+
+      }
+      if (passwordVal !== confirmPasswordVal) {
+       
+        error4.innerHTML = "Passwords do not match"
+        error4.classList.add('show');
+      } else {
+        error4.classList.remove('show');
+
+        error4.innerHTML = ""
+      }
+    }
+
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const registerForm = document.getElementById('reg-form');
+      registerForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        if (clientSideValidation()) {
+          const formData = new FormData(registerForm);
+          fetch('/register', {
+            method: 'POST',
+            body: new URLSearchParams(formData).toString(),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.errors) {
+                displayErrors(data.errors);
+              } else {
+                window.location.href = data.redirectUrl;
+              }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+      });
+    });
+
+    function clientSideValidation() {
+      nameValidateChecking();
+      emailValidateChecking();
+      passwordValidateChecking();
+      return document.querySelectorAll('.error-message.show').length === 0;
+
+    }
+
+    function displayErrors(errors) {
+      errors.forEach(error => {
+        showError(`error${error.param}`, error.msg);
+      });
+    }
+
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.innerHTML = message;
+      errorElement.classList.add('show');
+    }
+
+    function hideError(elementId) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.innerHTML = "";
+      errorElement.classList.remove('show');
+    }
+  </script>
+
+  <%- include('../partials/user/footer.ejs') %>

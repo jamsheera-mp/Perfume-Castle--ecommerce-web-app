@@ -108,6 +108,9 @@ ul, ol {
   opacity: 0.9;
   color: #FFF;
 }
+.btn-dark:{
+  background-color: #2B2D42;
+}
 
 /*----------------------------*\
 	Inputs
@@ -411,9 +414,9 @@ textarea.input {
 \*----------------------------*/
 
 #top-header {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  background-color: #1E1F29;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #ffff;
 }
 
 .header-links li {
@@ -427,10 +430,10 @@ textarea.input {
 }
 
 .header-links li a {
-  color: #FFF;
+  color: #0f0f0f;
 }
 
-.header-links li a:hover {
+/*.header-links li a:hover {
   color: #D10024;
 }
 
@@ -438,7 +441,72 @@ textarea.input {
   color: #D10024;
   margin-right: 5px;
 }
+*/
+/* Dropdown styles */
+.header-links .dropdown {
+  position: relative;
+}
 
+.header-links .dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+.header-links .dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  display: none;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 0.25rem;
+}
+
+.header-links .dropdown-menu.show {
+  display: block;
+}
+
+.header-links .dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 1.5rem;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: inherit;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+}
+
+.header-links .dropdown-item:hover, 
+.header-links .dropdown-item:focus {
+  color: #16181b;
+  text-decoration: none;
+  background-color: #f8f9fa;
+}
+
+.header-links .dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid #e9ecef;
+}
 /*----------------------------*\
 	Logo
 \*----------------------------*/
@@ -446,7 +514,7 @@ textarea.input {
 #header {
   padding-top: 15px;
   padding-bottom: 15px;
-  background-color: #15161D;
+  background-color: #000;
 }
 
 .header-logo {
@@ -2002,14 +2070,20 @@ textarea.input {
 ===========================================================*/
 
 #footer {
-  background: #15161D;
+  background: #000;
   color: #B9BABC;
+  margin-top : auto;
 }
 
 #bottom-footer {
-  background: #1E1F29;
+  background: #000;
 }
-
+.footer-divider {
+  border-top: 2px solid #ffffff96; 
+  margin: 20px auto; 
+  width: 80%;
+  max-width: 1200px;
+}
 .footer {
   margin: 30px 0px;
 }

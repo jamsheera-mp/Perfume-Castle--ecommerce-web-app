@@ -1,0 +1,51 @@
+
+  
+    <%- include('../partials/user/header.ejs') %>
+
+<!-- LOGIN FORM SECTION -->
+ <div class="section my-5 py-5">
+    <div class="container my-5 py-5">
+        <div class="row justify-content-center">
+            <div class="col-sm-12 col-md-6">
+                <div class="card p-4">
+                    <h3 class="text-center mb-4">Log In</h3>
+                    <form action="/login" method="POST">
+                        <div class="form-group mb-5">
+                            <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" required>
+                            <div id="error1" class="error-message"></div>
+                            
+                        </div>
+                        <div class="form-group mb-5">
+                            <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password" required>
+                            <div id="error1" class="error-message"></div>
+                            
+                        </div>
+                        <% if(locals.message && message.length>0){  %> 
+                            <div class="alert alert-danger text-center">
+                                <%= message %>
+                            </div>
+                       <%}  %> 
+                        <div class=" text-center d-grid gap-2 mb-5 mt-5 p-5">
+                            <button type="submit" class="btn btn-secondary">Log In</button>
+                        </div>
+                        <div class="text-center mb-5">
+                            <a href="#" class="text-decoration-none">Forgot Password?</a>
+                        </div>
+                        <div class="text-center mt-5">
+                            <p>Don't have an account? <a href="/register" class="text-decoration-none">Create Account</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+ </div>
+ 
+
+
+
+
+
+    <%- include('../partials/user/footer.ejs') %>
