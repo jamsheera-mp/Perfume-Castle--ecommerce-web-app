@@ -1,0 +1,142 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/header.ejs') %>
+
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Brand</h2>
+                    <p>Add, edit or delete a brand</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form action="/admin/addBrand" method="post" enctype="multipart/form-data">
+
+
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label"> BrandName</label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="name"
+                                        name="name" />
+                                    <small id="name-error" class="error-message text-danger"
+                                        style="display:none;"></small>
+                                </div>
+
+
+                                <div class="mb-4">
+                                    <label class="form-label">Brand Image</label>
+                                    <div class="input-upload">
+                                        <img src="" alt="" />
+                                        <input class="form-control border" name="image" type="file" />
+                                    </div>
+
+                                    <small id="description-error" class="error-message text-danger"
+                                        style="display:none;"></small>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="createCategoryButton">Add New Brand</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th class="text-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="" />
+                                                </div>
+                                            </th> -->
+
+                                            <th>Name</th>
+                                            <th>Image</th>
+
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if(data.length>0){ %>
+                                        <% data.reverse().forEach((brand,index)=>{ %>
+                                            <tr>
+                                                <td>
+                                                    <%= brand.brandName %>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center justify-content-center"
+                                                    style=
+                                                    "width:40px;
+                                                    height:40px;
+                                                    border-radius: 50%;
+                                                    overflow: hidden;"
+                                                    >
+
+                                                   <img
+                                                    src="/uploads/re-image/<%= brand.brandImage[0] %>" 
+                                                    alt="<%= brand.brandName %>"
+                                                    class="img-fluid rounded-circle"
+                                                    style="width:100%;height:auto;">
+
+                                                    </div>
+                                                   
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="dropdown">
+                                                        <a href="#" data-bs-toggle="dropdown"
+                                                            class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                class="material-icons md-more_horiz"></i> </a>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="#">View detail</a>
+                                                            
+                                                            <a class="dropdown-item text-danger" href="#">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                            <% }else{ %>
+                                                <tr>
+                                                    <td colspan="3"> No brands found.</td>
+                                                </tr>
+                                                <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> <!-- .col// -->
+                    </div> <!-- .row // -->
+                </div> <!-- card body .// -->
+            </div> <!-- card .// -->
+            <div class="pagination-container">
+                <div class="pagination-area mt-15 mb-50">
+                    <nav aria-label="Page navigation example">
+                        <% if (currentPage> 1){ %>
+                            <a href="?page=<%= currentPage - 1 %>">&laquo;Previous</a>
+                            <% } %>
+                                <% for(let i=1;i<=totalPages;i++){ %>
+                                    <% if(i===currentPage){ %>
+                                        <span class="current-page">
+                                            <%= i %>
+                                        </span>
+                                        <% }else{%>
+                                            <a href="?page=<%= i %>">
+                                                <%= i %>
+                                            </a>
+                                            <% } %>
+                                                <% } %>
+                                                    <% if(currentPage<totalPages){ %>
+                                                        <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+                                                        <% } %>
+                    </nav>
+                </div>
+            </div>
+
+
+        </section> <!-- content-main end// -->
+
+
+        <%- include('../partials/admin/footer.ejs') %>

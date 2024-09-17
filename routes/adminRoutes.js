@@ -4,9 +4,15 @@ const router = express.Router()
 const {adminAuth} = require('../middlewares/auth')
 const usersController = require('../controllers/admin/usersController')
 const categoryController = require('../controllers/admin/categoryController')
+const brandController = require('../controllers/admin/brandController')
+const multer =  require('multer')
+const storage = require('../helpers/multer')
+const uploads = multer({storage:storage})
 
-//admin auth
+//error mgmt
 router.get('/pageError',adminController.pageError)
+
+//login mgmt
 router.get('/login',adminController.loadLogin)
 router.get('/dashboard',adminAuth,adminController.loadDashboard)
 router.get('/logout',adminController.logout)
@@ -24,5 +30,12 @@ router.get('/editCategory',adminAuth,categoryController.loadEditCategory)
 router.post('/editCategory/:id',adminAuth,categoryController.editCategory)
 //router.get('/deleteCategory',adminAuth,categoryController.deleteCategory)
 
+//brand management
+router.get('/brands',adminAuth,brandController.brandInfo)
+router.post('/addBrand',adminAuth,uploads.single('image'),brandController.addBrand)
+
+
+//product management
+//router.get('/product',adminAuth,categoryController.productInfo)
 
 module.exports =  router;

@@ -58,6 +58,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <% if(data.length>0){ %>
                                         <% cat.reverse().forEach((category,index)=>{ %>
                                             <tr>
                                                 <td>
@@ -68,16 +69,25 @@
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="dropdown">
-                                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                                        <a href="#" data-bs-toggle="dropdown"
+                                                            class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                class="material-icons md-more_horiz"></i> </a>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item" href="#">View detail</a>
-                                                            <a class="dropdown-item" href="/admin/editCategory?id=<%= category._id %>">Edit info</a>
+                                                            <a class="dropdown-item"
+                                                                href="/admin/editCategory?id=<%= category._id %>">Edit
+                                                                info</a>
                                                             <a class="dropdown-item text-danger" href="#">Delete</a>
                                                         </div>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <% }) %>
+                                            <% }else{ %>
+                                                <tr>
+                                                    <td colspan="3"> No category found.</td>
+                                                </tr>
+                                                <% } %>
                                     </tbody>
                                 </table>
                             </div>
@@ -111,21 +121,8 @@
 
 
         </section> <!-- content-main end// -->
-        <footer class="main-footer font-xs">
-            <div class="row pb-30 pt-15">
-                <div class="col-sm-6">
-                    <script>
-                        document.write(new Date().getFullYear())
-                    </script> ©, Evara - HTML Ecommerce Template .
-                </div>
-                <div class="col-sm-6">
-                    <div class="text-sm-end">
-                        All rights reserved
-                    </div>
-                </div>
-            </div>
-        </footer>
-        </main>
+      
+        
         <script>
             function handleFormSubmit(event) {
                 event.preventDefault()
