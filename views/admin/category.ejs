@@ -20,20 +20,20 @@
 
 
                                 <div class="mb-4">
-                                    <label for="product_name" class="form-label">Name</label>
+                                    <label for="product_name" class="form-label"><h5>Name</h5></label>
                                     <input type="text" placeholder="Type here" class="form-control" id="name"
                                         name="name" />
-                                    <small id="name-error" class="error-message text-danger"
-                                        style="display:none;"></small>
+                                    <small id="name-error" class="error-message text-secondary"
+                                        style="display:none;font-size: 10px;"></small>
                                 </div>
 
 
                                 <div class="mb-4">
-                                    <label class="form-label">Description</label>
+                                    <label class="form-label"><h5>Description</h5></label>
                                     <textarea placeholder="Type here" class="form-control" id="descriptionId"
                                         name="description"></textarea>
-                                    <small id="description-error" class="error-message text-danger"
-                                        style="display:none;"></small>
+                                    <small id="description-error" class="error-message text-secondary"
+                                        style="display:none;font-size: 10px;"></small>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary" id="createCategoryButton">Create
@@ -46,19 +46,16 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <!-- <th class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" />
-                                                </div>
-                                            </th> -->
+                                         
 
-                                            <th>Name</th>
-                                            <th>Description</th>
+                                            <th><h5>Name</h5></th>
+                                            <th><h5>Description</h5></th>
+                                            <th><h5>Status</h5></th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% if(data.length>0){ %>
+                                        <% if(cat.length>0){ %>
                                         <% cat.reverse().forEach((category,index)=>{ %>
                                             <tr>
                                                 <td>
@@ -66,6 +63,15 @@
                                                 </td>
                                                 <td>
                                                     <%= category.description %>
+                                                </td>
+                                                <td>
+                                                    <% if(category.isListed === true){ %>
+                                                        <span class="badge bg-success">Listed</span>
+                                                        <% }else if(isDeleted === true){ %>
+                                                            <span class="badge bg-danger">Deleted</span>
+                                                           
+                                                        <% } %>
+
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="dropdown">
@@ -77,7 +83,9 @@
                                                             <a class="dropdown-item"
                                                                 href="/admin/editCategory?id=<%= category._id %>">Edit
                                                                 info</a>
-                                                            <a class="dropdown-item text-danger" href="#">Delete</a>
+                                                            <a class="dropdown-item text-danger" href="/admin/softDeleteCategory/<%= category._id %>">Soft Delete</a>
+                                                            <a class="dropdown-item text-danger" href="/admin/deleteCategory/<%= category._id %>">Delete</a>
+
                                                         </div>
                                                     </div>
                                                 </td>
@@ -126,11 +134,10 @@
         <script>
             function handleFormSubmit(event) {
                 event.preventDefault()
-                if (!validateForm) {
+                if (!validateForm()) {
                     return
-
                 }
-                const name = document.getElementById('name').value
+                const name = document.getElementsByName('name')[0].value
                 const description = document.getElementById('descriptionId').value
 
                 fetch('/admin/addCategory', {
@@ -142,41 +149,45 @@
                     body: JSON.stringify({ name, description })
 
                 })
-                    .then(response => {
-                        if (response.ok) {
+                .then(response => {
+                        if (!response.ok) {
                             return response.json().then(err => {
                                 throw new Error(err.message)
-
                             })
                         }
                         return response.json()
 
                     })
                     .then(data => {
+                        location.reload()
                         console.log('Form submitted:', { name, description });
                         //insert the new category into the table dynamically
-                        const tableBody = document.querySelector('tbody')
-                        const newRow = document.createElement('tr')
-                        newRow.innerHTML =
-                            `<td>${data.category.name}</td>
-                            <td>${data.category.description}</td> `
-                        tableBody.prepend(newRow)
+                        // const tableBody = document.querySelector('tbody')
+                        // const newRow = document.createElement('tr')
+                        // newRow.innerHTML =
+                        //     `<td>${data.category.name}</td>
+                        //     <td>${data.category.description}</td> `
+                        // tableBody.prepend(newRow)
 
 
                         // Optionally, clear the form after submission
-                        document.getElementById('name').value = '';
-                        document.getElementById('descriptionId').value = '';
+                        // document.getElementById('name').value = '';
+                        // document.getElementById('descriptionId').value = '';
 
                         //location.reload()
                     })
                     .catch(error => {
-                        if (error.message == "Category already exists") {
+                        console.log('error:',error);
+                        
+                         if (error.message === 'Category already exists') {
                             Swal.fire({
-                                title: 'OOps..,Category already exists',
+                                title: 'Category already exists',
                                 text: 'Please try again',
                                 icon: 'error',
                             })
-                        } else {
+                         } 
+                        else {
+                            
                             Swal.fire({
                                 title: 'OOps..,Something went wrong',
                                 text: "An error occured while adding category",
@@ -187,11 +198,9 @@
             }
             function validateForm() {
                 clearErrorMessages()
-                const name = document.getElementById('name').value.trim()
+                const name = document.getElementsByName('name')[0].value.trim()
                 const description = document.getElementById('descriptionId').value.trim()
                 isValid = true
-
-
                 if (name === "") {
                     displayErrorMessage('name-error', 'Please enter a name')
                     isValid = false
@@ -207,7 +216,7 @@
 
             }
             function displayErrorMessage(elementId, message) {
-                const errorElement = document.getElementById(elementId)
+                var errorElement = document.getElementById(elementId)
                 errorElement.innerText = message
                 errorElement.style.display = 'block'
             }
@@ -215,8 +224,9 @@
             function clearErrorMessages() {
                 const errorElements = document.getElementsByClassName('error-message')
                 Array.from(errorElements).forEach((element) => {
-                    element.style.display = 'none'
                     element.innerText = ""
+                    element.style.display = 'none'
+                    
                 })
             }
         </script>

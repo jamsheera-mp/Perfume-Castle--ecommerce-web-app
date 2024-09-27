@@ -1,0 +1,107 @@
+<%- include('../partials/user/header.ejs') %>
+
+    <main class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/products">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
+            </ol>
+        </nav>
+
+        <div class="product-detail">
+            <div class="product-images">
+                <div class="main-image">
+                    <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.producName %>" id="main-product-image">
+                </div>
+                <div class="thumbnail-images">
+                    <% product.productImage.forEach((image, index) => { %>
+                        <img src="/uploads/re-image/<%= image %>" alt="<%= product.productName %> - Image <%= index + 1 %>" class="thumbnail" onclick="changeMainImage(this.src)">
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="product-info">
+                <h1><%= product.productName %></h1>
+                <div class="rating">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <span class="star <%= i <= averageRating ? 'filled' : '' %>">★</span>
+                    <% } %>
+                    <span>(<%= reviews.length %> reviews)</span>
+                </div>
+                <p class="price">$<%= product.salePrice ? product.salePrice.toFixed(2) : 'N/A' %></p>
+                <% if (product.productOffer && product.productOffer > 0) { %>
+                    <p class="discount"><%= product.productOffer %>% OFF</p>
+                <% } %>
+                <p class="description"><%= product.description %></p>
+                <% if (product.quantity > 0) { %>
+                    <p class="stock">In Stock: <%= product.quantity %></p>
+                    <button class="btn btn-primary">Add to Cart</button>
+                <% } else { %>
+                    <p class="out-of-stock">Out of Stock</p>
+                <% } %>
+
+                <div class="highlights">
+                    <h3>Highlights</h3>
+                    <ul>
+                        <% product.highlights.forEach(highlight => { %>
+                            <li><%= highlight %></li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="reviews">
+            <h2>Customer Reviews</h2>
+            <% if ( reviews && reviews.length > 0) { %>
+                <% reviews.forEach(review => { %>
+                    <div class="review">
+                        <div class="rating">
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <span class="star <%= i <= review.rating ? 'filled' : '' %>">★</span>
+                            <% } %>
+                        </div>
+                        <p class="review-text"><%= review.text %></p>
+                        <p class="review-author">- <%= review.author %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No reviews yet. Be the first to review this product!</p>
+            <% } %>
+        </div>
+
+        <div class="related-products">
+            <h2>Related Products</h2>
+            <% if(relatedProducts && relatedProducts.length > 0){ %>
+            <div class="product-grid">
+                <% relatedProducts.forEach(relatedProduct => { %>
+                    <div class="product-card">
+                        <img src="/uploads/re-image/<%relatedProduct.productImage[0] %>  " alt="<%= relatedProduct.productName %>">
+                        <h3><%= relatedProduct.productName %></h3>
+                        <p class="price">$<%= relatedProduct.salePrice.toFixed(2) %></p>
+                        <a href="/products/<%= relatedProduct._id %>" class="btn">View Details</a>
+                    </div>
+                <% }) %>
+            </div>
+            <% } else { %>
+                <p>No related products found.</p>
+                <% } %>
+        </div>
+    </main>
+
+   
+   
+    <script>
+        $(document).ready(function(){
+            $('.main-image').zoom();
+        });
+
+        function changeMainImage(src) {
+            $('#main-product-image').attr('src', src);
+            $('.main-image').trigger('zoom.destroy').zoom();
+        }
+    </script>
+ 
+
+ <%- include('../partials/user/footer.ejs') %>

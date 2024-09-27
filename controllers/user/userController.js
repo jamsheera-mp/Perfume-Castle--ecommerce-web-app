@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema')
+const Category = require('../../models/categorySchema')
+const Product = require('../../models/productSchema')
 const { validationResult } = require('express-validator')
 const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
@@ -7,11 +9,20 @@ const bcryptjs = require('bcryptjs')
 const loadHome = async (req, res) => {
     try {
         const user = req.session.user
+        const categories = await Category.find({isListed:true})
+        let  products = await Product.find({
+            isBlocked:false,
+            category:{$in:categories.map(category=>category._id)},
+            quantity:{$gt:0}
+        }).sort({createdOn:-1}).limit(50)
+        
+        
+
         if(user){
-            const userData = await User.findOne({_id:req.session.user})
-            res.render('user/home',{user:userData})
+            const userData = await User.findOne({_id:user})
+            res.render('user/home',{user:userData, products,categories })
         }else{
-            return res.render('user/home',{user:null})
+            return res.render('user/home',{products,categories})
         }
         
     } catch (error) {
@@ -199,6 +210,7 @@ const loadLogin = async (req, res) => {
 }
 const login =async(req,res)=>{
     try {
+        const user = req.session.user
         const {email,password} = req.body
         console.log(req.body);
         

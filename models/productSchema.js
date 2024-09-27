@@ -10,6 +10,10 @@ const productSchema = new Schema({
         type : String,
         required : true 
     },
+    highlights:{
+        type : Array,
+        required : false
+    },
     brand:{
         type : String,
         required : true 
@@ -36,7 +40,7 @@ const productSchema = new Schema({
         default : true
     },
     ml:{
-        type : Number,
+        type : [Number],
         required : true
     },
     productImage:{
@@ -46,6 +50,11 @@ const productSchema = new Schema({
     isBlocked:{
         type : Boolean,
         default : false
+    },
+    isDeleted:{
+        type : Boolean,
+        default :  false
+
     },
     status:{
         type : String,

@@ -14,12 +14,14 @@
     <meta property="og:url" content="">
     <meta property="og:image" content="">
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="/img/blacklogo.jpeg">
+    <link rel="shortcut icon" type="image/x-icon" href="/public/admin/assets/imgs/logo/PCL_BS.jpg">
     <!-- Cropper.js CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <!--i icon-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.x.x/css/all.min.css">
 
     <!-- Template CSS -->
-    <link href="/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="/admin/assets/css/main.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -27,7 +29,7 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="/admin/dashboard" class="brand-wrap">
-                <img src="/assets/imgs/theme/logo.svg" class="logo" alt="Perfume Castle Dashboard">
+                <img src="/admin/assets/imgs/logo/PCL_BS.jpg" class="logo  " alt="Perfume Castle Dashboard" >
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -41,80 +43,52 @@
                     </a>
                 </li>
                 <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-products-list.html"> <i class="icon material-icons md-shopping_bag"></i>
+                    <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
                     <div class="submenu">
-                        <a href="page-products-list.html">Product List</a>
-                        <a href="page-products-grid.html">Product grid</a>
-                        <a href="page-products-grid-2.html">Product grid 2</a>
-                        <a href="page-categories.html">Categories</a>
+                        <a href="/admin/products">Product List</a>
+                        <a href="/admin/productsGrid">Product grid</a>
+                        <a href="/admin/addProducts">Add Product</a>
+                       
+                        
+                        <a href="">Product grid 2</a>
+                        
                     </div>
                 </li>
-                <li class="menu-item has-submenu">
+                <li class="menu-item ">
                     <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-shopping_cart"></i>
                         <span class="text">Category</span>
                     </a>
-                    <div class="submenu">
-                        <a href="page-orders-1.html">Order list 1</a>
-                        <a href="page-orders-2.html">Order list 2</a>
-                        <a href="page-orders-detail.html">Order detail</a>
-                    </div>
+                   
                 </li>
-                <li class="menu-item has-submenu">
+                <li class="menu-item">
                     <a class="menu-link" href="/admin/users"> <i class="icon material-icons md-store"></i>
                         <span class="text">Users</span>
                     </a>
-                    <div class="submenu">
-                        <a href="page-sellers-cards.html">Usercards</a>
-                        <a href="page-sellers-list.html">User list</a>
-                        <a href="page-seller-detail.html">User profile</a>
-                    </div>
-                </li>
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
-                        <span class="text">Add product</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-form-product-1.html">Add product 1</a>
-                        <a href="page-form-product-2.html">Add product 2</a>
-                        <a href="page-form-product-3.html">Add product 3</a>
-                        <a href="page-form-product-4.html">Add product 4</a>
-                    </div>
-                </li>
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
-                        <span class="text">Transactions</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-transactions-1.html">Transaction 1</a>
-                        <a href="page-transactions-2.html">Transaction 2</a>
-                    </div>
-                </li>
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
-                        <span class="text">Account</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="/admin/login">User login</a>
-                        <a href="page-account-register.html">User registration</a>
-                        <a href="/admin/pageError">Error 404</a>
-                    </div>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
-                        <span class="text">Reviews</span>
-                    </a>
-                </li>
+                    <!-- <div class="submenu">
+                        
+                        <a href="/admin/users">User list</a>
+                        <a href="">Usercards</a>
+                        <a href="">User profile</a>
+                    </div> -->
+                
                 <li class="menu-item">
                     <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
-                        <span class="text">Statistics</span>
+                
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Account</span>
                     </a>
+                    <!-- <div class="submenu">
+                        <a href="">Edit Account</a>
+                        
+                    </div> -->
                 </li>
+              
+              
             </ul>
             <hr>
             <ul class="menu-aside">

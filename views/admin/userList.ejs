@@ -16,7 +16,7 @@
                         <div class="col-lg-4 col-md-6 me-auto">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
-                        <div class="col-lg-2 col-md-3 col-6">
+                        <!-- <div class="col-lg-2 col-md-3 col-6">
                             <select class="form-select">
                                 <option>Status</option>
                                 <option>Active</option>
@@ -30,7 +30,7 @@
                                 <option>Show 30</option>
                                 <option>Show 40</option>
                             </select>
-                        </div>
+                        </div> -->
                     </div>
                 </header> <!-- card-header end// -->
                 <div class="card-body">
@@ -38,9 +38,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th scope="col"><b>Name</b></th>
-                                    <th scope="col"><b>Email</b></th>
-                                    <th scope="col"> <b>Action</b> </th>
+                                    <th scope="col"><h5>Name</h5></th>
+                                    <th scope="col"><h5>Email</h5></th>
+                                    <th scope="col"><h5>Status</h5></th>
+                                    <th scope="col"><h5>Action</h5> </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -54,6 +55,13 @@
                                             <td>
                                                 <%= data[i].email %>
                                             </td>
+                                            <td>
+                                                <% if(data[i].isBlocked === true){ %>
+                                                    <span class="badge rounded-pill bg-danger">Blocked</span>
+                                                    <% }else{ %>
+                                                        <span class="badge rounded-pill bg-success">Active</span>
+                                                        <% } %>
+                                                </td>
 
                                             <td class="text-end">
                                                 <div class="dropdown">

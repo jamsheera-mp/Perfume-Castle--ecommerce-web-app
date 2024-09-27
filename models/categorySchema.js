@@ -9,10 +9,16 @@ const categorySchema = new Schema({
     description:{
         type : String,
         required : true
-    },isListed:{
+    },
+    isListed:{
         type:Boolean,
         default:true
     },
+    isDeleted:{
+        type:Boolean,
+        default:false
+    },
+
     categoryOffer:{
         type : Number,
         default:0

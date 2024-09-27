@@ -1,0 +1,36 @@
+
+
+/* Inspired Brands Section CSS */
+/* .brands {
+    background-color:;
+} */
+
+.brand-logo img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    padding: 10px;
+    background-color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.brand-logo img:hover {
+    transform: scale(1.1);
+}
+.brand-item.hidden {
+    display: none;
+}
+#show-more {
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #000;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding:5px 10px;
+    font-size: 14px;
+}
+
+#show-more:hover {
+    background-color: #fff;
+    color: #000;
+}

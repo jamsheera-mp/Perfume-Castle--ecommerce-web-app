@@ -5,7 +5,7 @@ const Category = require('../../models/categorySchema')
 const categoryInfo = async (req,res)=>{
     try {
         const page = parseInt(req.query.page) || 1
-        const limit = 6
+        const limit = 10
         const skip =(page-1)*limit
 
         const categoryData = await Category.find({})
@@ -32,10 +32,12 @@ const categoryInfo = async (req,res)=>{
 }
 const addCategory =async(req,res)=>{
     const {name,description} = req.body
+    console.log(req.body);
+    
 try {
     const existingCategory = await Category.findOne({name})
     if(existingCategory){
-        return res.status(400).json({error:'Category already exists'})
+        return res.status(400).json({message:'Category already exists'})
     }
     const newCategory =  new Category({name,description})
     await newCategory.save()
@@ -91,9 +93,45 @@ const editCategory = async (req,res) =>{
     }
 }
 
+const deleteCategory = async (req,res)=>{
+    try {
+        const id = req.params.id
+        const category = await Category.findByIdAndDelete(id)
+        console.log('deleted category',category);
+        
+        if(category){
+            res.redirect('/admin/category')
+        }
+
+        
+    } catch (error) {
+        
+        console.log('error deleting category',error);
+        
+    }
+}
+const softDeleteCategory = async(req,res)=>{
+    try {
+        const id = req.params.id
+        if(!id){
+            return res.status(400).redirect('/admin/pageError')
+        }
+        await  Category.updateOne({_id:id},{$set:{isDeleted:true}})
+        res.redirect('/admin/category')
+
+    } catch (error) {
+        console.log('error while soft deleting category',error);
+        res.status(500).redirect('/admin/pageError')
+        
+        
+    }
+}
+
 module.exports = {
     categoryInfo,
     addCategory,
     loadEditCategory,
-    editCategory
+    editCategory,
+    deleteCategory,
+    softDeleteCategory
 }

@@ -1,0 +1,69 @@
+<%- include('../partials/user/header.ejs') %>
+
+    <section class="content-main mt-5">
+        <div class="content-header pt-5">
+            <div>
+                <h2 class="content-title card-title ms-5 ps-5">Our Products</h1>
+                <p class="mb-5 ms-5 ps-5">Shop now</p>
+            </div>
+        </div>
+        <div class="card mb-4 ">
+            <header class="card-header">
+                <div class="row gx-3 ">
+                    <div class="col-lg-4 col-md-6 me-auto ms-5 ps-5">
+                        <input type="text" placeholder="Search..." class="form-control">
+                    </div>
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select">
+                          <option value=""></option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select">
+                           <option value=""></option>
+                         
+                        </select>
+                    </div>
+                </div>
+            </header> <!-- card header ends-->
+            <div class="card-body">
+                <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
+                    <% products.forEach(product=>{ %>
+                        <div class="col">
+
+                            <div class="card card-product-grid ms-5 ps-5">
+                                <a href="/product/<%= product._id %>" class="img-wrap"> <img src="/uploads/re-image/<%= product.productImage[0] %>"
+                                        alt="<%= product.productName %>"> </a>
+                                <div class="info-wrap">
+                                    <a href="#" class="title text-truncate">
+                                        <%= product.productName %>
+                                    </a>
+                                    <div class="price mb-2">$<%= product.salePrice.toFixed(2) %>
+                                    </div> <!-- price.// -->
+                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
+                                        <i class="material-icons md-edit"></i> Add to cart
+                                    </a>
+                                    <% if (product.productOffer) { %>
+                                        <p class="discount">
+                                            <%= product.productOffer %>% OFF
+                                        </p>
+                                        <% } %>
+
+                                </div>
+                            </div><!--card -product end-->
+                        </div><!--col end-->
+                        <% }) %>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+        </div>
+
+
+
+        </main>
+
+
+        <%- include('../partials/user/footer.ejs') %>

@@ -1,0 +1,211 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/header.ejs') %>
+
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Products </h2>
+                    <p>View Products</p>
+                </div>
+                <!-- <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div> -->
+            </div>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-4 col-md-6 me-auto">
+                            <!-- <input type="text" placeholder="Search..." class="form-control"> -->
+                        </div>
+                    </div>
+                </header>
+                <div class="card-body">
+            
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                             
+
+                                <th><h5>Name</h5></th>
+                                <th scope="col"><h5>Image</h5></th>
+                                <th scope="col"><h5>Brand</h5></th>
+                                <th scope="col"><h5>Category</h5></th>
+                                <th scope="col"><h5>Quantity</h5></th>
+                                <th scope="col"><h5>Regular Price</h5></th>
+                                <th scope="col"><h5>Offer</h5></th>
+                                <th scope="col"><h5>Sale Price</h5></th>
+                                <th class="text-end"><h5>Action</h5></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(products.length>0){ %>
+                                <% for(let i = products.length-1; i >= 0; i--) { %>
+                                    <tr>
+                                        <td class="text-start"><%= products[i].productName %></td>
+                                        <td>
+                                            <img src="/uploads/re-image/<%= products[i].productImage[0]%>" alt="<%= products[i].productName %>" style="width: 100px; height: auto;">
+
+                                        </td>
+                                        <td><%= products[i].brand %></td>
+                                        <td><%= products[i].category.name %></td>
+                                        <td><%= products[i].quantity %></td>
+                                        <td><%= products[i].regularPrice %></td>
+
+                                        <td>
+                                            <% if(products[i].productOffer){ %>
+                                            <%= products[i].productOffer %>
+                                            <% }else{ %>
+                                                0%
+                                                <% } %>
+
+                                        </td>
+                                        <td> <%= products[i].salePrice %></td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown"
+                                                    class="btn btn-light rounded btn-sm font-sm"> <i
+                                                        class="material-icons md-more_horiz"></i> </a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="#">View detail</a>
+                                                    <a class="dropdown-item"
+                                                        href="/admin/editProduct?id=<%= products[i]._id %>">Edit
+                                                        Product</a>
+                                                        <form action="/admin/deleteProduct/<%= products[i]._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                                            <button type="submit" class="dropdown-item text-danger">Delete Product</button>
+                                                        </form>
+                                                        
+                                                        <form action="/admin/softDeleteProduct/<%= products[i]._id %>" method="POST" onsubmit="return confirm('Are you sure you want to soft delete this product?');">
+                                                            <button type="submit" class="dropdown-item text-danger">Soft Delete</button>
+                                                        </form>
+                                                    <!-- <a class="dropdown-item text-danger" href="/admin//deleteProduct/">Soft Delete</a>
+                                                    <a class="dropdown-item text-danger" href="/admin/softDeleteProduct/">Delete</a> -->
+                                                    <% if(products[i].productOffer===0){ %>
+                                                    <a class="dropdown-item" href=""  onclick="addOffer('<%=products[i]._id%>')">Add Offer</a>
+                                                    <% }else{ %>
+                                                    <a class="dropdown-item text-danger" href="#" onclick="removeOffer('<%=products[i]._id%>')">Remove Offer</a>
+                                                    <% } %>
+                                                    
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                                        <% }else{ %>
+                                            <tr>
+                                                <td colspan="3"> No product found.</td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div> <!-- .col// -->
+            </div> <!-- .row // -->
+            </div> <!-- card body .// -->
+            </div> <!-- card .// -->
+            <div class="pagination-container">
+                <div class="pagination-area mt-15 mb-50">
+                    <nav aria-label="Page navigation example">
+                        <% if (currentPage> 1){ %>
+                            <a href="?page=<%= currentPage - 1 %>">&laquo;Previous</a>
+                            <% } %>
+                                <% for(let i=1;i<=totalPages;i++){ %>
+                                    <% if(i===currentPage){ %>
+                                        <span class="current-page">
+                                            <%= i %>
+                                        </span>
+                                        <% }else{%>
+                                            <a href="?page=<%= i %>">
+                                                <%= i %>
+                                            </a>
+                                            <% } %>
+                                                <% } %>
+                                                    <% if(currentPage<totalPages){ %>
+                                                        <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+                                                        <% } %>
+                    </nav>
+                </div>
+            </div>
+
+
+        </section> <!-- content-main end// -->
+
+<script>
+
+    async function addOffer(productId){
+        const {value:amount} = await Swal.fire({
+            title: 'Add Offer in percentage',
+            input: 'number',
+            inputLabel: 'Offer Percentage',
+            inputPlaceholder: '%'
+        })
+        $.ajax({
+            type: "POST",
+            url: "/admin/addOffer",
+            data:{
+                percentage:amount,
+                productId:productId
+            },
+            success:(response)=>{
+                if(response.status===true){
+                    location.reload()
+                    Swal.fire('Offer added','The offer has been removed','success')
+                }else{
+                    alert('failed')
+                }
+
+            }
+        })
+        
+    }
+
+    function removeOffer(productId){
+        try{
+            Swal.fire({
+                title: 'Remove offer?',
+                text: 'Are you sure you want to remove the offer?',
+                icon:'warning',
+                showCancelButton:true,
+                confirmButtonColor:'#3085d6',
+                cancelButtonColor:'#d33',
+                confirmButtonText:'Yes, remove it!',
+                cancelButtonText:'No, cancel it!',
+                timer:5000,
+                timerProgressBar:true
+
+
+            }).then(async (result)=>{
+                if(result.isConfirmed){
+                    $.ajax({
+                        url:'/admin/removeOffer',
+                        method:'POST',
+                        data:{
+                            productId:productId,
+                        },
+                        success:(response)=>{
+                            if(response.status===true){
+                                Swal.fire('Removed!,','The offer has been removed','success')
+                                location.reload()
+                            }else if(response.status===false){
+                                Swal.fire('failed')
+                            }else{
+                                alert('failed')
+                            }
+                        }
+
+                    })
+                }
+            })
+        }catch(error){
+            console.error(error);
+            
+        }
+    }
+
+</script>
+
+
+
+       
+        <%- include('../partials/admin/footer.ejs') %>
