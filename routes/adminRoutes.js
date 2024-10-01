@@ -49,8 +49,9 @@ router.get('/productsGrid',adminAuth,productController.getAllProductsGrid)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,uploads.array('images',3),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
-router.post('/addOffer',adminAuth,productController.addOffer)
-router.get('/removeOffer',adminAuth,productController.removeOffer)
+
 router.post('/deleteProduct/:id',adminAuth,productController.deleteProduct)
 router.post('/softDeleteProduct/:id',adminAuth,productController.softDeleteProduct)
+
+
 module.exports =  router;

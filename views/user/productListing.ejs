@@ -40,9 +40,13 @@
                                     </a>
                                     <div class="price mb-2">$<%= product.salePrice.toFixed(2) %>
                                     </div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Add to cart
-                                    </a>
+                                    <form action="/addToCart" method="POST">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-sm font-sm rounded btn-brand">
+                                            <i class="material-icons md-edit"></i> Add to cart
+                                        </button>
+                                    </form>
                                     <% if (product.productOffer) { %>
                                         <p class="discount">
                                             <%= product.productOffer %>% OFF

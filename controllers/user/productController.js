@@ -16,7 +16,7 @@ const getProductList = async (req, res) => {
             .populate('brand')
             .lean();
 
-            console.log("products:",products);
+            //console.log("products:",products);
             
         const totalProducts = await Product.countDocuments({ status: 'Available' });
         console.log("totalProducts:",totalProducts);
@@ -48,6 +48,13 @@ const getProductDetails = async (req, res) => {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
 
+        // Check if guest user, store viewed products in session
+        if (!req.session.user) {
+            req.session.viewedProducts = req.session.viewedProducts || [];
+            if (!req.session.viewedProducts.includes(product._id.toString())) {
+                req.session.viewedProducts.push(product._id.toString());
+            }
+        }
 
         const reviews = await Review.find({ productId: product._id })
         const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0

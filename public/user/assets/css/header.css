@@ -1,0 +1,114 @@
+/* Sticky Container for Full Header (Announcement + Main Header) */
+.header-area {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0; /* Stick to the top of the page */
+    z-index: 1000; /* Ensure it stays on top */
+    background-color: #000; /* Ensure background stays black */
+    color: #fff; /* White text */
+    border-bottom:#000 !important
+}
+
+/* Announcement Bar */
+.announcement-bar {
+    background-color: #fff !important; /* White background */
+    color: #000 !important; /* Black text */
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    padding:0 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    z-index: 1001; /* Ensure it’s above other elements */
+}
+
+.announcement-bar p {
+    margin: 0;
+}
+
+/* Combined Header (Middle and Bottom) */
+.header-main {
+    background-color: #000 !important; /* Black background */
+    color: #fff !important; /* White text */
+    padding: 10px 0;
+    z-index: 999; /* Ensure it stays above page content */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.logo img {
+    max-height: 40px !important; /* Reduced logo size */
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid gray !important; /* Gray bottom line */
+    padding: 5px;
+    color: gray !important; /* Gray text */
+}
+
+.search-bar span {
+    margin-right: 10px !important;
+}
+
+.search-bar i {
+    font-size: 18px !important;
+    cursor: pointer;
+    color: gray !important; /* Gray search icon */
+}
+
+/* Right Icons (User, Wishlist, Cart) */
+.header-action-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-action-icon {
+    margin-left: 15px !important;
+    color: gray !important; /* Gray icons */
+    font-size: 20px !important;
+}
+.header-action-icon a {
+    color: gray !important; /* Ensure anchor link uses gray color for icons */
+}
+
+
+.pro-count {
+    position: relative !important;
+    top: -10px !important;
+    right: -10px !important;
+    background-color: gray !important;
+    color: white !important;
+    border-radius: 50% !important;
+    padding: 2px 5px !important;
+    font-size: 12px !important;
+}
+
+/* Navigation Menu */
+.nav-wrap {
+    padding: 5px 0 !important;
+}
+
+.main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.main-nav ul li {
+    margin-right: 20px !important;
+}
+
+.main-nav ul li a {
+    color: #fff !important; /* Ensure text stays white */
+    text-decoration: none;
+    font-weight: bold !important;
+}
+
+.main-nav ul li a:hover {
+    text-decoration: underline !important;
+}

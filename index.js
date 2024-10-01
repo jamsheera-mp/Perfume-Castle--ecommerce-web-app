@@ -1,9 +1,11 @@
 require('dotenv').config()
 const express = require('express')
 const session = require('express-session')
+const MongoStore = require('connect-mongo');
 //const Swal = require('sweetalert2')
 //const flash = require('connect-flash')
 const passport = require('./config/passport')
+
 const app = express()
 
 const connectDB = require('./config/db')
@@ -22,13 +24,17 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie:{
-        secure: false,
-        httpOnly:true,
-        maxAge: 1000 * 60 * 60 * 24 * 7 
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI , 
+        ttl: 7 * 24 * 60 * 60, // 1 week (time to live in seconds)
+    }),
+    cookie: {
+        secure: false, // Set true if using HTTPS
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week in milliseconds
     }
+}));
 
-}))
 
 //passport initialize
 app.use(passport.initialize())

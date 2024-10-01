@@ -58,7 +58,7 @@ const addProducts = async(req,res)=>{
                 return res.status(400).json({message:"Category not found"})
             }
             const newProduct = new Product({
-                productName :products.productTitle,
+                productName :products.productName,
                 description:products.description,
                 brand:products.brand,
                 category:categoryId._id,
@@ -277,40 +277,6 @@ const deleteSingleImage = async(req,res)=>{
         res.redirect('/admin/pageError')
     }
 }
-const addOffer = async(req,res)=>{
-    try {
-        const {productId,percentage} = req.body
-        const findProduct = await Product.findOne({_id:productId})
-        const  findCategory = await Category.findOne({_id:findProduct.category})
-        if(findCategory.categoryOffer>percentage){
-            return res.json({status:false,message:"This products category already has a category offer"})
-        }
-        findProduct.salePrice = findProduct.salePrice.Math.floor(findProduct.regularPrice*(percentage/100))
-        findProduct.productOffer = parseInt(percentage)
-        await findProduct.save()
-        findCategory.categoryOffer = 0
-        await findCategory.save()
-        res.json({status:true,message:"Offer added successfully"})
-
-    } catch (error) {
-        res.redirect('/admin/pageError')
-        res.status(500).json({status:false,message:'Internal server error'})
-    }
-}
-
-const removeOffer = async(req,res)=>{
-    try {
-        const {productId} = req.body
-        const findProduct = await Product.findOne({_id:productId})
-        const percentage = findProduct.productOffer
-        findProduct.salePrice = findProduct.salePrice+Math.floor(findProduct.regularPrice*(percentage/100))
-        findProduct.productOffer = 0
-        await findProduct.save()
-        res.json({status:true})
-    } catch (error) {
-       res.redirect('/admin/pageError') 
-    }
-}
 
 const deleteProduct = async(req,res)=>{
     try {
@@ -353,8 +319,7 @@ module.exports = {
     getEditProduct,
     editProduct,
     deleteSingleImage,
-    addOffer,
-    removeOffer,
+    
     deleteProduct,
     softDeleteProduct
 }

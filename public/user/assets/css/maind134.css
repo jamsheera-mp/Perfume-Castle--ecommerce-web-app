@@ -63,113 +63,6 @@ time, mark, audio, video {
   font: inherit;
   vertical-align: baseline;
 }
-/*-----------------------------------------------------------------------------------------------------------------------*/
-/*-- background and text color */
-/* Global Background Color */
-/* *{
-  background-color: rgb(28,28,28);
-} */
-body {
-  /* background-color:rgb(28,28,28,1.0);  Light black background */
-  color: #f0f0f0;             /* Light gray text color for contrast */
-  font-family: Arial, sans-serif;  /* Set a readable font */
-}
-.header-area{
-  background-color: #e8e7e7;  /* Darker background */
-  color: #ffff; 
-}
-
-/* Default heading colors */
-h1, h2, h3, h4, h5, h6 {
-  color: #ffffff;  /* Make headings fully white */
-}
-
-/* Links */
-a {
-  color: #00bcd4;  /* A bright color for links (like teal) */
-  text-decoration: none;
-}
-
-a:hover {
-  color: #ffffff;  /* Change to white on hover */
-}
-
-/* Buttons */
-button, .btn {
-  background-color: #444444;  /* Slightly lighter black for buttons */
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover, .btn:hover {
-  background-color: #555555;  /* Darker hover effect */
-}
-
-/* Inputs and Form Elements */
-input, select, textarea {
-  background-color: #444444;  /* Light black input background */
-  color: #ffffff;             /* White text */
-  border: 1px solid #555555;  /* Border to distinguish the field */
-  padding: 8px;
-  border-radius: 4px;
-}
-
-input::placeholder, textarea::placeholder {
-  color: #bbbbbb;  /* Placeholder color */
-}
-
-input:focus, textarea:focus {
-  border-color: #00bcd4;  /* Highlighted border on focus */
-  outline: none;
-}
-
-/* Section and Containers */
-section, .container {
-  /* background-color: #2c2c2c;  Darker background for sections */
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-/* Cards and Banners */
-.card, .banner-features {
-  /* background-color: #3a3a3a;  Slightly lighter for card elements */
-  color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  text-align: center;
-}
-
-/* Footer */
-footer {
-  background-color: #ede3e3;  /* Darker background for the footer */
-  color: #ffff;  /* Light gray text */
-  padding: 20px;
-  text-align: center;
-}
-
-/* Ensure the navbar also follows the theme */
-.navbar {
-  background-color: #2c2c2c;
-  border-bottom: 1px solid #444444;
-}
-
-.navbar a {
-  color: #ffffff;
-}
-
-.navbar a:hover {
-  color: #00bcd4;
-}
-
-
-
-/*-----------------------------------------------------------------------------------------------------------------------*/
-
 
 thead {
   font-weight: 600;
@@ -3265,32 +3158,27 @@ table .product-thumbnail img {
   padding: 50px;
 }
 
-.brand-features {
+.banner-features {
   text-align: center;
-  padding: 10px;
+  padding: 25px 15px;
   border-radius: 4px;
   border: 1px solid #cce7d0;
   -webkit-box-shadow: 20px 20px 54px rgba(0, 0, 0, 0.03);
           box-shadow: 20px 20px 54px rgba(0, 0, 0, 0.03);
 }
 
-.brand-features:hover {
+.banner-features:hover {
   -webkit-box-shadow: 20px 20px 54px rgba(0, 0, 0, 0.05);
           box-shadow: 20px 20px 54px rgba(0, 0, 0, 0.05);
 }
 
-.brand-features img {
-  width:100px;
-  height:100px;
-  object-fit: cover;
-  border-radius: 50%;
-  overflow: hidden;
-  /* display: inline-block;
-  margin-bottom: 15px; */
+.banner-features img {
+  display: inline-block;
+  margin-bottom: 15px;
 }
 
-.brand-features h4 {
-  font-size: 14px;
+.banner-features h4 {
+  font-size: 13px;
   font-weight: 700;
   display: inline-block;
   padding: 9px 8px 6px 8px;
@@ -9901,7 +9789,7 @@ span.fi-rs-apps {
   .d-sm-none {
     display: none;
   }
-  .brand-features {
+  .banner-features {
     margin-bottom: 15px;
   }
   .product-cart-wrap:not(:last-child), .mb-xs-30 {
@@ -10017,7 +9905,7 @@ span.fi-rs-apps {
   .col-lg-4 .banner-img {
     margin-bottom: 30px;
   }
-  .brand-features {
+  .banner-features {
     margin-bottom: 30px;
   }
 }

@@ -1,0 +1,76 @@
+<%- include('../partials/user/header.ejs') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-3" style="padding-left: 0;">
+            <aside class="navbar-aside bg-light" id="offcanvas_aside" style="height: 100vh; overflow-y: auto; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);">
+                <div class="aside-top py-4 px-3 text-center">
+                    <a href="/user/dashboard" class="brand-wrap">
+                        <img src="/user/assets/imgs/logo/PCL_BS.jpg" class="logo img-fluid" alt="User Dashboard" style="max-width: 150px;">
+                    </a>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm"> <i class="fas fa-bars"></i> </button>
+                    </div>
+                </div>
+                <nav class="mt-4">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active d-flex align-items-center" href="/profile">
+                                <i class="fas fa-user me-2"></i> <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/address">
+                                <i class="fas fa-map-marker-alt me-2"></i> <span>Manage Addresses</span>
+                            </a>
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item"><a class="nav-link" href="/addAddress">Add New Address</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/addresses/edit">Edit Address</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/addresses/delete">Delete Address</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/orders">
+                                <i class="fas fa-receipt me-2"></i> <span>My Orders</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/wishlist">
+                                <i class="fas fa-heart me-2"></i> <span>My Wishlist</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/cart">
+                                <i class="fas fa-shopping-cart me-2"></i> <span>My Cart</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/transactions">
+                                <i class="fas fa-money-check-alt me-2"></i> <span>Transactions</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="/profile/edit">
+                                <i class="fas fa-edit me-2"></i> <span>Edit Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center text-danger" href="/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+        </div>
+
+        <div class="col-9">
+            <main class="content" style="padding: 2rem;">
+                <!-- User Content -->
+                <h1>Welcome to Your Dashboard</h1>
+            </main>
+        </div>
+    </div>
+</div>
+<hr>
+<%- include('../partials/user/footer.ejs') %>

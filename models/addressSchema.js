@@ -23,7 +23,12 @@ const addressSchema = new Schema({
             required : true
 
         },
+       
         landMark:{
+            type : String,
+            required : true
+        },
+        district:{
             type : String,
             required : true
         },
@@ -41,9 +46,12 @@ const addressSchema = new Schema({
         },
         altPhone:{
             type : String,
-            required : true
+            required : false,
+            default: "" 
         }
     }]
+},{
+    timestamps : true
 })
 
 const Address = mongoose.model("Address",addressSchema)

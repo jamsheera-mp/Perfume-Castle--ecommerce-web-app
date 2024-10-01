@@ -1,0 +1,227 @@
+<%- include('../partials/user/header.ejs') %>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-3" style="padding-left: 0;">
+                <aside class="navbar-aside bg-light"
+                    style="height: 100vh; overflow-y: auto; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);">
+                    <div class="aside-top py-4 px-3 text-center">
+                        <a href="/user/dashboard" class="brand-wrap">
+                            <img src="/user/assets/imgs/logo/PCL_BS.jpg" class="logo img-fluid" alt="User Dashboard"
+                                style="max-width: 150px;">
+                        </a>
+                    </div>
+                    <nav class="mt-4">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/user/profile">
+                                    <i class="fas fa-user me-2"></i> <span>Profile Information</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/user/addresses">
+                                    <i class="fas fa-map-marker-alt me-2"></i> <span>Manage Addresses</span>
+                                    <ul class="nav flex-column ms-3"></ul>
+                                    <li class="nav-item"><a class="nav-link" href="/addAddress">Add New Address</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/addresses/edit">Edit Address</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/addresses/delete">Delete Address</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/orders">
+                                    <i class="fas fa-receipt me-2"></i> <span>My Orders</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/wishlist">
+                                    <i class="fas fa-heart me-2"></i> <span>My Wishlist</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/cart">
+                                    <i class="fas fa-shopping-cart me-2"></i> <span>My Cart</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/transactions">
+                                    <i class="fas fa-money-check-alt me-2"></i> <span>Transactions</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="/profile/edit">
+                                    <i class="fas fa-edit me-2"></i> <span>Edit Profile</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center text-danger" href="/logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+
+
+            <!-- Main Content -->
+            <div class="col-9">
+                <main class="content" style="padding: 2rem;">
+                    <h3 class="pb-3">Add a New Address</h3>
+                    <div class="add-address-form" style="max-width: 700px;">
+                        <form action="/address/add" method="POST" id="addAddressForm" novalidate>
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-primary"><i
+                                        class="fas fa-map-marker-alt me-2"></i>Use my current location</button>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <input type="text" name="name" class="form-control" placeholder="Name" required>
+                                    <div class="invalid-feedback">Please enter the name.</div>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" name="phone" class="form-control"
+                                        placeholder="10-digit mobile number" pattern="\d{10}" required>
+                                    <div class="invalid-feedback">Please enter a valid 10-digit mobile number.</div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <input type="text" name="pincode" class="form-control" placeholder="Pincode"
+                                        pattern="\d{6}" required>
+                                    <div class="invalid-feedback">Please enter a valid 6-digit pincode.</div>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" name="city" class="form-control" placeholder="City/Town"
+                                        required>
+                                    <div class="invalid-feedback">Please enter the city/town.</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" name="landMark" class="form-control" placeholder="Landmark" required>
+                                <div class="invalid-feedback">Please enter a landmark.</div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" name="district" class="form-control" placeholder="District" required>
+                                <div class="invalid-feedback">Please enter your district.</div>
+                            </div>
+                            <div class="mb-3">
+                                <select name="state" id="state"  class="form-select" required>
+
+                                <option value="" selected disabled>--Select State--</option>
+                                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chandigarh">Chandigarh</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                                <option value="Daman and Diu">Daman and Diu</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Ladakh">Ladakh</option>
+                                <option value="Lakshadweep">Lakshadweep</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Puducherry">Puducherry</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                            </select>
+                                <div class="invalid-feedback">Please select a state.</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <input type="text" name="altPhone" class="form-control"
+                                        placeholder="Alternate Phone (Optional)">
+                                    <div class="invalid-feedback">Please enter a valid alternate phone number.</div>
+                                </div>
+                                <div class="col-6">
+                                    <label for="addressType">Address Type</label>
+                                    <select name="addressType" class="form-select" required>
+                                        <option value="Home">Home</option>
+                                        <option value="Work">Work</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select an address type.</div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Save Address</button>
+                                <button type="reset" class="btn btn-secondary">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <script>
+        // Client-side form validation
+        (function () {
+            'use strict';
+            const form = document.getElementById('addAddressForm');
+            const inputs = form.querySelectorAll('input, select');
+
+            // Function to check if the field is valid
+            function validateField(field) {
+                if (field.checkValidity()) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                }
+            }
+
+            // Real-time validation on field input
+            inputs.forEach(input => {
+                input.addEventListener('input', function () {
+                    validateField(input);
+                });
+            });
+
+            // Validate on form submission
+            form.addEventListener('submit', function (event) {
+                // Loop over each field to check validity
+                inputs.forEach(input => {
+                    validateField(input);
+                });
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        })();
+    </script>
+
+    <%- include('../partials/user/footer.ejs') %>
