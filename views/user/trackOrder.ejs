@@ -1,0 +1,236 @@
+<%- include('../partials/user/header.ejs') %>
+
+<style>
+    .order-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .order-card:hover {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    .timeline {
+        list-style-type: none;
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline:before {
+        content: ' ';
+        background: #d4d9df;
+        display: inline-block;
+        position: absolute;
+        left: 9px;
+        width: 2px;
+        height: 100%;
+    }
+    .timeline > li {
+        margin: 20px 0;
+        padding-left: 20px;
+    }
+    .timeline > li:before {
+        content: ' ';
+        background: white;
+        display: inline-block;
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid #22c0e8;
+        left: 0;
+        width: 20px;
+        height: 20px;
+    }
+    .timeline > li.active:before {
+        border-color: #28a745;
+    }
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    .toast.show {
+        opacity: 1;
+    }
+    .toast.success {
+        background-color: #28a745;
+    }
+    .toast.error {
+        background-color: #dc3545;
+    }
+</style>
+
+<main class="main">
+    <div class="container py-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Track Order</li>
+            </ol>
+        </nav>
+
+        <div class="card order-card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Track Order: <%= orderId %></h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="card-title">Current Status: <span class="badge bg-info" id="orderStatus"><%= orderStatus %></span></h5>
+                        <ul class="timeline mt-4">
+                            <% statusHistory.forEach(status => { %>
+                                <li class="<%= status.status === orderStatus ? 'active' : '' %>">
+                                    <h6><%= status.status %></h6>
+                                    <p class="text-muted"><%= status.date %></p>
+                                </li>
+                            <% }) %>
+                        </ul>
+                        <% if(orderStatus !== 'Cancelled'){ %>
+                            <form class="cancel-order-form mt-3" data-order-id="<%= orderId %>">
+                                <button type="submit" class="btn btn-danger w-100">Cancel Order</button>
+                            </form>
+                        <% } %>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="card-title">Order Details</h5>
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th>Order Date:</th>
+                                    <td><%= orderDate %></td>
+                                </tr>
+                                <tr>
+                                    <th>Total Amount:</th>
+                                    <td>$<%= total.toFixed(2) %></td>
+                                </tr>
+                                <tr>
+                                    <th>Payment Method:</th>
+                                    <td><%= order.paymentMethod %></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h5 class="card-title mt-4">Shipping Address</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong><%= shippingAddress.name %></strong></p>
+                                <p><%= shippingAddress.landMark %>, <%= shippingAddress.city %>, <%= shippingAddress.district %></p>
+                                <p><%= shippingAddress.state %> - <%= shippingAddress.pincode %></p>
+                                <p>Phone: <%= shippingAddress.phone %></p>
+                                <% if (shippingAddress.altPhone) { %>
+                                    <p>Alt Phone: <%= shippingAddress.altPhone %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="card-title mt-4">Ordered Items</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Product Image</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orderedItems.forEach(item => { %>
+                                <tr>
+                                    <td><%= item.productName %></td>
+                                    <td>
+                                        <img src="/uploads/re-image/<%= item.productImage[0]%>" 
+                                             alt="<%= item.productName %>" 
+                                             class="img-thumbnail" 
+                                             style="width: 50px; height: auto;">
+                                    </td>
+                                    <td><%= item.quantity %></td>
+                                    <td>$<%= (item.quantity *item.price).toFixed(2) %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+
+    
+    
+    const cancelOrderForm = document.querySelector('.cancel-order-form');
+
+    if (cancelOrderForm) {
+        cancelOrderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const orderId = this.getAttribute('data-order-id');
+            
+            fetch(`/cancelOrder/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showToast(data.message, 'success');
+                    updateOrderStatus('Cancelled');
+                    this.style.display = 'none';
+                } else if (data.error) {
+                    showToast(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while cancelling the order', 'error');
+            });
+        });
+    }
+});
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    document.body.appendChild(toast);
+
+    // Trigger reflow
+    toast.offsetHeight;
+
+    // Add show class for animation
+    toast.classList.add('show');
+
+    // Remove the toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300); // Wait for fade out animation
+    }, 3000);
+}
+
+
+
+function updateOrderStatus(newStatus) {
+    const statusElement = document.getElementById('orderStatus');
+    if (statusElement) {
+        statusElement.textContent = newStatus;
+        statusElement.className = 'badge bg-danger';
+    }
+}
+</script>
+
+<%- include('../partials/user/footer.ejs') %>

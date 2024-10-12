@@ -1,0 +1,98 @@
+<%- include('../partials/user/header.ejs') %>
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4">
+                <h3 class="text-center mb-4">Verify OTP</h3>
+                <form id="otpForm" action="" method="POST">
+                    <div class="form-group mb-3">
+                        <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter OTP" required
+                            maxlength="6" pattern="\d*" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block w-100">
+                        Verify Email
+                    </button>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span id="timerValue" class="badge bg-secondary p-2">60</span>
+                        <button type="button" class="btn btn-link" onclick="resendOTP()">
+                            Resend OTP
+                        </button>
+                    </div>
+                    <div id="errorMessage" class="alert alert-danger text-center mt-3" style="display: none;"></div>
+                    <% if (locals.message && message.length> 0) { %>
+                        <div class="alert alert-danger text-center mt-3">
+                            <%= message %>
+                        </div>
+                    <% } %>
+                </form>
+                <p class="text-center mt-3">
+                    Already verified? <a href="/login">Login now</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        // OTP Timer Logic
+        let timer = 60;
+        let timerInterval;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer--;
+                $('#timerValue').text(timer);
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    $('#timerValue').text("Expired").addClass("bg-danger");
+                    $('#otp').prop('disabled', true);
+                    $('#resendOtpBtn').prop('disabled', false);
+                }
+            }, 1000);
+        };
+
+        startTimer();
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        $('#otpForm').submit(function (e) {
+            e.preventDefault();
+            const otp = $('#otp').val();
+
+            $.post("/verify-pwdforgot-otp", { otp: otp }, function (data) {
+                if (data.success) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    showError(data.message || 'Invalid OTP. Please try again.');
+                }
+            });
+        });
+       
+        function resendOTP() {
+            clearInterval(timerInterval);
+            timer = 60;
+            document.getElementById('otp').disabled = false;
+            document.getElementById('timerValue').classList.remove('expired');
+            startTimer();
+            $.ajax({
+                type: 'POST',
+                url: '/resend-otp-for-pwdReset',
+                success: function(data) {
+                    if(data.success) {
+                        alert('OTP has been resent. Please check your email.');
+                    } else {
+                        alert('Failed to resend OTP. Please try again.');
+                    }
+                }
+            });
+            return false;
+        }
+    </script>
+<%- include('../partials/user/footer.ejs') %>

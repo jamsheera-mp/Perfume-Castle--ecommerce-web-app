@@ -1,5 +1,18 @@
 const User = require('../models/userSchema')
 
+
+
+//Authentication : Check if the user is logged in
+const isUserAuthenticated = (req,res,next) =>{
+    if(req.session && req.session.user){
+        return next()
+    }else{
+        res.redirect('/login')
+    }
+}
+
+
+//Authorization : Check if the user is valid and not blocked
 const userAuth = (req,res,next)=>{
     if(req.session && req.session.user){
         const userId = req.session.user
@@ -17,7 +30,7 @@ const userAuth = (req,res,next)=>{
         })
 
     }else{
-        //next()
+        
         res.redirect('/login')
     }
 }
@@ -40,6 +53,7 @@ const adminAuth = (req,res,next)=>{
 
 
 module.exports ={
+    isUserAuthenticated,
     userAuth,
     adminAuth
 }

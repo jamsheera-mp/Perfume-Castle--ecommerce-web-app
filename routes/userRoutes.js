@@ -3,6 +3,8 @@ const router = express.Router()
 const userController = require('../controllers/user/userController')
 const productController = require('../controllers/user/productController')
 const cartController = require('../controllers/user/cartController')
+const orderController = require('../controllers/user/orderController')
+const profileController = require('../controllers/user/profileController')
 const {userAuth} =  require('../middlewares/auth')
 
 
@@ -33,33 +35,51 @@ router.post('/login',userController.login)
 router.post('/verify-otp',userController.verifyOtp)
 router.post('/resend-otp',userController.resendOtp)
 
+//password
+router.get('/forgotPassword',profileController.getForgotPassword)
+router.post('/passwordReset',profileController.passwordReset)
+router.post('/verify-pwdforgot-otp',profileController.verifyPwdForgotOTP)
+router.get('/reset-password',profileController.getResetPwdPage)
+router.post('/resend-otp-for-pwdReset',profileController.resendOtp)
+router.post('/reset-password',profileController.postNewPwd)
 
-//product mgmt
-router.get('/product',productController.getProductList)
-router.get('/product/:id',productController.getProductDetails)
+
+
 
 
 //profile mgmt
- router.get('/profile',userAuth,userController.loadProfile)
- router.get('/address',userAuth,userController.loadAddresses)
- router.post('/addAddress',userAuth,userController.addAddress)
- router.post('/editAddress/:id', userAuth, userController.editAddress)
- router.post('/deleteAddress/:addressId', userAuth, userController.deleteAddress);
+router.get('/profile',userAuth,userController.loadProfile)
+router.get('/address',userAuth,userController.loadAddresses)
+router.post('/addAddress',userAuth,userController.addAddress)
+router.post('/editAddress/:id', userAuth, userController.editAddress)
+router.post('/deleteAddress/:addressId', userAuth, userController.deleteAddress);
+router.post('/updateProfile',userAuth,userController.updateProfile)
+router.post('/changePassword',userAuth,profileController.cahngePassword)
+
+
+//product mgmt
+router.get('/product',userAuth,productController.getProductList)
+router.get('/product/:id',userAuth,productController.getProductDetails)
+router.get('/search', userAuth,productController.searchProducts); //search
 
 
 
- //cart mgmt
- router.get('/cart', cartController.listCartItems)
-router.post('/addToCart', cartController.addToCart)
-router.post('/cart/update', cartController.updateCartItem)
-router.post('/cart/remove', cartController.removeCartItem)
-router.post('/cart/clear', cartController.clearCart)
+
+//cart mgmt
+ router.get('/cart',userAuth, cartController.listCartItems)
+router.post('/addToCart',userAuth, cartController.addToCart)
+router.post('/updateCart',userAuth, cartController.updateCart)
+router.post('/deleteCartItem/:productId', userAuth, cartController.removeCartItem)
+router.post('/clearCart', userAuth,cartController.clearCart)
+
 
 //order mgmt
-// router.get('/order', userAuth, orderController.getOrderList)
-// router.get('/order/:id', userAuth, orderController.getOrderDetails)
-// router.post('/order', userAuth, orderController.createOrder)
-
+router.get('/checkout',userAuth,orderController.getCheckout)
+router.post('/placeOrder',userAuth,orderController.placeOrder)
+router.get('/orderSuccess',userAuth,orderController.getOrderSuccess)
+router.get('/orders', userAuth,orderController.getOrderList);
+router.get('/track-order/:orderId', userAuth,orderController.trackOrder);
+router.post('/cancelOrder/:orderId',userAuth,orderController.cancelOrder)
 
 
 

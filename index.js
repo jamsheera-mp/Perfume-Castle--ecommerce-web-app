@@ -2,15 +2,18 @@ require('dotenv').config()
 const express = require('express')
 const session = require('express-session')
 const MongoStore = require('connect-mongo');
-//const Swal = require('sweetalert2')
+const Swal = require('sweetalert2')
 //const flash = require('connect-flash')
 const passport = require('./config/passport')
+const categoryBrandMiddleware = require('./middlewares/categoriesLoad')
+const cartMiddleware = require('./middlewares/cart')
 
 const app = express()
 
 const connectDB = require('./config/db')
 const path = require('path')
 const userRoutes = require('./routes/userRoutes')
+
 const adminRoutes = require('./routes/adminRoutes')
 const PORT = process.env.PORT || 3000 //port
 connectDB() //db
@@ -35,7 +38,7 @@ app.use(session({
     }
 }));
 
-
+//app.use(flash)
 //passport initialize
 app.use(passport.initialize())
 app.use(passport.session())
@@ -49,6 +52,8 @@ app.use((req, res, next) => {
     res.locals.user = req.session.user || null; // Make 'user' available globally in all views
     next();
 });
+app.use(categoryBrandMiddleware);
+app.use(cartMiddleware);
 
 
 //view engine set up
@@ -62,6 +67,7 @@ app.use(express.static('public')) //static files
 
 //routes
 app.use('/',userRoutes)
+
 app.use('/admin',adminRoutes)
 
 app.listen(PORT,()=>{

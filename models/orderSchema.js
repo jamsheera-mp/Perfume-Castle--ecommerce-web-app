@@ -3,6 +3,7 @@ const {Schema} = mongoose
 const {v4:uuidv4} = require('uuid')
 
 const orderSchema = new Schema({
+   
     orderId:{
         type : String,
         default : ()=> uuidv4(),
@@ -14,7 +15,7 @@ const orderSchema = new Schema({
             ref : "Product",
             required : true
         },
-        quqntity:{
+        quantity:{
             type : Number,
             required : true
         },
@@ -37,10 +38,16 @@ const orderSchema = new Schema({
         required : true
 
     },
-    address:{
-        type : Schema.Types.ObjectId,
-        ref : 'User',
-        required : true
+    address: {
+        addressId: {
+            type: Schema.Types.ObjectId,
+            required: true
+        },
+        parentAddressId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Address',
+            required: true
+        }
     },
     invoiceDate:{
         type  : Date,
@@ -59,11 +66,20 @@ const orderSchema = new Schema({
     couponApplied:{
         type : Boolean,
         default : false
+    },
+    paymentMethod: {
+        type : String,
+        enum : ['CashOnDelivery','Online','wallet'],
+        required : true
+    },
+    paymentStatus:{
+        type: String,
+        enum :['Pending','Paid','Failed'],
+        default: 'Pending'
     }
 },{
     timestamps : true
-}
-)
+})
 
 const Order = mongoose.model('Order',orderSchema)
 module.exports = Order

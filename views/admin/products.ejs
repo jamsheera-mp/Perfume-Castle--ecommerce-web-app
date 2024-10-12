@@ -16,7 +16,7 @@
                 <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
-                            <!-- <input type="text" placeholder="Search..." class="form-control"> -->
+                            <!--<input type="text" placeholder="Search..." class="form-control">-->
                         </div>
                     </div>
                 </header>
@@ -71,7 +71,11 @@
 
                                             </td>
                                             <td>
-                                                <%= products[i].brand %>
+                                                <% if (products[i].brand) { %>
+                                                    <%= products[i].brand.brandName %>
+                                                <% } else { %>
+                                                    No brand
+                                                <% } %>
                                             </td>
                                             <td>
                                                 <%= products[i].category.name %>

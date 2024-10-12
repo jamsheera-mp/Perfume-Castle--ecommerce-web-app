@@ -1,17 +1,20 @@
 const User = require('../../models/userSchema')
 const Category = require('../../models/categorySchema')
+const Brand = require('../../models/brandSchema')
 const Product = require('../../models/productSchema')
-const { validationResult } = require('express-validator')
+// const { validationResult } = require('express-validator')
 const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
 const bcryptjs = require('bcryptjs')
 const Address = require('../../models/addressSchema')
-const cartController = require('../../controllers/user/cartController')
+const Order = require('../../models/orderSchema')
+
 //Load home page
 const loadHome = async (req, res) => {
     try {
         const user = req.session.user
         const categories = await Category.find({ isListed: true })
+        const brands = await Brand.find({ isBlocked: false })
         let products = await Product.find({
             isBlocked: false,
             category: { $in: categories.map(category => category._id) },
@@ -20,11 +23,13 @@ const loadHome = async (req, res) => {
 
 
 
+
+
         if (user) {
-            const userData = await User.findOne({ _id: user })
-            res.render('user/home', { user: userData, products, categories })
+            const userData = await User.findById(user)
+            res.render('user/home', { user: userData, products, categories, brands })
         } else {
-            return res.render('user/home', { products, categories })
+            return res.render('user/home', { products, categories, brands, })
         }
 
     } catch (error) {
@@ -198,7 +203,7 @@ const resendOtp = async (req, res) => {
 const loadLogin = async (req, res) => {
     try {
         if (!req.session.user) {
-           
+
             return res.render('user/login')
         }
         else {
@@ -235,7 +240,7 @@ const login = async (req, res) => {
         }
         req.session.user = findUser._id
         //guest user cart want to store in db
-        await cartController.mergeGuestCartWithUserCart(req,req.user._id);
+        // await cartController.mergeGuestCartWithUserCart(req,req.user);
         res.redirect('/')
 
     } catch (error) {
@@ -247,31 +252,42 @@ const logout = async (req, res) => {
     try {
         req.session.destroy((err) => {
             if (err) {
-                console.log("session destruction error", err)
-                return res.redirect('pageNotFound')
+                console.error('Error destroying session:', err);
+                return res.status(500).json({ success: false, message: 'Logout failed' });
             }
-            return res.redirect('/login')
+             res.redirect('/login')
         })
     } catch (error) {
         console.log("Logout error", error);
-        res.redirect('/pageNotFound')
+        res.status(500).json({ success: false, message: 'An error occurred during logout' });
+        
 
     }
 }
 
 
-//profile mgmt
+//profile mgmt-----------------------------------------------------------------------------------------------------------------------
 
 const loadProfile = async (req, res) => {
     try {
 
         const userId = req.session.user
         const user = await User.findById(userId)
+        const addresses = await Address.find({ userId: userId })
+        // Collect all address IDs of the user
+        const addressIds = addresses.map(address => address._id);
+
+        // Find orders associated with the user's addresses
+        const orders = await Order.find({ 'address.parentAddressId': { $in: addressIds } }).populate('orderedItems.product');
+
+        
+        console.log('Orders:', orders);
+        console.log('Addresses:',addresses)
         if (!user) {
             return res.status(404).render('user/404', { message: "User not found" });
         }
 
-        res.render('user/profile', { user });
+        res.render('user/profile', { user, addresses, orders });
     } catch (error) {
         console.error('Error loading profile page:', error);
         res.redirect('/pageNotFound')
@@ -301,10 +317,22 @@ const loadAddresses = async (req, res) => {
 const addAddress = async (req, res) => {
     try {
         const userId = req.session.user;
-        const user = await User.findById(userId)
-        const { name, phone, pincode, city, landMark, district, state, altPhone, addressType } = req.body;
+        console.log('User Id:',userId);
+        
+        const user = await User.findById(userId);
 
-        // Create a new address object
+        if (!user) {
+            console.log('User not found')
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const { name, phone, pincode, city, landMark, district, state, altPhone, addressType } = req.body;
+        console.log('Received address data:', { name, phone, pincode, city, landMark, district, state, altPhone, addressType });
+
+        // Create the new address object
         const newAddress = {
             name,
             phone,
@@ -313,62 +341,82 @@ const addAddress = async (req, res) => {
             landMark,
             district,
             state,
-            altPhone,
-            addressType
+            addressType,
+            ...(altPhone && { altPhone }) 
         };
-        console.log('new address:', newAddress);
-        // Check if the same address already exists
-        const existingAddress = await Address.findOne({
-            userId,
-            'address.name': name,
-            // 'address.city': city,
-            // 'address.pincode': pincode,
-            // 'address.landMark': landMark
-        });
 
-        if (existingAddress) {
-            // If an identical address already exists, skip adding it
-            return res.status(400).send('This address already exists.');
+        // Find the existing address document or create a new one
+        let addressDoc = await Address.findOne({ userId });
+
+        if (addressDoc) {
+            // Check for duplicate address
+            const isDuplicate = addressDoc.address.some(addr =>
+                addr.name === name &&
+                addr.city === city &&
+                addr.pincode === pincode &&
+                addr.landMark === landMark
+            );
+
+            if (isDuplicate) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'This address already exists'
+                });
+            }
+
+            // Add the new address to the existing document
+            addressDoc.address.push(newAddress);
+        } else {
+            // Create a new address document
+            addressDoc = new Address({
+                userId,
+                address: [newAddress]
+            });
         }
 
-        // Find the user and update their address array
-        await Address.findOneAndUpdate(
-            { userId }, // Find the document with this userId
-            { $push: { address: newAddress } }, // Push the new address into the address array
-            { new: true, upsert: true } // Create the document if it doesn't exist
-        );
+        // Save with validation
+        const savedAddress = await addressDoc.save();
+        console.log('Saved address:', savedAddress);
 
-        // Retrieve all addresses for the user to display
-        const addresses = await Address.find({ userId }).populate('userId');
-        req.session.save()
+        res.status(200).json({
+            success: true,
+            message: 'Address added successfully',
+            addresses: savedAddress.address
+        });
 
-        // Render the addresses view with all addresses
-        res.render('user/addresses', { user, addresses });
     } catch (error) {
         console.error('Error saving address:', error);
-        res.redirect('/pageNotFound');
+
+        // Handle validation errors specifically
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation error',
+                errors: Object.values(error.errors).map(err => err.message)
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Error saving address. Please try again.'
+        });
     }
 };
-
 //Edit address
 const editAddress = async (req, res) => {
     try {
         const addressId = req.params.id;
-        const userId = req.session.user; //store the user ID in session
+        const userId = req.session.user;
 
         const { name, phone, pincode, city, landMark, district, state, addressType } = req.body;
 
-        // Validate input data
-        if (!name || !phone || !pincode || !city || !landMark || !district || !state || !addressType) {
-            return res.status(400).send('Invalid input data');
-        }
 
-        // Retrieve user document
-        const user = await User.findById(userId);
+
+
 
         // Update the address fields in the array
         const updateResult = await Address.updateOne(
-            { userId, 'address._id': addressId }, // Find the specific user and address by ID
+            { userId, 'address._id': addressId },
             {
                 $set: {
                     'address.$.name': name,
@@ -384,50 +432,33 @@ const editAddress = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            return res.status(404).send('Address update failed.');
+            return res.status(404).send({ success: false, message: 'Address update failed.' });
         }
-        req.session.save()
+        //req.session.save()
+        res.json({ success: true, message: 'Address updated successfully.' })
 
-        // Redirect to the addresses management page after successful update
-        res.redirect('/address')
     } catch (error) {
         console.error('Error updating address:', error);
-        res.redirect('/pageNotFound');
+        res.status(500).json({ success: false, message: 'Internal server error' });
+
     }
 }
 // delete address
 const deleteAddress = async (req, res) => {
     try {
-        const userId = req.session.user; // Get the user ID from the session or request
-        const addressId = req.params.addressId; // The ID of the address to delete from the URL parameters
+        const userId = req.session.user; 
+        const addressId = req.params.addressId; 
 
-        // Find the address document for the user
-        const addressDocument = await Address.findOne({ userId: userId });
-        if (!addressDocument) {
-            return res.status(404).json({ success: false, message: 'Address document not found' });
-        }
 
-        // Ensure the address array exists
-        if (!Array.isArray(addressDocument.address) || addressDocument.address.length === 0) {
-            return res.status(400).json({ success: false, message: 'No addresses found' });
-        }
-        console.log('User ID:', userId);
-        console.log('Address Document:', addressDocument);
-        console.log('Address ID to delete:', addressId);
+        const result = await Address.updateOne(
+            { userId: userId },
+            { $pull: { address: { _id: addressId } } }
+        );
+        console.log('Result:', result); 
 
-        // Find the index of the address to be deleted
-        const addressIndex = addressDocument.address.findIndex(a => a._id.toString() === addressId);
-
-        // If the address is not found, return an error
-        if (addressIndex === -1) {
+        if (result.modifiedCount === 0) {
             return res.status(404).json({ success: false, message: 'Address not found' });
         }
-
-        // Remove the address at the found index
-        addressDocument.address.splice(addressIndex, 1);
-
-        // Save the updated address document
-        await addressDocument.save();
 
         return res.status(200).json({ success: true, message: 'Address deleted successfully' });
     } catch (error) {
@@ -435,6 +466,20 @@ const deleteAddress = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { name, email } = req.body;
+
+        // Update user in database
+        await User.findByIdAndUpdate(userId, { name, email });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ success: false, message: 'Error updating profile' });
+    }
+}
 
 module.exports = {
     loadHome,
@@ -450,8 +495,10 @@ module.exports = {
     loadAddresses,
 
     addAddress,
+    updateProfile,
 
     editAddress,
     deleteAddress,
-    logout
+    logout,
+
 }

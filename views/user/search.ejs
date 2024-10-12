@@ -1,0 +1,221 @@
+
+<%- include('../partials/user/header.ejs') %>
+
+
+
+<!-- Main Container -->
+<div class="container mt-4">
+    <!-- Search Header -->
+    <h2>Search Results for "<%= search %>"</h2>
+
+    <!-- Display No Results -->
+    <% if (products.length === 0) { %>
+        <div class="alert alert-warning" role="alert">
+            No products found for your search.
+        </div>
+    <% } else { %>
+        <!-- Results Section -->
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row gx-3">
+                    
+
+                    <!-- Sort By Dropdown -->
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select" id="sortBy" name="sortBy" onchange="applyFilters()">
+                            <option value="popularity" <%= sortBy === 'popularity' ? 'selected' : '' %>>Popularity</option>
+                            <option value="price-low-high" <%= sortBy === 'price-low-high' ? 'selected' : '' %>>Price: Low to High</option>
+                            <option value="price-high-low" <%= sortBy === 'price-high-low' ? 'selected' : '' %>>Price: High to Low</option>
+                            <option value="average-rating" <%= sortBy === 'average-rating' ? 'selected' : '' %>>Average Rating</option>
+                            <option value="new-arrivals" <%= sortBy === 'new-arrivals' ? 'selected' : '' %>>New Arrivals</option>
+                            <option value="a-z" <%= sortBy === 'a-z' ? 'selected' : '' %>>A to Z</option>
+                            <option value="z-a" <%= sortBy === 'z-a' ? 'selected' : '' %>>Z to A</option>
+                        </select>
+                    </div>
+
+                    <!-- Show Out of Stock Checkbox -->
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showOutOfStock" name="showOutOfStock" value="true" <%= showOutOfStock ? 'checked' : '' %> onchange="applyFilters()">
+                            <label class="form-check-label" for="showOutOfStock">
+                                Show Out of Stock
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Products Grid -->
+            <div class="card-body">
+                <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
+                    <% products.forEach(product => { %>
+                        <div class="col">
+                            <div class="card card-product-grid ms-5 ps-5">
+                                <a href="/product/<%= product._id %>" class="img-wrap">
+                                    <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+                                </a>
+                                <div class="info-wrap text-center">
+                                    <a href="#" class="title text-truncate"><%= product.productName %></a>
+                                    <div class="price mb-2 text-center">$<%= product.salePrice.toFixed(2) %></div>
+
+                                    <!-- Display Stock Info -->
+                                    <div class="stock-info mb-2 text-center">
+                                        <%= product.quantity > 0 ? `Stock left: ${product.quantity}` : 'Out of stock' %>
+                                    </div>
+
+                                    <!-- Add to Cart Form -->
+                                    <form action="/addToCart" method="POST">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-sm font-sm rounded btn-brand" <%= product.quantity === 0 ? 'disabled' : '' %>>
+                                            <i class="material-icons md-edit"></i> Add to cart
+                                        </button>
+                                    </form>
+
+                                    <!-- Product Offer -->
+                                    <% if (product.productOffer) { %>
+                                        <p class="discount">
+                                            <%= product.productOffer %>% OFF
+                                        </p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination (if needed) -->
+        <% if (totalPages > 1) { %>
+            <nav aria-label="Search results pagination">
+                <ul class="pagination">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                            <a class="page-link" href="/search?search=<%= search %>&category=<%= category %>&page=<%= i %>&sortBy=<%= sortBy %>&showOutOfStock=<%= showOutOfStock %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    <% } %>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const sortBySelect = document.getElementById('sortBy');
+    const showOutOfStockCheckbox = document.getElementById('showOutOfStock');
+    const resultsContainer = document.querySelector('.card-body .row');
+    const paginationContainer = document.querySelector('.pagination');
+
+    let currentSearchQuery = '';
+
+    // Function to perform initial search
+    function performSearch(e) {
+        e.preventDefault();
+        const searchQuery = document.querySelector('input[name="search"]').value;
+        currentSearchQuery = searchQuery;
+        const url = `/search?search=${encodeURIComponent(searchQuery)}`;
+        window.location.href = url;
+    }
+
+    // Function to update results with filters
+    function updateResults() {
+        const sortBy = sortBySelect.value;
+        const showOutOfStock = showOutOfStockCheckbox.checked;
+        const currentPage = 1; // Reset to first page on filter change
+
+        const url = `/search?search=${encodeURIComponent(currentSearchQuery)}&sortBy=${sortBy}&showOutOfStock=${showOutOfStock}&page=${currentPage}&filter=true`;
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            renderProducts(data.products);
+            renderPagination(data.totalPages, data.currentPage);
+            updateTotalResults(data.totalProducts);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to render products
+    function renderProducts(products) {
+        resultsContainer.innerHTML = products.map(product => `
+            <div class="col">
+                <div class="card card-product-grid ms-5 ps-5">
+                    <a href="/product/${product._id}" class="img-wrap">
+                        <img src="/uploads/re-image/${product.productImage[0]}" alt="${product.productName}">
+                    </a>
+                    <div class="info-wrap text-center">
+                        <a href="#" class="title text-truncate">${product.productName}</a>
+                        <div class="price mb-2 text-center">$${product.salePrice.toFixed(2)}</div>
+                        <div class="stock-info mb-2 text-center">
+                            ${product.quantity > 0 ? `Stock left: ${product.quantity}` : 'Out of stock'}
+                        </div>
+                        <form action="/addToCart" method="POST">
+                            <input type="hidden" name="productId" value="${product._id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-sm font-sm rounded btn-brand" ${product.quantity === 0 ? 'disabled' : ''}>
+                                <i class="material-icons md-edit"></i> Add to cart
+                            </button>
+                        </form>
+                        ${product.productOffer ? `<p class="discount">${product.productOffer}% OFF</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Function to render pagination
+    function renderPagination(totalPages, currentPage) {
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `
+                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+        paginationContainer.innerHTML = paginationHTML;
+
+        // Add event listeners to pagination links
+        paginationContainer.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                updateResults(page);
+            });
+        });
+    }
+
+    // Function to update total results count
+    function updateTotalResults(totalProducts) {
+        const totalResultsElement = document.querySelector('.total-results');
+        if (totalResultsElement) {
+            totalResultsElement.textContent = `${totalProducts} results found`;
+        }
+    }
+
+    // Event listeners
+    searchForm.addEventListener('submit', performSearch);
+    sortBySelect.addEventListener('change', updateResults);
+    showOutOfStockCheckbox.addEventListener('change', updateResults);
+
+    // Set current search query on page load
+    currentSearchQuery = new URLSearchParams(window.location.search).get('search') || '';
+});
+</script>
+
+<%- include('../partials/user/header.ejs') %>

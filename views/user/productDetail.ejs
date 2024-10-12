@@ -22,25 +22,46 @@
             </div>
 
             <div class="product-info">
+
                 <h1><%= product.productName %></h1>
+                
                 <div class="rating">
                     <% for (let i = 1; i <= 5; i++) { %>
                         <span class="star <%= i <= averageRating ? 'filled' : '' %>">★</span>
                     <% } %>
                     <span>(<%= reviews.length %> reviews)</span>
                 </div>
+
                 <p class="price">$<%= product.salePrice ? product.salePrice.toFixed(2) : 'N/A' %></p>
+
                 <% if (product.productOffer && product.productOffer > 0) { %>
                     <p class="discount"><%= product.productOffer %>% OFF</p>
                 <% } %>
+
                 <p class="description"><%= product.description %></p>
+
                 <% if (product.quantity > 0) { %>
                     <p class="stock">In Stock: <%= product.quantity %></p>
-                    <button class="btn btn-primary">Add to Cart</button>
+
+                    <form action="/addToCart" method="POST">
+                    <input type="hidden" name="productId" value="<%= product._id %>">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+
                 <% } else { %>
                     <p class="out-of-stock">Out of Stock</p>
                 <% } %>
-
+                <% if (product.ml && product.ml.length > 0) { %>
+                    <div class="product-ml">
+                        <h3>Available ML</h3>
+                        <ul>
+                            <% product.ml.forEach(size => { %>
+                                <li><%= size %> ml</li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                <% } %>
                 <div class="highlights">
                     <h3>Highlights</h3>
                     <ul>

@@ -1,0 +1,107 @@
+<%- include('../partials/user/header.ejs') %>
+
+
+
+
+
+
+
+
+<!-- Main Container -->
+<div class="container mt-4">
+    <!-- Search Header -->
+    <h2>Search Results for "<%= search %>"</h2>
+
+    <!-- Display No Results -->
+    <% if (products.length === 0) { %>
+        <div class="alert alert-warning" role="alert">
+            No products found for your search.
+        </div>
+    <% } else { %>
+        <!-- Results Section -->
+        <div class="row">
+            <header class="card-header">
+                <div class="row gx-3 ">
+                    
+      
+     
+            <div class="card-body">
+                <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
+                    <% products.forEach(product=>{ %>
+                        <div class="col">
+
+                            <div class="card card-product-grid ms-5 ps-5">
+                                <a href="/product/<%= product._id %>" class="img-wrap"> <img
+                                        src="/uploads/re-image/<%= product.productImage[0] %>"
+                                        alt="<%= product.productName %>"> </a>
+                                <div class="info-wrap text-center">
+                                    <a href="#" class="title text-truncate">
+                                        <%= product.productName %>
+                                    </a>
+                                    <div class="price mb-2 text-center">$<%= product.salePrice.toFixed(2) %>
+                                    </div> <!-- price.// -->
+
+                                    <!-- Display Stock Left -->
+                                    <div class="stock-info mb-2 text-center">
+                                        <%= product.quantity> 0 ? `Stock left: ${product.quantity}` : 'Out of stock' %>
+                                    </div>
+
+                                    <form action="/addToCart" method="POST">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-sm font-sm rounded btn-brand"<%= product.quantity === 0 ? 'disabled' : '' %>>
+                                            <i class="material-icons md-edit"></i> Add to cart
+                                        </button>
+                                    </form>
+                                    <% if (product.productOffer) { %>
+                                        <p class="discount">
+                                            <%= product.productOffer %>% OFF
+                                        </p>
+                                        <% } %>
+
+                                </div>
+                            </div><!--card -product end-->
+                        </div><!--col end-->
+                        <% }) %>
+                </div>
+            </div>
+    <% } %>
+
+
+
+
+
+
+
+
+    
+
+
+
+    <!-- Pagination (if needed) -->
+    <% if (totalPages > 1) { %>
+        <nav aria-label="Search results pagination">
+            <ul class="pagination">
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                        <a class="page-link" href="/search?search=<%= search %>&category=<%= category %>&page=<%= i %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    <% } %>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<%- include('../partials/user/footer.ejs') %>

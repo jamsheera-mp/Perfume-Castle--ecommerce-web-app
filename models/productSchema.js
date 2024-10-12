@@ -4,6 +4,7 @@ const {Schema} = mongoose
 const productSchema = new Schema({
     productName:{
         type : String,
+        required : true, 
         
     },
     description:{
@@ -15,8 +16,9 @@ const productSchema = new Schema({
         required : false
     },
     brand:{
-        type : String,
-        required : true 
+        type : Schema.Types.ObjectId,
+        ref : 'Brand',
+        required : false
     },
     category:{
         type : Schema.Types.ObjectId,
@@ -37,7 +39,7 @@ const productSchema = new Schema({
     },
     quantity:{
         type : Number,
-        default : true
+        default : 0
     },
     ml:{
         type : [Number],
@@ -62,9 +64,23 @@ const productSchema = new Schema({
         required : true,
         default : "Available"
     },
+    popularity:{
+        type:Number,
+        default:0
+    },
+    averageRating:{
+        type:Number,
+        default:0
+    },
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    }
     
 },{timestamps:true})
 
+// Index for improved query performance
+productSchema.index({ productName: 1, salePrice: 1, popularity: -1, averageRating: -1, dateAdded: -1 })
 
 const Product = mongoose.model("Product",productSchema)
 module.exports = Product

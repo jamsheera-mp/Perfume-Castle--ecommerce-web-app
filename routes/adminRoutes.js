@@ -7,6 +7,7 @@ const usersController = require('../controllers/admin/usersController')
 const categoryController = require('../controllers/admin/categoryController')
 const brandController = require('../controllers/admin/brandController')
 const productController = require('../controllers/admin/productController')
+const orderController = require('../controllers/admin/orderController')
 const multer =  require('multer')
 const storage = require('../helpers/multer')
 const uploads = multer({storage:storage})
@@ -52,6 +53,17 @@ router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 
 router.post('/deleteProduct/:id',adminAuth,productController.deleteProduct)
 router.post('/softDeleteProduct/:id',adminAuth,productController.softDeleteProduct)
+
+
+//order mgmt
+
+router.get('/orders', adminAuth, orderController.listOrders);
+router.get('/order/:orderId', adminAuth, orderController.getOrderDetails);// Order details route
+router.post('/order/update/:orderId', adminAuth, orderController.updateOrderStatus);// Order status update route
+router.post('/order/cancel/:orderId', adminAuth, orderController.cancelOrderAndUpdateStock);// Order cancellation route
+
+
+
 
 
 module.exports =  router;

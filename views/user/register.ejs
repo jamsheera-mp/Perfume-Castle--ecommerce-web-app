@@ -27,15 +27,21 @@
 
               <div id="error2" class="error-message"></div>
             </div>
-            <div class="form-group mb-4">
+            <div class="form-group mb-4 position-relative">
               <input type="password" class="form-control" id="password" placeholder="Enter your password"
                 name="password" />
+                <span class="position-absolute top-50 end-0 translate-middle-y me-3"style="cursor:pointer;" onclick="togglePassword()">
+                  <i class="bi bi-eye-slash fs-5" id="toggleIcon"></i>
+              </span>
 
               <div id="error3" class="error-message"></div>
             </div>
-            <div class="form-group mb-4">
+            <div class="form-group mb-4 position-relative">
               <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password"
                 name="confirmPassword" />
+                <span class="position-absolute top-50 end-0 translate-middle-y me-3"style="cursor:pointer;" onclick="togglePassword()">
+                  <i class="bi bi-eye-slash fs-5" id="toggleConfirmIcon"></i>
+              </span>
 
               <div id="error4" class="error-message"></div>
             </div>
@@ -206,6 +212,39 @@
       errorElement.innerHTML = "";
       errorElement.classList.remove('show');
     }
+
+
+
+//toggle password eye
+function togglePassword() {
+    var passwordInput = document.getElementById("password");
+    var confirmPasswordInput = document.getElementById("confirmPassword");
+    var passwordEye = document.getElementById("toggleIcon");
+    var confirmPasswordEye = document.getElementById("toggleConfirmIcon");
+
+    // Toggle password input
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        passwordEye.classList.remove("bi-eye-slash");
+        passwordEye.classList.add("bi-eye");
+    } else {
+        passwordInput.type = "password";
+        passwordEye.classList.remove("bi-eye");
+        passwordEye.classList.add("bi-eye-slash");
+    }
+
+    // Toggle confirm password input
+    if (confirmPasswordInput.type === "password") {
+        confirmPasswordInput.type = "text";
+        confirmPasswordEye.classList.remove("bi-eye-slash");
+        confirmPasswordEye.classList.add("bi-eye");
+    } else {
+        confirmPasswordInput.type = "password";
+        confirmPasswordEye.classList.remove("bi-eye");
+        confirmPasswordEye.classList.add("bi-eye-slash");
+    }
+}
+
   </script>
 
   <%- include('../partials/user/footer.ejs') %>

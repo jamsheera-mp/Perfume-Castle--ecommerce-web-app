@@ -18,6 +18,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="/admin/assets/imgs/logo/PCL_BS.jpg">
     <!-- Template CSS -->
     <link href="/admin/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
 </head>
 
 <body>
@@ -81,7 +83,7 @@
 
 
 
-                    <form action="/admin/login" method="post" id="loginForm">
+                    <form action="/admin/login" method="post" id="loginForm" onsubmit=" return validateForm()">
 
 
                         <div class="mb-3">
@@ -89,14 +91,18 @@
                                 id="email">
 
                         </div> <!-- form-group// -->
-                        <div class="mb-3">
+                        <div class="mb-3 position-relative">
                             <input class="form-control" placeholder="Password" type="password" name="password"
                                 id="password">
+                            <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
+                                onclick="togglePassword()">
+                                <i class="bi bi-eye-slash fs-5" id="" toggleIcon></i>
+                            </span>
 
                         </div> <!-- form-group// -->
                         <!-- Error Message Display -->
                         <% if (typeof message !=='undefined' ) { %>
-                            <div class="alert alert-danger" id="error-message" >
+                            <div class="alert alert-danger" id="error-message">
                                 <%= message %>
                             </div>
                             <% } %>
@@ -165,16 +171,110 @@
 
 
     <script>
-       // Clear error message when user types in the input fields
-       document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', function() {
+//         document.addEventListener('DOMContentLoaded', function() {
+//     const form = document.querySelector('form');
+//     const inputs = form.querySelectorAll('input');
+//     const errorMessages = {
+//         email: 'Please enter a valid email address.',
+//         password: 'Password must be at least 8 characters long.'
+//     };
+
+//     inputs.forEach(input => {
+//         const errorElement = document.createElement('div');
+//         errorElement.className = 'error-message';
+//         errorElement.id = `${input.id}-error`;
+//         errorElement.style.display = 'none';
+//         errorElement.style.color = 'red';
+//         errorElement.style.fontSize = '0.8em';
+//         input.parentNode.insertBefore(errorElement, input.nextSibling);
+
+//         input.addEventListener('input', function() {
+//             validateInput(this);
+//         });
+
+//         input.addEventListener('blur', function() {
+//             validateInput(this);
+//         });
+//     });
+
+//     function validateInput(input) {
+//         const errorElement = document.getElementById(`${input.id}-error`);
+//         if (input.validity.valid) {
+//             errorElement.style.display = 'none';
+//             input.classList.remove('invalid-input');
+//         } else {
+//             errorElement.textContent = errorMessages[input.id] || 'This field is required.';
+//             errorElement.style.display = 'block';
+//             input.classList.add('invalid-input');
+//         }
+//     }
+
+//     function validateForm() {
+//         let isValid = true;
+//         inputs.forEach(input => {
+//             if (!input.validity.valid) {
+//                 validateInput(input);
+//                 isValid = false;
+//             }
+//         });
+//         return isValid;
+//     }
+
+//     form.addEventListener('submit', function(e) {
+//         if (!validateForm()) {
+//             e.preventDefault();
+//         }
+//     });
+
+//     // Clear error messages on page load
+//     inputs.forEach(input => {
+//         const errorElement = document.getElementById(`${input.id}-error`);
+//         errorElement.style.display = 'none';
+//         input.classList.remove('invalid-input');
+//     });
+// });
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function () {
                 const errorMessage = document.getElementById('error-message');
-                if (errorMessage) {
-                    errorMessage.style.display = 'none';
+                if (input.validity.valid) {
+                    errorMessage.style.display = 'none'; // Hide error when input is valid
+                } else {
+                    errorMessage.style.display = 'block'; // Show error if the input becomes invalid
                 }
             });
         });
 
+        function validateForm() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password')
+            const errorMessage = document.getElementById('error-message');
+
+            if (!emailInput.validity.valid) {
+                errorMessage.style.display = 'block'; // Show error message if email is invalid
+                return false; // Prevent form submission
+            }
+            if (!passwordInput.validity.valid) {
+                errorMessage.style.display = 'block'
+                return false
+            }
+            errorMessage.style.display = 'none'; // Hide error if the input is valid
+            return true; // Allow form submission
+        }
+        function togglePassword() {
+            var passwordInput = document.getElementById("password");
+            var passwordEye = document.getElementById("toggleIcon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                passwordEye.classList.remove("bi-eye-slash");
+                passwordEye.classList.add("bi-eye");
+            } else {
+                passwordInput.type = "password";
+                passwordEye.classList.remove("bi-eye");
+                passwordEye.classList.add("bi-eye-slash");
+            }
+        }
 
     </script>
 
