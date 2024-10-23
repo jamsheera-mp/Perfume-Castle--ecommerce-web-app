@@ -8,6 +8,10 @@ const categoryController = require('../controllers/admin/categoryController')
 const brandController = require('../controllers/admin/brandController')
 const productController = require('../controllers/admin/productController')
 const orderController = require('../controllers/admin/orderController')
+const couponController = require('../controllers/admin/couponController')
+const offerController = require('../controllers/admin/offerController')
+const salesReportController = require('../controllers/admin/salesReportController')
+const ledgerController = require('../controllers/admin/ledgerController')
 const multer =  require('multer')
 const storage = require('../helpers/multer')
 const uploads = multer({storage:storage})
@@ -18,8 +22,27 @@ router.get('/pageError',adminController.pageError)
 //login mgmt
 router.get('/login',adminController.loadLogin)
 router.get('/dashboard',adminAuth,adminController.loadDashboard)
-router.get('/logout',adminController.logout)
+router.get('/logout',adminAuth,adminController.logout)
 router.post('/login',adminController.login)
+
+
+
+//dashboard 
+router.get('/dashboard/update-sales', adminAuth, adminController.updateSalesData);
+router.get('/dashboard/update-top-products', adminAuth, adminController.updateTopProducts);
+router.get('/dashboard/update-top-categories', adminAuth, adminController.updateTopCategories);
+router.get('/dashboard/update-top-brands', adminAuth, adminController.updateTopBrands);
+
+//ledger
+router.get('/ledger', ledgerController.getLedgerEntries);
+router.post('/ledger/add', ledgerController.addLedgerEntry);
+router.get('/ledger/export', ledgerController.exportLedger);
+router.post('/ledger/generate-from-orders', ledgerController.generateLedgerFromOrders);
+
+
+
+
+
 
 //user management
 router.get('/users',adminAuth,usersController.userInfo)
@@ -34,12 +57,15 @@ router.post('/editCategory/:id',adminAuth,categoryController.editCategory)
 router.get('/deleteCategory/:id',adminAuth,categoryController.deleteCategory)
 router.get('/softDeleteCategory/:id',adminAuth,categoryController.softDeleteCategory)
 
-//brand management
-router.get('/brands',adminAuth,brandController.brandInfo)
-router.post('/addBrand',adminAuth,uploads.single('image'),brandController.addBrand)
-router.get('/blockBrand',adminAuth,brandController.blockBrand)
-router.get('/unBlockBrand',adminAuth,brandController.unBlockBrand)
-router.get('/deleteBrand',adminAuth,brandController.deleteBrand)
+
+// brand management routes
+router.get('/brands', adminAuth, brandController.brandInfo);
+router.post('/addBrand', adminAuth, uploads.single('image'), brandController.addBrand);
+router.patch('/blockBrand/:id', adminAuth, brandController.blockBrand);
+router.patch('/unBlockBrand/:id', adminAuth, brandController.unBlockBrand);
+router.delete('/deleteBrand/:id', adminAuth, brandController.deleteBrand);
+
+
 
 
 //product management
@@ -62,8 +88,33 @@ router.get('/order/:orderId', adminAuth, orderController.getOrderDetails);// Ord
 router.post('/order/update/:orderId', adminAuth, orderController.updateOrderStatus);// Order status update route
 router.post('/order/cancel/:orderId', adminAuth, orderController.cancelOrderAndUpdateStock);// Order cancellation route
 
+//coupon mgmt
+router.get('/coupons',adminAuth,couponController.getCouponPage)
+router.post('/createCoupons', couponController.createCoupon);
+router.post('/deleteCoupons/:id', couponController.deleteCoupon);
 
 
 
+//offer mgmt
+// Offer management routes using router chaining
+router
+  .route('/offers')
+  .get(offerController.renderOfferPage);
+
+router
+  .route('/api/offers')
+  .get(offerController.getAllOffers)
+  .post(offerController.addOffer);
+
+router
+  .route('/api/offers/:id')
+  .put(offerController.updateOffer)
+  .delete(offerController.deleteOffer);
+
+
+
+//salesReport mgmt
+router.get('/sales-report', salesReportController.getSalesReport);
+router.get('/download-report', salesReportController.downloadReport);
 
 module.exports =  router;

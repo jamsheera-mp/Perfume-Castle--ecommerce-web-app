@@ -5,6 +5,11 @@ const productController = require('../controllers/user/productController')
 const cartController = require('../controllers/user/cartController')
 const orderController = require('../controllers/user/orderController')
 const profileController = require('../controllers/user/profileController')
+const wishlistController = require('../controllers/user/wishlistController')
+const couponController = require('../controllers/user/couponController')
+const paymentController = require('../controllers/user/paymentController')
+const walletController = require('../controllers/user/walletController')
+const invoiceControlller = require('../controllers/user/invoiceController')
 const {userAuth} =  require('../middlewares/auth')
 
 
@@ -73,6 +78,12 @@ router.post('/deleteCartItem/:productId', userAuth, cartController.removeCartIte
 router.post('/clearCart', userAuth,cartController.clearCart)
 
 
+//online payment
+
+router.post('/createRazorpayOrder', paymentController.createRazorpayOrder);
+router.post('/verifyRazorpayPayment', paymentController.verifyRazorpayPayment);
+
+
 //order mgmt
 router.get('/checkout',userAuth,orderController.getCheckout)
 router.post('/placeOrder',userAuth,orderController.placeOrder)
@@ -80,9 +91,27 @@ router.get('/orderSuccess',userAuth,orderController.getOrderSuccess)
 router.get('/orders', userAuth,orderController.getOrderList);
 router.get('/track-order/:orderId', userAuth,orderController.trackOrder);
 router.post('/cancelOrder/:orderId',userAuth,orderController.cancelOrder)
+router.post('/returnOrder/:orderId',userAuth,orderController.returnOrder)
+
+
+//wallet mgmt
+router.get('/wallet',userAuth,walletController.getWallet)
+
+
+//wishlist management
+router.get('/wishlist',userAuth,wishlistController.getWishlist)
+router.post('/toggleWishlist/:productId', wishlistController.toggleWishlist);
+
+//router.post('/addToWishlist/:productId',userAuth,wishlistController.addToWishlist)
+router.post('/removeFromWishlist/:productId', userAuth, wishlistController.removeFromWishlist)
 
 
 
- 
+//coupon mgmt
+router.post('/applyCoupon', couponController.applyCoupon);
+router.post('/removeCoupon', couponController.removeCoupon);
+
+//invoice
+router.get('/download-invoice/:orderId',userAuth,invoiceControlller.downloadInvoice)
 
 module.exports = router

@@ -255,7 +255,7 @@
         const form = event.target.closest('form'); // Get the related form
         const formData = new FormData(form); // Extract form data
         const productId = formData.get('productId');
-        const cartMessage = document.getElementById(`cartMessage-${productId}`); // Message container for feedback
+        
 
         try {
             const response = await fetch('/addToCart', {
@@ -272,27 +272,27 @@
             const result = await response.json();
 
             if (result.success) {
-                // Show success message on the same page
-                cartMessage.textContent = 'Item added to cart!';
-                cartMessage.classList.remove('alert-danger');
-                cartMessage.classList.add('alert', 'alert-success');
-                cartMessage.style.display = 'block';
+                Swal.fire({
+                icon: 'success',
+                title: 'Product added to cart',
+                text: 'Item successfully added to your cart!',
+                confirmButtonText: 'OK'
+            });
 
                 // Optionally update the button to "Go to Cart" or disable it
                 event.target.innerHTML = '<i class="material-icons md-shopping_cart"></i> Go to Cart';
                 event.target.disabled = true; // Disable button after adding
             } else {
-                // Show error message on the same page (like stock issue)
-                cartMessage.textContent = result.error || 'Failed to add item to cart.';
-                cartMessage.classList.remove('alert-success');
-                cartMessage.classList.add('alert', 'alert-danger');
-                cartMessage.style.display = 'block';
+                throw new Error(data.error || 'Failed to add to cart');
             }
         } catch (error) {
-            // Handle network or unexpected errors
-            cartMessage.textContent = 'An error occurred. Please try again.';
-            cartMessage.classList.add('alert', 'alert-danger');
-            cartMessage.style.display = 'block';
+            console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message || 'An error occurred while adding to cart',
+            confirmButtonText: 'OK'
+        });
         }
     });
 });

@@ -6,7 +6,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Perfume Castle Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,6 +20,8 @@
     <link href="/admin/assets/css/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+    
 </head>
 
 <body>
@@ -46,17 +48,7 @@
                         <a href="#" class="requestfullscreen nav-link btn-icon"><i
                                 class="material-icons md-cast"></i></a>
                     </li>
-                    <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage"
-                            aria-expanded="false"><i class="material-icons md-public"></i></a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
-                            <a class="dropdown-item text-brand" href="#"><img src="/admin/assets/imgs/theme/flag-us.png"
-                                    alt="English">English</a>
-                            <!-- <a class="dropdown-item" href="#"><img src="/admin/assets/imgs/theme/flag-fr.png" alt="Français">Français</a>
-                            <a class="dropdown-item" href="#"><img src="/admin/assets/imgs/theme/flag-jp.png" alt="Français">日本語</a>
-                            <a class="dropdown-item" href="#"><img src="/admin/assets/imgs/theme/flag-cn.png" alt="Français">中国人</a> -->
-                        </div>
-                    </li>
+                 
                     <li class="dropdown nav-item">
                         <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount"
                             aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User"></a>
@@ -71,21 +63,11 @@
             </div>
         </header>
 
-
-
-
-
-
         <section class="content-main mt-20 mb-80">
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Sign in</h4>
-
-
-
-                    <form action="/admin/login" method="post" id="loginForm" onsubmit=" return validateForm()">
-
-
+                       <form id="loginForm"  id="loginForm" onsubmit="handleLogin(event)">
                         <div class="mb-3">
                             <input class="form-control" placeholder="Username or email" type="text" name="email"
                                 id="email">
@@ -100,13 +82,7 @@
                             </span>
 
                         </div> <!-- form-group// -->
-                        <!-- Error Message Display -->
-                        <% if (typeof message !=='undefined' ) { %>
-                            <div class="alert alert-danger" id="error-message">
-                                <%= message %>
-                            </div>
-                            <% } %>
-
+                        
 
                                 <div class="mb-3">
                                     <a href="#" class="float-end font-sm text-muted">Forgot password?</a>
@@ -149,15 +125,6 @@
             </div>
         </section>
 
-
-
-
-
-
-
-
-
-
         <footer class="main-footer text-center">
             <p class="font-xs">
                 <script>
@@ -171,113 +138,73 @@
 
 
     <script>
-//         document.addEventListener('DOMContentLoaded', function() {
-//     const form = document.querySelector('form');
-//     const inputs = form.querySelectorAll('input');
-//     const errorMessages = {
-//         email: 'Please enter a valid email address.',
-//         password: 'Password must be at least 8 characters long.'
-//     };
+async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-//     inputs.forEach(input => {
-//         const errorElement = document.createElement('div');
-//         errorElement.className = 'error-message';
-//         errorElement.id = `${input.id}-error`;
-//         errorElement.style.display = 'none';
-//         errorElement.style.color = 'red';
-//         errorElement.style.fontSize = '0.8em';
-//         input.parentNode.insertBefore(errorElement, input.nextSibling);
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
 
-//         input.addEventListener('input', function() {
-//             validateInput(this);
-//         });
+                const data = await response.json();
 
-//         input.addEventListener('blur', function() {
-//             validateInput(this);
-//         });
-//     });
-
-//     function validateInput(input) {
-//         const errorElement = document.getElementById(`${input.id}-error`);
-//         if (input.validity.valid) {
-//             errorElement.style.display = 'none';
-//             input.classList.remove('invalid-input');
-//         } else {
-//             errorElement.textContent = errorMessages[input.id] || 'This field is required.';
-//             errorElement.style.display = 'block';
-//             input.classList.add('invalid-input');
-//         }
-//     }
-
-//     function validateForm() {
-//         let isValid = true;
-//         inputs.forEach(input => {
-//             if (!input.validity.valid) {
-//                 validateInput(input);
-//                 isValid = false;
-//             }
-//         });
-//         return isValid;
-//     }
-
-//     form.addEventListener('submit', function(e) {
-//         if (!validateForm()) {
-//             e.preventDefault();
-//         }
-//     });
-
-//     // Clear error messages on page load
-//     inputs.forEach(input => {
-//         const errorElement = document.getElementById(`${input.id}-error`);
-//         errorElement.style.display = 'none';
-//         input.classList.remove('invalid-input');
-//     });
-// });
-
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', function () {
-                const errorMessage = document.getElementById('error-message');
-                if (input.validity.valid) {
-                    errorMessage.style.display = 'none'; // Hide error when input is valid
+                if (data.success) {
+                    // Show success message
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    // Redirect to dashboard
+                    window.location.href = data.redirectUrl;
                 } else {
-                    errorMessage.style.display = 'block'; // Show error if the input becomes invalid
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonText: 'Try Again'
+                    });
                 }
-            });
-        });
-
-        function validateForm() {
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password')
-            const errorMessage = document.getElementById('error-message');
-
-            if (!emailInput.validity.valid) {
-                errorMessage.style.display = 'block'; // Show error message if email is invalid
-                return false; // Prevent form submission
+            } catch (error) {
+                console.error('Login error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong! Please try again later.',
+                    confirmButtonText: 'OK'
+                });
             }
-            if (!passwordInput.validity.valid) {
-                errorMessage.style.display = 'block'
-                return false
-            }
-            errorMessage.style.display = 'none'; // Hide error if the input is valid
-            return true; // Allow form submission
         }
-        function togglePassword() {
-            var passwordInput = document.getElementById("password");
-            var passwordEye = document.getElementById("toggleIcon");
 
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const toggleIcon = document.getElementById("toggleIcon");
+            
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                passwordEye.classList.remove("bi-eye-slash");
-                passwordEye.classList.add("bi-eye");
+                toggleIcon.classList.remove("bi-eye-slash");
+                toggleIcon.classList.add("bi-eye");
             } else {
                 passwordInput.type = "password";
-                passwordEye.classList.remove("bi-eye");
-                passwordEye.classList.add("bi-eye-slash");
+                toggleIcon.classList.remove("bi-eye");
+                toggleIcon.classList.add("bi-eye-slash");
             }
         }
-
     </script>
-
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+    
+   
 
     <script src="/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
     <script src="/admin/assets/js/vendors/bootstrap.bundle.min.js"></script>

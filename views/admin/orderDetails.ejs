@@ -77,6 +77,15 @@
                 min-width: 120px;
                 display: inline-block;
             }
+            .status-Return-Request {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .status-Returned {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
         </style>
 
         <section class="order-details-page">
@@ -122,6 +131,9 @@
                                                 >
                                                 Delivered
                                             </option>
+                                            <% if (order.status === 'Return Request') { %>
+                                                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Approve Return</option>
+                                            <% } %>
                                         </select>
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100 mb-2">
@@ -129,13 +141,15 @@
                                     </button>
                                 </form>
 
-                                <form action="/admin/order/cancel/<%= order._id %>" method="POST">
-                                    <button type="submit" class="btn btn-danger w-100"
-                                        onclick="return confirm('Are you sure you want to cancel this order?')">
-                                        Cancel Order
-                                    </button>
-                                </form>
+                                <% if (order.status !== 'Return Request') { %>
+                                    <form action="/admin/order/cancel/<%= order._id %>" method="POST">
+                                        <button type="submit" class="btn btn-danger w-100"
+                                            onclick="return confirm('Are you sure you want to cancel this order?')">
+                                            Cancel Order
+                                        </button>
+                                    </form>
                                 <% } %>
+                            <% } %>
                         </div>
                     </div>
                 </div>
@@ -256,9 +270,21 @@
                                     <%= order.paymentStatus %>
                                 </span>
                             </p>
+
                         </div>
                     </div>
+                   
                 </div>
+                <% if (order.returnReason) { %>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">Return Information</h5>
+                                <p><strong>Return Reason:</strong> <%= order.returnReason %></p>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
 
                 <!-- Order Timeline -->
                 <div class="col-lg-6">
@@ -296,6 +322,18 @@
                                                                 <small class="text-muted">Order has been
                                                                     cancelled</small>
                                                             </div>
+                                                            <% } %>
+                                                            <% if (order.status === 'Return Request' || order.status === 'Returned') { %>
+                                                                <div class="timeline-item">
+                                                                    <p class="mb-0"><strong>Return Requested</strong></p>
+                                                                    <small class="text-muted">Customer requested a return</small>
+                                                                </div>
+                                                                <% if (order.status === 'Returned') { %>
+                                                                    <div class="timeline-item">
+                                                                        <p class="mb-0"><strong>Return Approved</strong></p>
+                                                                        <small class="text-muted">Return request approved</small>
+                                                                    </div>
+                                                                <% } %>
                                                             <% } %>
                             </div>
                         </div>

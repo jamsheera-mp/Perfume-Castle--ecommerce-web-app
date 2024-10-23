@@ -1,17 +1,122 @@
-
 <%- include('../partials/admin/sidebar.ejs') %>
 <%- include('../partials/admin/header.ejs') %>
+<style>
+    /* admin-dashboard.css */
 
- 
-        <section class="content-main">
-            <div class="content-header">
-                <div>
-                    <h2 class="content-title card-title">Dashboard </h2>
-                    <p>Whole data about your business here</p>
-                </div>
-                <div>
-                    <a href="#" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
+/* Reduce card height and align text nicely */
+.card-body {
+    padding: 20px;
+}
+
+/* Sales chart responsive container */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Badges in lists */
+.list-group-item .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+}
+
+</style>
+<section class="content-main">
+    <div class="content-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="content-title card-title">Dashboard</h2>
+            <p class="text-muted">Comprehensive data insights about your business</p>
+        </div>
+        <div>
+            <a href="/admin/sales-report" class="btn btn-primary btn-icon"><i class="text-muted material-icons md-post_add"></i> Create report</a>
+        </div>
+    </div>
+
+    <!-- Sales Chart Section -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Chart</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <select id="timeFrame" class="form-select w-50">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" style="height: 300px;width:100%;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
                 </div>
             </div>
-           
-        <%- include('../partials/admin/footer.ejs') %>
+        </div>
+
+         
+        <!-- Summary Cards for Top Products, Categories, and Brands -->
+        
+        <div class="col-lg-4">
+            <div class="card-deck">
+                <!-- Top Products -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Top 5 Products</h5>
+                        <ul class="list-group">
+                            <% topProducts.forEach((product, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= product.productName %>
+                                    <span class="badge bg-primary rounded-pill">₹<%= product.totalRevenue %> ( <%= product.salesCount %> sales)</span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Top Categories -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Top 3 Categories</h5>
+                        <ul class="list-group">
+                            <% topCategories.forEach((category, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= category.name %>
+                                    <span class="badge bg-success rounded-pill">₹<%= category.totalRevenue %> ( <%= category.salesCount %> sales)</span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Top Brands -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Top 4 Brands</h5>
+                        <ul class="list-group">
+                            <% topBrands.forEach((brand, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= brand.brandName %>
+                                    <span class="badge bg-warning rounded-pill">₹<%= brand.totalRevenue %> ( <%= brand.salesCount %> sales)</span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</section>
+
+<%- include('../partials/admin/footer.ejs') %>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Include your custom JavaScript for the dashboard -->
+<script src="/admin/assets/js/admin-dashboard.js"></script>
+
+<script>
+    // Initialize the sales chart with the data from the server
+    const salesData = <%- salesData %>;
+    initializeSalesChart(salesData);
+    
+</script>

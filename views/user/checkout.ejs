@@ -1,4 +1,5 @@
 <%- include('../partials/user/header.ejs') %>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <main class="main">
         <div class="page-header breadcrumb-wrap">
@@ -11,72 +12,147 @@
         </div>
         <section class="mt-50 mb-50">
             <div class="container">
-                <form action="/placeOrder" method="POST" id="checkout-form">
+
+                <div id="checkout">
                     <div class="row d-flex">
                         <div class="col-md-6">
-                            <!-------------------------------------------Order Summary Section Begins ------------------------------------------------------------------------------->
 
-                            <div class="order_review">
-                                <div class="mb-20">
+                            <!-------------------------------------------Order Summary Section Begins ------------------------------------------------------------------------------->
+                            <!-- Order Summary Section -->
+                            <div class=" card order_review">
+
+                                <div class="card-header ">
                                     <h4>Your Orders</h4>
                                 </div>
-                                <div class="table-responsive order_table text-center">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th colspan="2">Product</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% if (cartItems && cartItems.length> 0) { %>
-                                                <% let totalPrice=0; %>
-                                                    <% cartItems.forEach(item=> { %>
-                                                        <% const productTotal=item.price * item.quantity; %>
-                                                            <% totalPrice +=productTotal; %>
-                                                                <tr>
-                                                                    <td class="image product-thumbnail">
-                                                                        <img src="/uploads/re-image/<%= item.productId.productImage[0] %>"
-                                                                            alt="<%= item.productId.productName %>" />
-                                                                    </td>
-                                                                    <td>
-                                                                        <h5><a
-                                                                                href="/product/<%= item.productId._id %>">
-                                                                                <%= item.productId.productName %>
-                                                                            </a></h5>
-                                                                        <span class="product-qty">x <%= item.quantity %>
-                                                                        </span>
-                                                                    </td>
-                                                                    <td>$<%= productTotal.toFixed(2) %>
-                                                                    </td>
-                                                                </tr>
-                                                                <% }); %>
+                                <div class="card-body">
+                                    <div class="table-responsive order_table text-center">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2">Product</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% if (cartItems && cartItems.length> 0) { %>
+                                                    <% let totalPrice=0; %>
+                                                        <% cartItems.forEach(item=> { %>
+                                                            <% const productTotal=item.price * item.quantity; %>
+                                                                <% totalPrice +=productTotal; %>
                                                                     <tr>
-                                                                        <th>SubTotal</th>
-                                                                        <td colspan="2">$<%= totalPrice.toFixed(2) %>
+                                                                        <td class="image product-thumbnail">
+                                                                            <img src="/uploads/re-image/<%= item.productId.productImage[0] %>"
+                                                                                alt="<%= item.productId.productName %>" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <h5><a
+                                                                                    href="/product/<%= item.productId._id %>">
+                                                                                    <%= item.productId.productName %>
+                                                                                </a></h5>
+                                                                            <span class="product-qty">x <%=
+                                                                                    item.quantity %>
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>$<%= (item.price * item.quantity).toFixed(2)
+                                                                                %>
                                                                         </td>
                                                                     </tr>
-                                                                    <tr>
-                                                                        <th>Shipping</th>
-                                                                        <td colspan="2"><em>Free Shipping</em></td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th>Total</th>
-                                                                        <td colspan="2" class="product-subtotal"><span
-                                                                                class="font-xl text-brand fw-900">$<%=
-                                                                                    totalPrice.toFixed(2) %></span></td>
-                                                                    </tr>
-                                                                    <% } else { %>
+                                                                    <% }); %>
                                                                         <tr>
-                                                                            <td colspan="3">Your cart is empty.</td>
+                                                                            <th>SubTotal</th>
+                                                                            <td colspan="2">$<%= subtotal.toFixed(2) %>
+                                                                            </td>
                                                                         </tr>
-                                                                        <% } %>
-                                        </tbody>
-                                    </table>
+                                                                        <tr>
+                                                                            <th>Shipping</th>
+                                                                            <td colspan="2"><em>Free Shipping</em>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <!----coupon information----->
+                                                                        <% if (appliedCoupon) { %>
+                                                                            <tr>
+                                                                                <th>Coupon Applied</th>
+                                                                                <td colspan="2">
+                                                                                    <%= couponCode %>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th>Discount</th>
+                                                                                <td colspan="2">-$<%=
+                                                                                        couponDiscount.toFixed(2) %>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }else{ %>
+                                                                                <tr>
+                                                                                    <th>Discount</th>
+                                                                                    <td colspan="2">$0.00</td>
+                                                                                </tr>
+                                                                                <% } %>
+                                                                                    <tr>
+                                                                                        <th>Total</th>
+                                                                                        <td colspan="2"
+                                                                                            class="product-subtotal">
+                                                                                            <span
+                                                                                                class="font-xl text-brand fw-900">$
+                                                                                                <%= total.toFixed(2) %>
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <% } else { %>
+                                                                                        <tr>
+                                                                                            <td colspan="3">Your cart is
+                                                                                                empty.
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <% } %>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
+
                             </div>
 
                             <!-------------------------------------------Order Summary Section Ends ------------------------------------------------------------------------------->
+
+                            <!--------------------------------------------------- New Coupon Section ------------------------------------------->
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="mb-30">
+                                        <div class="heading_s1 mb-3">
+                                            <h4>Apply Coupon</h4>
+                                        </div>
+                                        <div class="total-amount">
+                                            <div class="left">
+                                                <div class="coupon">
+                                                    <form id="couponForm">
+                                                        <div class="form-row row justify-content-center">
+                                                            <div class="form-group col-lg-8">
+                                                                <input class="form-control font-medium"
+                                                                    name="couponCode" id="couponCode"
+                                                                    placeholder="Enter Your Coupon">
+                                                            </div>
+                                                            <div class="form-group col-lg-4">
+                                                                <button class="btn btn-sm btn-primary w-100"
+                                                                    type="submit">
+                                                                    <i class="fi-rs-label mr-10"></i>Apply
+                                                                </button>
+                                                            </div>
+
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="couponInfo" style="display:none;">
+                                        <p>Coupon applied: <span id="appliedCouponCode"></span>
+                                        </p>
+                                        <p>Discount: $<span id="couponDiscount"></span></p>
+                                        <button id="removeCoupon">Remove Coupon</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!----------------------------------------------- End of New Coupon Section ------------------------------------>
 
 
                             <!----------------------------------------------------Payment Method Selection Begins-------------------------------------------------->
@@ -120,11 +196,10 @@
                             </div>
                         </div>
 
-
                         <!----------------------------------------------------Payment Method Selection Ends -------------------------------------------------->
 
 
-
+                        <!--<a class="btn" id="placeOrderBtn">Place Order</button>-->
 
                         <!----------------------------------------------------Billing Details  -------------------------------------------------->
                         <div class="col-md-6">
@@ -136,15 +211,15 @@
                                 </div>
                                 <div class="card-body">
                                     <!--------------------------------------------Existing addresses selection  ---------------------------------------->
-                                    <div class="card">
-                                        <div class="card-header">
+                                    <div class="mb-4">
+                                        
                                             <h6>Use Existing Address</h6>
-                                        </div>
+                                       
                                         <div class="card-body p-2">
                                             <% if (addresses && addresses.length> 0) { %>
                                                 <% addresses.forEach((addr, index)=> { %>
                                                     <% addr.address.forEach((addressItem)=> { %>
-                                                        <div class="form-check">
+                                                        <div class="form-check mb-3">
                                                             <div>
                                                                 <input class="form-check-input" type="radio"
                                                                     name="addressType" value="<%= addressItem._id %>"
@@ -156,18 +231,16 @@
                                                                     <span class="badge bg-secondary">
                                                                         <%= addressItem.addressType %>
                                                                     </span>
-                                                                    <p>
-                                                                        <%= addressItem.name %>
-                                                                            <br>
+                                                                    <p> <%= addressItem.name %><br>
                                                                             <%= addressItem.phone %>
-
 
                                                                                 <br>
 
                                                                                 <%= addressItem.city %>, <%=
                                                                                         addressItem.landMark %>,
-                                                                                        <%= addressItem.district %>, <%=
-                                                                                                addressItem.state %>,
+                                                                                        <%= addressItem.district %>,
+                                                                                            <%= addressItem.state %>
+                                                                                                ,
                                                                                                 <strong>
                                                                                                     <%= addressItem.pincode
                                                                                                         %>
@@ -191,8 +264,9 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="name-<%= index %>" name="name"
                                                                                 value="<%= addressItem.name %>"
-                                                                                required>
-                                                                            <div class="invalid-feedback">Please enter
+                                                                                >
+                                                                            <div class="invalid-feedback">Please
+                                                                                enter
                                                                                 the name.
                                                                             </div>
                                                                         </div>
@@ -202,8 +276,9 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="phone-<%= index %>" name="phone"
                                                                                 value="<%= addressItem.phone %>"
-                                                                                pattern="\d{10}" required>
-                                                                            <div class="invalid-feedback">Please enter a
+                                                                                pattern="\d{10}" >
+                                                                            <div class="invalid-feedback">Please
+                                                                                enter a
                                                                                 valid
                                                                                 10-digit
                                                                                 mobile number.</div>
@@ -217,8 +292,9 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="pincode-<%= index %>" name="pincode"
                                                                                 value="<%= addressItem.pincode %>"
-                                                                                pattern="\d{6}" required>
-                                                                            <div class="invalid-feedback">Please enter a
+                                                                                pattern="\d{6}" >
+                                                                            <div class="invalid-feedback">Please
+                                                                                enter a
                                                                                 valid
                                                                                 6-digit
                                                                                 pincode.</div>
@@ -229,8 +305,9 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="city-<%= index %>" name="city"
                                                                                 value="<%= addressItem.city %>"
-                                                                                required>
-                                                                            <div class="invalid-feedback">Please enter
+                                                                                >
+                                                                            <div class="invalid-feedback">Please
+                                                                                enter
                                                                                 the
                                                                                 city/town.</div>
                                                                         </div>
@@ -242,7 +319,7 @@
                                                                         <input type="text" class="form-control"
                                                                             id="landmark-<%= index %>" name="landMark"
                                                                             value="<%= addressItem.landMark %>"
-                                                                            required>
+                                                                            >
                                                                         <div class="invalid-feedback">Please enter a
                                                                             landmark.</div>
                                                                     </div>
@@ -253,8 +330,9 @@
                                                                         <input type="text" class="form-control"
                                                                             id="district-<%= index %>" name="district"
                                                                             value="<%= addressItem.district %>"
-                                                                            required>
-                                                                        <div class="invalid-feedback">Please enter your
+                                                                            >
+                                                                        <div class="invalid-feedback">Please enter
+                                                                            your
                                                                             district.
                                                                         </div>
                                                                     </div>
@@ -263,140 +341,28 @@
                                                                         <label for="state-<%= index %>"
                                                                             class="form-label">State</label>
                                                                         <select name="state" id="state-<%= index %>"
-                                                                            class="form-select" required>
-                                                                            <option value="" selected disabled>--Select
+                                                                            class="form-select" >
+                                                                            <option value="" selected disabled>
+                                                                                --Select
                                                                                 State--
                                                                             </option>
-                                                                            <option value="Andaman and Nicobar Islands"
-                                                                                <%=addressItem.state==="Andaman and Nicobar Islands"
-                                                                                ? 'selected' : '' %>>Andaman and Nicobar
-                                                                                Islands
-                                                                            </option>
-                                                                            <option value="Andhra Pradesh"
-                                                                                <%=addressItem.state==="Andhra Pradesh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Andhra Pradesh</option>
-                                                                            <option value="Arunachal Pradesh"
-                                                                                <%=addressItem.state==="Arunachal Pradesh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Arunachal Pradesh</option>
-                                                                            <option value="Assam"
-                                                                                <%=addressItem.state==="Assam"
-                                                                                ? 'selected' : '' %>>Assam</option>
-                                                                            <option value="Bihar"
-                                                                                <%=addressItem.state==="Bihar"
-                                                                                ? 'selected' : '' %>>Bihar</option>
-                                                                            <option value="Chandigarh"
-                                                                                <%=addressItem.state==="Chandigarh"
-                                                                                ? 'selected' : '' %>>Chandigarh</option>
-                                                                            <option value="Chhattisgarh"
-                                                                                <%=addressItem.state==="Chhattisgarh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Chhattisgarh</option>
-                                                                            <option value="Dadra and Nagar Haveli"
-                                                                                <%=addressItem.state==="Dadra and Nagar Haveli"
-                                                                                ? 'selected' : '' %>
-                                                                                >Dadra and Nagar Haveli</option>
-                                                                            <option value="Daman and Diu"
-                                                                                <%=addressItem.state==="Daman and Diu"
-                                                                                ? 'selected' : '' %>
-                                                                                >Daman and Diu</option>
-                                                                            <option value="Delhi"
-                                                                                <%=addressItem.state==="Delhi"
-                                                                                ? 'selected' : '' %>>Delhi</option>
-                                                                            <option value="Goa"
-                                                                                <%=addressItem.state==="Goa"
-                                                                                ? 'selected' : '' %>
-                                                                                >Goa</option>
-                                                                            <option value="Gujarat"
-                                                                                <%=addressItem.state==="Gujarat"
-                                                                                ? 'selected' : '' %>>Gujarat</option>
-                                                                            <option value="Haryana"
-                                                                                <%=addressItem.state==="Haryana"
-                                                                                ? 'selected' : '' %>>Haryana</option>
-                                                                            <option value="Himachal Pradesh"
-                                                                                <%=addressItem.state==="Himachal Pradesh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Himachal Pradesh</option>
-                                                                            <option value="Jammu and Kashmir"
-                                                                                <%=addressItem.state==="Jammu and Kashmir"
-                                                                                ? 'selected' : '' %>
-                                                                                >Jammu and Kashmir</option>
-                                                                            <option value="Jharkhand"
-                                                                                <%=addressItem.state==="Jharkhand"
-                                                                                ? 'selected' : '' %>>Jharkhand</option>
+
+
+
                                                                             <option value="Karnataka"
                                                                                 <%=addressItem.state==="Karnataka"
-                                                                                ? 'selected' : '' %>>Karnataka</option>
+                                                                                ? 'selected' : '' %>>Karnataka
+                                                                            </option>
                                                                             <option value="Kerala"
                                                                                 <%=addressItem.state==="Kerala"
                                                                                 ? 'selected' : '' %>>Kerala</option>
-                                                                            <option value="Ladakh"
-                                                                                <%=addressItem.state==="Ladakh"
-                                                                                ? 'selected' : '' %>>Ladakh</option>
-                                                                            <option value="Lakshadweep"
-                                                                                <%=addressItem.state==="Lakshadweep"
-                                                                                ? 'selected' : '' %>>Lakshadweep
-                                                                            </option>
-                                                                            <option value="Madhya Pradesh"
-                                                                                <%=addressItem.state==="Madhya Pradesh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Madhya Pradesh</option>
-                                                                            <option value="Maharashtra"
-                                                                                <%=addressItem.state==="Maharashtra"
-                                                                                ? 'selected' : '' %>>Maharashtra
-                                                                            </option>
-                                                                            <option value="Manipur"
-                                                                                <%=addressItem.state==="Manipur"
-                                                                                ? 'selected' : '' %>>Manipur</option>
-                                                                            <option value="Meghalaya"
-                                                                                <%=addressItem.state==="Meghalaya"
-                                                                                ? 'selected' : '' %>>Meghalaya</option>
-                                                                            <option value="Mizoram"
-                                                                                <%=addressItem.state==="Mizoram"
-                                                                                ? 'selected' : '' %>>Mizoram</option>
-                                                                            <option value="Nagaland"
-                                                                                <%=addressItem.state==="Nagaland"
-                                                                                ? 'selected' : '' %>>Nagaland</option>
-                                                                            <option value="Odisha"
-                                                                                <%=addressItem.state==="Odisha"
-                                                                                ? 'selected' : '' %>>Odisha</option>
-                                                                            <option value="Puducherry"
-                                                                                <%=addressItem.state==="Puducherry"
-                                                                                ? 'selected' : '' %>>Puducherry</option>
-                                                                            <option value="Punjab"
-                                                                                <%=addressItem.state==="Punjab"
-                                                                                ? 'selected' : '' %>>Punjab</option>
-                                                                            <option value="Rajasthan"
-                                                                                <%=addressItem.state==="Rajasthan"
-                                                                                ? 'selected' : '' %>>Rajasthan</option>
-                                                                            <option value="Sikkim"
-                                                                                <%=addressItem.state==="Sikkim"
-                                                                                ? 'selected' : '' %>>Sikkim</option>
-                                                                            <option value="Tamil Nadu"
-                                                                                <%=addressItem.state==="Tamil Nadu"
-                                                                                ? 'selected' : '' %>>Tamil Nadu</option>
-                                                                            <option value="Telangana"
-                                                                                <%=addressItem.state==="Telangana"
-                                                                                ? 'selected' : '' %>>Telangana</option>
-                                                                            <option value="Tripura"
-                                                                                <%=addressItem.state==="Tripura"
-                                                                                ? 'selected' : '' %>>Tripura</option>
-                                                                            <option value="Uttar Pradesh"
-                                                                                <%=addressItem.state==="Uttar Pradesh"
-                                                                                ? 'selected' : '' %>
-                                                                                >Uttar Pradesh</option>
-                                                                            <option value="Uttarakhand"
-                                                                                <%=addressItem.state==="Uttarakhand"
-                                                                                ? 'selected' : '' %>>Uttarakhand
-                                                                            </option>
-                                                                            <option value="West Bengal"
-                                                                                <%=addressItem.state==="West Bengal"
-                                                                                ? 'selected' : '' %>>West Bengal
-                                                                            </option>
+
+
+
 
                                                                         </select>
-                                                                        <div class="invalid-feedback">Please select a
+                                                                        <div class="invalid-feedback">Please select
+                                                                            a
                                                                             state.</div>
                                                                     </div>
 
@@ -414,22 +380,25 @@
                                                                             <label for="addressType">Address
                                                                                 Type</label>
                                                                             <select name="addressType"
-                                                                                class="form-select" required>
+                                                                                class="form-select" >
                                                                                 <option value="Home"
                                                                                     <%=addressItem.addressType==='Home'
-                                                                                    ? 'selected' : '' %>>Home</option>
+                                                                                    ? 'selected' : '' %>>Home
+                                                                                </option>
                                                                                 <option value="Work"
                                                                                     <%=addressItem.addressType==='Work'
-                                                                                    ? 'selected' : '' %>>Work</option>
+                                                                                    ? 'selected' : '' %>>Work
+                                                                                </option>
                                                                             </select>
-                                                                            <div class="invalid-feedback">Please select
+                                                                            <div class="invalid-feedback">Please
+                                                                                select
                                                                                 an address
                                                                                 type.
                                                                             </div>
                                                                         </div>
 
                                                                     </div>
-                                                                    <div class=.d-flex.justify-content-between>
+                                                                    <div class=d-flex align-items-center>
                                                                         <button id="saveEditBtn-<%=index %>"
                                                                             type="submit" class="btn btn-primary">Save
                                                                             Changes</button>
@@ -437,7 +406,6 @@
                                                                             onclick="toggleEditForm('<%= index %>')">
                                                                             Cancel</button>
                                                                     </div>
-
 
 
                                                                 </form>
@@ -457,6 +425,7 @@
                                                                         class="btn btn-sm btn-danger">Delete</button>
                                                                 </form>
                                                             </div>
+                                                            
                                                             <% }); %>
                                                                 <% }) %>
                                                                     <% } else { %>
@@ -489,7 +458,8 @@
                                                 <div class="col-6">
                                                     <input type="text" name="phone" id="phone" class="form-control"
                                                         placeholder="10-digit mobile number" pattern="\d{10}" required>
-                                                    <div class="invalid-feedback">Please enter a valid 10-digit mobile
+                                                    <div class="invalid-feedback">Please enter a valid 10-digit
+                                                        mobile
                                                         number.</div>
                                                 </div>
                                             </div>
@@ -497,7 +467,8 @@
                                                 <div class="col-6">
                                                     <input type="text" name="pincode" id="pincode" class="form-control"
                                                         placeholder="Pincode" pattern="\d{6}" required>
-                                                    <div class="invalid-feedback">Please enter a valid 6-digit pincode.
+                                                    <div class="invalid-feedback">Please enter a valid 6-digit
+                                                        pincode.
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
@@ -532,34 +503,10 @@
                                                     <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli
                                                     </option>
                                                     <option value="Daman and Diu">Daman and Diu</option>
-                                                    <option value="Delhi">Delhi</option>
-                                                    <option value="Goa">Goa</option>
-                                                    <option value="Gujarat">Gujarat</option>
-                                                    <option value="Haryana">Haryana</option>
-                                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                                                    <option value="Jharkhand">Jharkhand</option>
+
                                                     <option value="Karnataka">Karnataka</option>
                                                     <option value="Kerala">Kerala</option>
-                                                    <option value="Ladakh">Ladakh</option>
-                                                    <option value="Lakshadweep">Lakshadweep</option>
-                                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                                    <option value="Maharashtra">Maharashtra</option>
-                                                    <option value="Manipur">Manipur</option>
-                                                    <option value="Meghalaya">Meghalaya</option>
-                                                    <option value="Mizoram">Mizoram</option>
-                                                    <option value="Nagaland">Nagaland</option>
-                                                    <option value="Odisha">Odisha</option>
-                                                    <option value="Puducherry">Puducherry</option>
-                                                    <option value="Punjab">Punjab</option>
-                                                    <option value="Rajasthan">Rajasthan</option>
-                                                    <option value="Sikkim">Sikkim</option>
-                                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                                    <option value="Telangana">Telangana</option>
-                                                    <option value="Tripura">Tripura</option>
-                                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                                    <option value="Uttarakhand">Uttarakhand</option>
-                                                    <option value="West Bengal">West Bengal</option>
+
                                                 </select>
                                                 <div class="invalid-feedback">Please select a state.</div>
                                             </div>
@@ -567,7 +514,8 @@
                                                 <div class="col-6">
                                                     <input type="text" name="altPhone" id="altphone"
                                                         class="form-control" placeholder="Alternate Phone (Optional)">
-                                                    <div class="invalid-feedback">Please enter a valid alternate phone
+                                                    <div class="invalid-feedback">Please enter a valid alternate
+                                                        phone
                                                         number.</div>
                                                 </div>
                                                 <div class="col-6">
@@ -576,7 +524,8 @@
                                                         <option value="Home">Home</option>
                                                         <option value="Work">Work</option>
                                                     </select>
-                                                    <div class="invalid-feedback">Please select an address type.</div>
+                                                    <div class="invalid-feedback">Please select an address type.
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="d-flex justify-content-between">
@@ -592,269 +541,565 @@
                         </div> <!--billing details column ends-->
                     </div> <!--Row ends-->
                     <!-------------------------------------------Billing Details End ------------------------------------------------------------------------------->
-                </form>
-
+                </div>
             </div> <!-- Container ends-->
-
-
-
         </section>
+
+
+
+
         <script>
 
-        // Form validation functions
-        function validateAddressForm(formData) {
-            const validations = {
-                name: {
-                    test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
-                    message: 'Name must be 2-50 characters long and contain only letters'
-                },
-                phone: {
-                    test: value => /^\d{10}$/.test(value),
-                    message: 'Phone must be exactly 10 digits'
-                },
-                pincode: {
-                    test: value => /^\d{6}$/.test(value),
-                    message: 'Pincode must be exactly 6 digits'
-                },
-                city: {
-                    test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
-                    message: 'City must be 2-50 characters long and contain only letters'
-                },
-                landMark: {
-                    test: value => value.length >= 3,
-                    message: 'Landmark must be at least 3 characters long'
-                },
-                district: {
-                    test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
-                    message: 'District must be 2-50 characters long and contain only letters'
-                },
-                state: {
-                    test: value => value.length > 0,
-                    message: 'Please select a state'
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log('DOM fully loaded');
+                //-----------------------------coupon managment start---------------------------------------------------
+
+                const couponForm = document.getElementById("couponForm");
+                if (!couponForm) {
+                    console.error("Coupon form not found. ");
+
+                    return;
                 }
-            };
-        
-            const errors = {};
-            let isValid = true;
-        
-            for (const [field, validation] of Object.entries(validations)) {
-                const value = formData.get(field);
-                if (!validation.test(value)) {
-                    errors[field] = validation.message;
-                    isValid = false;
-                }
-            }
-        
-            return { isValid, errors };
-        }
-        
-        document.addEventListener('DOMContentLoaded', function () {
-            // Address Form Toggle
-            const addAddressToggle = document.getElementById('addAddressToggle');
-            const newAddressForm = document.getElementById('new-address');
-        
-            addAddressToggle.addEventListener('click', function () {
-                if (newAddressForm.style.display === 'none' || newAddressForm.style.display === '') {
-                    newAddressForm.style.display = 'block';
-                } else {
-                    newAddressForm.style.display = 'none';
-                }
-            });
-        
-            // Add Address Form Submission
-            const addAddressForm = document.getElementById('addAddressForm');
-            if (addAddressForm) {
-                addAddressForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    const { isValid, errors } = validateAddressForm(formData);
-        
-                    if (!isValid) {
-                        Object.keys(errors).forEach(field => {
-                            const input = document.getElementById(field);
-                            const feedback = input.nextElementSibling;
-                            input.classList.add('is-invalid');
-                            if (feedback) feedback.textContent = errors[field];
+
+                console.log('Coupon form found:', couponForm);
+
+
+                couponForm.addEventListener("submit", async function (event) {
+                    console.log('Form submitted');
+                    event.preventDefault();
+                    var couponCode = document.getElementById("couponCode").value;
+                    console.log('Coupon code:', couponCode);
+
+                    if (!couponCode) {
+                        console.log('No coupon code entered');
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Please enter a coupon code',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
                         });
-                        return;
-                    }
-        
-                    fetch('/addAddress', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
+                    } else {
+                        try {
+                            console.log('Sending request to apply coupon');
+                            var response = await fetch('/applyCoupon', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ couponCode: couponCode })
+                            });
+                            console.log('Response received');
+                            var data = await response.json();
+                            console.log('Response data:', data);
+
                             if (data.success) {
-                                alert('Address added successfully!');
-                                location.reload();
+                                console.log('Coupon applied successfully');
+                                document.getElementById("couponInfo").style.display = "block";
+                                document.getElementById("appliedCouponCode").textContent = data.couponCode;
+                                document.getElementById("couponDiscount").textContent = data.discount.toFixed(2);
+                                document.getElementById("couponForm").style.display = "none";
+
+                                // Update the total amount
+                                const totalElement = document.querySelector('.product-subtotal .font-xl');
+                                if (totalElement) {
+                                    totalElement.textContent = `$${data.finalAmount.toFixed(2)}`;
+                                } else {
+                                    console.error('Total element not found');
+                                }
+
+                                Swal.fire({
+                                    title: 'Success',
+                                    text: 'Coupon applied successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                });
                             } else {
-                                alert('Error adding address: ' + data.message);
+                                console.log('Coupon application failed:', data.message);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: data.message || 'Failed to apply coupon',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                });
                             }
-                        })
-                        .catch(error => console.error('Error:', error));
+                        } catch (error) {
+                            console.error('Error applying coupon:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'An unexpected error occurred. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                            });
+                        }
+                    }
                 });
-            }
-        
-            // Address Deletion
-            function deleteAddress(addressId) {
-                if (confirm('Are you sure you want to delete this address?')) {
-                    fetch(`/deleteAddress/${addressId}`, {
-                        method: 'POST',
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('address deleting message:', data);
-        
+                // Add this inside your existing DOMContentLoaded event listener
+                const removeCouponBtn = document.getElementById('removeCoupon');
+
+                removeCouponBtn.addEventListener('click', async function () {
+                    const result = await Swal.fire({
+                        title: 'Remove Coupon',
+                        text: "Are you sure you want to remove this coupon?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, remove it!'
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch('/removeCoupon', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+
+                            const data = await response.json();
+
                             if (data.success) {
-                                Swal.fire('success', data.message, 'success')
-                                const addressCard = document.querySelector(`#address-${addressId}`);
-                                if (addressCard) {
-                                    addressCard.remove();
+                                // Show success message
+                                await Swal.fire({
+                                    title: 'Success',
+                                    text: 'Coupon removed successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                });
+
+                                // Reset UI
+                                document.getElementById("couponInfo").style.display = "none";
+                                document.getElementById("couponForm").style.display = "block";
+                                document.getElementById("couponCode").value = '';
+
+                                // Update total amount by reloading the page
+                                if (data.requiresRefresh) {
+                                    location.reload();
+                                    return;
+                                }
+
+                                // If no refresh required, update the total manually
+                                if (data.updatedTotal) {
+                                    const totalElement = document.querySelector('.product-subtotal .font-xl');
+                                    if (totalElement) {
+                                        totalElement.textContent = `$${data.updatedTotal.toFixed(2)}`;
+                                    }
                                 }
                             } else {
-                                Swal.fire('Error', data.message, 'error')
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: data.message || 'Failed to remove coupon',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
                             }
-                        })
-                        .catch(error => {
-                            Swal.fire('Error', 'Something went wrong', 'error')
-                            console.error('Error:', error)
-                        })
-                }
-            }
-        
-            // Edit Address
-            function toggleEditForm(index) {
-                const editForm = document.getElementById(`editForm-${index}`);
-                if (editForm.style.display === 'none' || editForm.style.display === '') {
-                    editForm.style.display = 'block';
-                } else {
-                    editForm.style.display = 'none';
-                }
-            }
-        
-            function submitEditForm(index) {
-                const form = document.getElementById(`editAddressForm-${index}`);
-                const formData = new FormData(form);
-        
-                fetch(form.getAttribute('action'), {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload()
-                            updateAddressOnPage(index, data.address);
-                            toggleEditForm(index);
-                        } else {
-                            alert('Error updating address. Please try again.');
+                        } catch (error) {
+                            console.error('Error removing coupon:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'An error occurred while removing the coupon. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        
-            function updateAddressOnPage(index, updatedAddress) {
-                const addressElement = document.querySelector(`#editForm-${index}`).previousElementSibling;
-                addressElement.querySelector('strong').innerText = updatedAddress.name || 'No Name';
-                addressElement.querySelectorAll('p')[1].innerText = `${updatedAddress.city}, ${updatedAddress.landMark}, ${updatedAddress.district}, ${updatedAddress.state}, ${updatedAddress.pincode}`;
-            }
-        
-            // Edit Address Form
-            const editForms = document.querySelectorAll('[id^="editAddressForm-"]');
-            editForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    const { isValid, errors } = validateAddressForm(formData);
-        
-                    if (!isValid) {
-                        Object.keys(errors).forEach(field => {
-                            const input = this.querySelector(`[name="${field}"]`);
-                            const feedback = input.nextElementSibling;
-                            input.classList.add('is-invalid');
-                            if (feedback) feedback.textContent = errors[field];
-                        });
-                        return;
                     }
-        
-                    fetch(this.getAttribute('action'), {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Error updating address: ' + data.message);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
                 });
-            });
-        
-            // Place Order
-            const placeOrderBtn = document.getElementById('placeOrderBtn');
-            if (placeOrderBtn) {
-                placeOrderBtn.addEventListener('click', function() {
-                    const selectedAddressRadio = document.querySelector('input[name="addressType"]:checked');
-                    const selectedPaymentRadio = document.querySelector('input[name="payment_option"]:checked');
-                    console.log('Selected address:', selectedAddressRadio.value);
-                    console.log('Selected payment method:', selectedPaymentRadio.value);
-                    
-        
-                    if (!selectedAddressRadio) {
-                        alert('Please select a delivery address');
-                        return;
+
+                //-----------------------------coupon managment end---------------------------------------------------
+
+
+                //-------------------------------address managment start---------------------------------------------------
+                // Get necessary elements
+                const newAddressForm = document.getElementById('new-address');
+                const addAddressToggle = document.getElementById('addAddressToggle');
+                const existingAddresses = document.querySelectorAll('.form-check');
+
+                // Show add address form by default if no addresses exist
+                if (existingAddresses.length === 0) {
+                    if (newAddressForm) {
+                        newAddressForm.style.display = 'block';
                     }
-        
-                    if (!selectedPaymentRadio) {
-                        alert('Please select a payment method');
-                        return;
+                    if (addAddressToggle) {
+                        addAddressToggle.innerHTML = '- Hide Address Form';
                     }
-                    const addressId = selectedAddressRadio.value;
-                    const requestData = {
-                        address: addressId,
-                        paymentMethod: selectedPaymentRadio.value
-                    };
-                    console.log('Request data:', requestData);
+                }
+
+                // Toggle Add Address Form
+                if (addAddressToggle) {
+                    addAddressToggle.addEventListener('click', () => {
+                        const isVisible = newAddressForm.style.display === 'block';
+                        newAddressForm.style.display = isVisible ? 'none' : 'block';
+                        addAddressToggle.innerHTML = isVisible ? '+ Add New Address' : '- Hide Address Form';
+                    });
+                }
+
+                // Toggle Edit Address Form
+                window.toggleEditForm = function (index) {
+                    const editForm = document.getElementById(`editForm-${index}`);
+                    if (editForm) {
+                        const isVisible = editForm.style.display === 'block';
+                        editForm.style.display = isVisible ? 'none' : 'block';
+                    }
+                };
+
+                // Form validation
+                function validateForm(form) {
+                    const inputs = form.querySelectorAll('input[required], select[required]');
+                    let isValid = true;
+
+                    // Reset all validations first
+                    inputs.forEach(input => input.classList.remove('is-invalid'));
+
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            input.classList.add('is-invalid');
+                            isValid = false;
+                        } else if (input.pattern) {
+                            const regex = new RegExp(input.pattern);
+                            if (!regex.test(input.value.trim())) {
+                                input.classList.add('is-invalid');
+                                isValid = false;
+                            }
+                        }
+                    });
+
+                    if (!isValid) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error',
+                            text: 'Please fill all required fields correctly',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+
+                    return isValid;
+                }
+
+                // Add Address Form Submission
+                const addAddressForm = document.getElementById('addAddressForm');
+                if (addAddressForm) {
+                    addAddressForm.addEventListener('submit', async function (e) {
+                        e.preventDefault();
+
+                        if (!validateForm(this)) return;
+
+                        const formData = new FormData(this);
+                        const data = Object.fromEntries(formData);
+
+                        try {
+                            const response = await fetch('/addAddress', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            });
+
+                            if (!response.ok) throw new Error('Failed to add address');
+
+                            const result = await response.json();
+
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Address added successfully',
+                                confirmButtonColor: '#3085d6'
+                            });
+
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Error adding address:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to add address. Please try again.',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    });
+
+                    // Add input event listeners to remove invalid class when user types
+                    addAddressForm.querySelectorAll('input, select').forEach(input => {
+                        input.addEventListener('input', () => {
+                            input.classList.remove('is-invalid');
+                        });
+                    });
+                }
+
+                //--------------------edit address form submission----------------
+                const editForms = document.querySelectorAll('[id^="editAddressForm-"]');
+                editForms.forEach(form => {
+                    const id = form.getAttribute('data-address-id');
+                    form.addEventListener('submit', async (e, id) => {
+                        e.preventDefault();
+                        const form = event.target;
+
+                        if (!validateForm(form)) return;
+
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData);
+
+                        try {
+                            const response = await fetch(`/editAddress/${id}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to edit address');
+                            }
+
+                            const result = await response.json();
+
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Address updated successfully',
+                                confirmButtonColor: '#3085d6'
+                            });
+
+                            window.location.reload();
+                        } catch (error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to update address. Please try again.',
+                                confirmButtonColor: '#3085d6'
+                            });
+                            console.error('Error editing address:', error);
+                        }
+
+
+                    });
+                });
+                //--------------------------delete address-----------------------
+                const deleteButtons = document.querySelectorAll('.delete-address-btn');
+                deleteButtons.forEach(button => {
+                    const id = button.getAttribute('data-address-id');
+                    button.addEventListener('click', () => async (id) => {
+                        const result = await Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, delete it!'
+                        });
+
+                        if (result.isConfirmed) {
+                            try {
+                                const response = await fetch(`/deleteAddress/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    await Swal.fire({
+                                        icon: 'success',
+                                        title: 'Deleted!',
+                                        text: data.message || 'Address has been deleted.',
+                                        confirmButtonColor: '#3085d6'
+                                    });
+                                    // Remove the address element from DOM or reload the page
+                                    const addressElement = document.querySelector(`[data-address-id="${id}"]`).closest('.form-check');
+                                    if (addressElement) {
+                                        addressElement.remove();
+                                    } else {
+                                        window.location.reload();
+                                    }
+                                } else {
+                                    throw new Error(data.message || 'Failed to delete address');
+                                }
+
+                            } catch (error) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Failed to delete address. Please try again.',
+                                    confirmButtonColor: '#3085d6'
+                                });
+                                console.error('Error deleting address:', error);
+                            }
+                        }
+                    });
+                });
+
+                //-------------------------------address managment end---------------------------------------------------
+
+
+                //-------------------------------order managment start---------------------------------------------------
+                // Place Order
+                const placeOrderBtn = document.getElementById('placeOrderBtn');
+                if (placeOrderBtn) {
+
+                    placeOrderBtn.addEventListener('click', function () {
+                        const selectedAddressRadio = document.querySelector('input[name="addressType"]:checked');
+                        const selectedPaymentRadio = document.querySelector('input[name="payment_option"]:checked');
+                        console.log('Selected address:', selectedAddressRadio.value);
+                        console.log('Selected payment method:', selectedPaymentRadio.value);
+
+                        if (!selectedAddressRadio) {
+                            //alert('Please select a delivery address');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Please select a delivery address.',
+                                confirmButtonColor: '#3085d6'
+
+                            })
+                            return;
+                        }
+
+                        if (!selectedPaymentRadio) {
+                            //alert('Please select a payment method');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Please select a payment method.',
+                                confirmButtonColor: '#3085d6'
+                            })
+                            return;
+                        }
+                        const addressId = selectedAddressRadio.value;
+                        const paymentMethod = selectedPaymentRadio.value
+                        placeOrder(addressId, paymentMethod);
+                    })
+                }
+
+                //---------------------------------place order function----------------------------
+                function placeOrder(addressId, paymentMethod) {
                     fetch('/placeOrder', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(requestData)
+                        body: JSON.stringify({ address: addressId, paymentMethod: paymentMethod })
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.href = '/orderSuccess';
-                        } else {
-                            alert(data.message || 'Error occurred while placing order');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while placing the order');
-                    });
-                });
-            }
-        });
-        
-        // Reset validation state when input changes
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('is-invalid')) {
-                e.target.classList.remove('is-invalid');
-                const feedback = e.target.nextElementSibling;
-                if (feedback && feedback.classList.contains('invalid-feedback')) {
-                    feedback.textContent = '';
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (paymentMethod === 'CashOnDelivery') {
+                                    window.location.href = '/orderSuccess?orderId=' + data.orderId;
+                                } else if (paymentMethod === 'Online') {
+                                    initiateRazorpayPayment(data);
+                                }
+                            } else {
+                                //alert(data.message || 'Error occurred while placing order');
+                                Swal.fire({
+                                    title: 'error',
+                                    text: data.message || 'Error occurred while placing order.',
+                                    confirmButtonColor: '#3085d6',
+
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            //alert('An error occurred while placing the order');
+                            Swal.fire({
+                                title: 'error',
+                                text: 'An error occurred while placing the order.',
+                                confirmButtonText: 'Ok'
+                            })
+                        });
                 }
-            }
-        });
-    </script>
+                //-------------------------------------Razor pay initialization-------------------------------
+
+                function initiateRazorpayPayment(orderData) {
+                    const options = {
+                        key: 'rzp_test_trhZpz0cQLRJsN',
+                        amount: orderData.amount,
+                        currency: orderData.currency,
+                        name: 'Perfume Castle',
+                        description: 'Purchase Description',
+                        order_id: orderData.razorpayOrderId,
+                        handler: function (response) {
+                            verifyPayment(response, orderData.orderId);
+                        },
+                        prefill: {
+                            name: 'Customer Name',
+                            email: 'customer@example.com',
+                            contact: '9999999999'
+                        },
+                        theme: {
+                            color: '#3399cc'
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response) {
+                        alert('Payment failed. Please try again.');
+
+                    });
+                    rzp.open();
+                }
+
+                //------------------------------verify razorpay payment----------------------
+
+                function verifyPayment(paymentResponse, orderId) {
+                    fetch('/verifyRazorpayPayment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                            razorpay_order_id: paymentResponse.razorpay_order_id,
+                            razorpay_signature: paymentResponse.razorpay_signature
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = '/orderSuccess?orderId=' + data.orderId;
+                            } else {
+                                //alert(data.message || 'Payment verification failed');
+                                Swal.fire({
+                                    title: 'Payment verification failed',
+                                    text: data.message || 'Payment verification failed',
+                                    icon: 'error',
+                                    confirmButtonText: 'Try Again'
+
+                                })
+
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            //alert('An error occurred while verifying the payment');
+                            Swal.fire({
+                                title: 'Payment error',
+                                text: 'An error occurred while verifying the payment',
+                                icon: 'error',
+                                confirmButtonText: 'Try Again'
+                            })
+                        });
+                }
 
 
-        <!------------------------------- Place Order Form Submission Ends-------------------------------->
+                //----------------------------------------------------------------------------
+                // Reset validation state when input changes
+                document.addEventListener('input', function (e) {
+                    if (e.target.classList.contains('is-invalid')) {
+                        e.target.classList.remove('is-invalid');
+                        const feedback = e.target.nextElementSibling;
+                        if (feedback && feedback.classList.contains('invalid-feedback')) {
+                            feedback.textContent = '';
+                        }
+                    }
+                });
+
+                //-------------------------------order managment end---------------------------------------------------
+            });
+
+        </script>
 
         <%- include('../partials/user/footer.ejs') %>

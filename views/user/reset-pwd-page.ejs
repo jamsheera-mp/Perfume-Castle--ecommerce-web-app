@@ -2,45 +2,89 @@
 
 <section class="py-5 mt-5">
     <div class="container py-5 mt-5">
-        <div class="row justify-content-center ">
-            <div class="col-lg-6 align-items-center ">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 align-items-center">
                 <div class="card mt-5 py-5">
                     <div class="card-body">
-                        <form action="/reset-password" method="post">
-    
+                        <form id="resetForm" action="/reset-password" method="post" onsubmit="return validateForm()">
+
                             <div class="d-flex justify-content-center message">
-                                <% 
-                                if(typeof message !== 'undefined')
-                                {
-                                %> 
-                                <p><%= message %></p>
-                                <%
-                                }
-                                %>
+                                <% if (typeof message !== 'undefined') { %> 
+                                    <p><%= message %></p>
+                                <% } %>
                             </div>
-    
-                            <div class="form-group">
-                                <label for="register-password">New Password *</label>
-                                <input type="password" class="form-control" id="register-password-2" name="newPwd1" required>
+
+                            <div class="form-group position-relative">
+                                <label for="new-password">New Password *</label>
+                                <input type="password" class="form-control" id="new-password" name="newPwd1" required>
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
+                                      onclick="togglePassword('new-password', 'toggleIcon1')">
+                                    <i class="bi bi-eye-slash fs-5" id="toggleIcon1"></i>
+                                </span>
                             </div>
-    
-                            <div class="form-group">
-                                <label for="register-password">Confirm Password *</label>
-                                <input type="password" class="form-control" id="register-password-2" name="newPwd2" required>
-                            </div><!-- End .form-group -->
+
+                            <div class="form-group position-relative">
+                                <label for="confirm-password">Confirm Password *</label>
+                                <input type="password" class="form-control" id="confirm-password" name="newPwd2" required>
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
+                                      onclick="togglePassword('confirm-password', 'toggleIcon2')">
+                                    <i class="bi bi-eye-slash fs-5" id="toggleIcon2"></i>
+                                </span>
+                            </div>
+
                             <div class="text-center">
                                 <button type="submit" class="btn btn-outline-primary-2">
                                     <span>RESET</span>
-                            </button>
+                                </button>
                             </div>    
-                           
-    
                         </form>
                     </div>
                  </div>
             </div>
-            
-                               
         </div>
     </div>
 </section>
+
+<script>
+    // Toggle password visibility
+    function togglePassword(inputId, iconId) {
+        var passwordInput = document.getElementById(inputId);
+        var passwordIcon = document.getElementById(iconId);
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            passwordIcon.classList.remove("bi-eye-slash");
+            passwordIcon.classList.add("bi-eye");
+        } else {
+            passwordInput.type = "password";
+            passwordIcon.classList.remove("bi-eye");
+            passwordIcon.classList.add("bi-eye-slash");
+        }
+    }
+
+    // Form validation
+    function validateForm() {
+        var newPwd1 = document.getElementById("new-password").value;
+        var newPwd2 = document.getElementById("confirm-password").value;
+
+        // Check if both fields are filled
+        if (!newPwd1 || !newPwd2) {
+            alert("Please fill in both password fields.");
+            return false;
+        }
+
+        // Check if passwords match
+        if (newPwd1 !== newPwd2) {
+            alert("Passwords do not match.");
+            return false;
+        }
+
+        // Check if password is at least 6 characters long
+        if (newPwd1.length < 6) {
+            alert("Password must be at least 6 characters long.");
+            return false;
+        }
+
+        return true;
+    }
+</script>

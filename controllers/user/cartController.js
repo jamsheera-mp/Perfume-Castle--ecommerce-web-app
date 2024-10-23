@@ -1,11 +1,14 @@
+
+
 const Product = require('../../models/productSchema')
 const Cart = require('../../models/cartSchema');
+
 
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
     const userId = req.session.user;
-    const requestedQuantity =  parseInt(quantity);
+    const requestedQuantity = parseInt(quantity);
 
 
     // Validate product availability
@@ -20,7 +23,7 @@ const addToCart = async (req, res) => {
     }
 
     // Validate stock
-    
+
     if (product.quantity < requestedQuantity) {
       return res.status(400).json({ success: false, error: `Only ${product.quantity} items available in stock` });
     }
@@ -31,7 +34,7 @@ const addToCart = async (req, res) => {
       cart = new Cart({ userId, items: [] });
     }
     //Max quantity a user can add to cart for a product
-    const maxQuantityPerUser  = 5; 
+    const maxQuantityPerUser = 5;
 
     // Update cart items
     const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
@@ -43,7 +46,7 @@ const addToCart = async (req, res) => {
 
       //check if new quantity exceeds maxQuantityPerUser
       if (newQuantity > maxQuantityPerUser) {
-        const availableToAdd =  maxQuantityPerUser - existingItem.quantity;
+        const availableToAdd = maxQuantityPerUser - existingItem.quantity;
 
         return res.status(400).json({
           success: false,
@@ -65,17 +68,17 @@ const addToCart = async (req, res) => {
     } else {
       // product is not in cart,add new item
       //check if requested quantity exceeds maxQuantityPerUser
-      
-      if (requestedQuantity > maxQuantityPerUser ) {
+
+      if (requestedQuantity > maxQuantityPerUser) {
         return res.status(400).json({
           success: false,
-          error: `Cannot add more than ${maxQuantityPerUser } items of the same product to cart`
+          error: `Cannot add more than ${maxQuantityPerUser} items of the same product to cart`
         });
       }
       //Add new items to cart
       cart.items.push({
         productId: product._id,
-        quantity:requestedQuantity,
+        quantity: requestedQuantity,
         price: product.salePrice,
         totalPrice: requestedQuantity * product.salePrice
       });
@@ -83,14 +86,15 @@ const addToCart = async (req, res) => {
 
     // Update cart subtotal
     cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-
+     
     await cart.save();
     return res.json({
       success: true,
       cart: {
         items: cart.items,
         cartSubTotal: cart.cartSubTotal,
-        cartItemCount: cart.items.length
+        cartItemCount: cart.items.length,
+        
       }
     });
   } catch (error) {
@@ -99,7 +103,7 @@ const addToCart = async (req, res) => {
   }
 };
 
-
+//----------------------------------------------update cart-----------------------------------------------
 const updateCart = async (req, res) => {
   try {
     const { productId, newQuantity } = req.body;
@@ -161,14 +165,14 @@ const updateCart = async (req, res) => {
         error: 'Item not found in cart'
       });
     }
-     // Check max quantity per user
-     const maxQuantityPerUser = 5;
-     if (newQuantity > maxQuantityPerUser) {
-       return res.status(400).json({
-         success: false,
-         error: `You can only add up to ${maxQuantityPerUser} of this item`
-       });
-     }
+    // Check max quantity per user
+    const maxQuantityPerUser = 5;
+    if (newQuantity > maxQuantityPerUser) {
+      return res.status(400).json({
+        success: false,
+        error: `You can only add up to ${maxQuantityPerUser} of this item`
+      });
+    }
     // Update quantity and calculate new price
     cart.items[itemIndex].quantity = newQuantity;
     cart.items[itemIndex].totalPrice = newQuantity * product.salePrice;
@@ -201,10 +205,10 @@ const removeCartItem = async (req, res) => {
     const userId = req.session.user;
     if (!productId || !userId) {
       return res.status(400).json({
-          success: false,
-          error: 'Invalid request parameters'
+        success: false,
+        error: 'Invalid request parameters'
       });
-  }
+    }
 
     const cart = await Cart.findOne({ userId });
     if (!cart) {
@@ -219,7 +223,7 @@ const removeCartItem = async (req, res) => {
     cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
     await cart.save();
 
-     return res.status(200).json({
+    return res.status(200).json({
       success: 'true',
       cartSubTotal: cart.cartSubTotal,
       cartItemCount: cart.items.length
@@ -227,7 +231,7 @@ const removeCartItem = async (req, res) => {
 
   } catch (error) {
     console.error('Error removing cart item:', error);
-     return res.status(500).json({ success: false, error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
 
@@ -259,24 +263,29 @@ const listCartItems = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart) {
-      return res.render('user/cart', { 
-        cartItems: [], 
+      return res.render('user/cart', {
+        cartItems: [],
         cartTotalPrice: 0,
-        hasOutOfStockItem: false // Add default value for empty cart
+        hasOutOfStockItem: false ,// Add default value for empty cart
+       
       });
     }
 
     // Check if any item in cart is out of stock
-    const hasOutOfStockItem = cart.items.some(item => 
+    const hasOutOfStockItem = cart.items.some(item =>
       !item.productId || // Check if product exists
-      item.productId.stockQuantity < item.quantity || // Check if enough stock
-      !item.productId.status // Assuming product has a status field indicating availability
+      item.productId.stockQuantity < item.quantity  // Check if enough stock
+      //!item.productId.isBlocked || //check  if product is blocked
+      // !item.productId.isDeleted //check  if product is deleted
+
     );
+  
 
     res.render('user/cart', {
       cartItems: cart.items,
       cartTotalPrice: cart.cartSubTotal,
-      hasOutOfStockItem // Add this to the render context
+      hasOutOfStockItem, 
+    
     });
 
   } catch (error) {
@@ -284,10 +293,12 @@ const listCartItems = async (req, res) => {
     res.status(500).send('Error fetching cart items: ' + error.message);
   }
 };
+
 module.exports = {
   addToCart,
   listCartItems,
   updateCart,
   clearCart,
-  removeCartItem
+  removeCartItem,
+  
 }

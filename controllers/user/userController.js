@@ -411,9 +411,6 @@ const editAddress = async (req, res) => {
         const { name, phone, pincode, city, landMark, district, state, addressType } = req.body;
 
 
-
-
-
         // Update the address fields in the array
         const updateResult = await Address.updateOne(
             { userId, 'address._id': addressId },

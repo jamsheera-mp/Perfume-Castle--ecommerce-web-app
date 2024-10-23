@@ -2,8 +2,7 @@
     <%- include('../partials/admin/header.ejs') %>
 
         <section class="content-main">
-            <form action="/admin/addProducts" method="post"  enctype="multipart/form-data"
-               id="addProductForm">
+            <form action="/admin/addProducts" method="post" enctype="multipart/form-data" id="addProductForm">
                 <div class="row">
                     <div class="col-9">
                         <div class="content-header">
@@ -18,22 +17,22 @@
                                 <div class="mb-4">
                                     <label for="ProductName" class="form-label">Product Name</label>
                                     <input type="text" placeholder="Type here" class="form-control" id="productName"
-                                        name="productName" required>
-                                    
+                                        name="productName" >
+
                                 </div>
                                 <small id="productName-error"
-                                style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
                                 <div class="mb-4">
                                     <label for="description" class="form-label">Description</label>
                                     <textarea placeholder="Type here" class="form-control" rows="4" id="descriptionId"
-                                        name="description" required></textarea>
-                                   
+                                        name="description" ></textarea>
+
 
                                 </div>
                                 <small id="description-error"
-                                style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
-                       
+
                             </div>
                         </div> <!-- card end// -->
 
@@ -52,16 +51,16 @@
                                             </option>
                                             <% } %>
                                     </select>
-                                    
+
 
                                 </div>
                                 <small id="brand-error"
-                                style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
-                       
+
                                 <div class="mb-4">
                                     <label class="form-label">Categories</label>
-                                    <select class="form-select" name="category" required>
+                                    <select class="form-select" name="category" >
                                         <option value="">Select Category</option>
 
                                         <% for(let i=0;i<cat.length;i++){ %>
@@ -70,11 +69,11 @@
                                             </option>
                                             <% } %>
                                     </select>
-                                    
+
                                 </div>
                                 <small id="category-error"
-                                style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
-                       
+                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+
                             </div>
                         </div> <!-- card end// -->
 
@@ -121,7 +120,7 @@
                                         </div>
                                     </div>
                                     <% } %>
-                                    <div id="addedImageContainer"></div>
+                                        <div id="addedImageContainer"></div>
 
                             </div>
 
@@ -135,46 +134,49 @@
                             <div class="card-body">
                                 <div class="mb-4">
                                     <label for="ml" class="form-label">ML</label>
-                                    <select class="form-select" name="ml" required>
+                                    <select class="form-select" name="ml" >
                                         <option>100 </option>
                                         <option>50</option>
                                     </select>
                                     <small id="ml-error"
-                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
                                 </div>
                                 <div class="mb-4">
                                     <label for="regularPrice" class="form-label"> Regular Price</label>
-                                    <input type="text" placeholder="Type here" class="form-control"
-                                        name="regularPrice" step="0.01" required>
-                                        <small id="regularPrice-error"
+                                    <input type="text" placeholder="Type here" class="form-control" name="regularPrice"
+                                        step="0.01" >
+                                    <small id="regularPrice-error"
                                         style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
-                                
+
                                 </div>
                                 <div class="mb-4">
                                     <label for="productOffer" class="form-label">Product Offer</label>
-                                    <input type="text" placeholder="Type here" class="form-control" name="productOffer" step="0.01" required>
+                                    <input type="text" placeholder="Type here" class="form-control" name="productOffer"
+                                        step="0.01">
                                     <small id="productOffer-error"
-                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
-                           
+
                                 </div>
                                 <div class="mb-4">
                                     <label for="salePrice" class="form-label">Sale Price</label>
-                                    <input type="text" placeholder="Type here" class="form-control" name="salePrice" step="0.01" required>
+                                    <input type="text" placeholder="Type here" class="form-control" name="salePrice"
+                                        step="0.01" >
                                     <small id="salePrice-error"
-                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
-                           
+
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="quantity" class="form-label">Quantity</label>
-                                    <input type="text" placeholder="Type here" class="form-control" name="quantity" required>
+                                    <input type="text" placeholder="Type here" class="form-control" name="quantity"
+                                        >
                                     <small id="quantity-error"
-                                    style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
+                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
-                           
+
                                 </div>
 
 
@@ -189,30 +191,50 @@
         </section>
 
         <script>
-            document.getElementById('addProductForm').addEventListener('submit',async function(e){
+            document.getElementById('addProductForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
-                if(!validateForm()){
+                if (!validateForm()) {
                     return false
                 }
                 const formData = new FormData(this)
-                try{
-                    const response = await fetch('/admin/addProducts',{
+                try {
+                    const response = await fetch('/admin/addProducts', {
                         method: 'POST',
                         body: formData
                     })
                     const result = await response.json()
-                    if(result.status === 'success'){
-                        alert(result.message)
-                        window.location.href = '/admin/products'
-                    }else{
-                        alert(result.message)
+                    if (result.status === 'success') {
+                        //alert(result.message)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Product Added',
+                            text: result.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '/admin/products'
+                        })
+
+                    } else {
+                        //alert(result.message)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message,
+                            confirmButtonText: 'Try Again'
+                        });
                     }
-                }catch(error){
-                    alert('An error occured while saving  product')
+                } catch (error) {
+                    //alert('An error occured while saving  product')
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred while saving the product',
+                        confirmButtonText: 'OK'
+                    });
 
                 }
             })
-           
+
             function viewImage1(event) {
                 document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
 
@@ -443,7 +465,7 @@
 
                 return isValid;
             }
-           
+
 
             function displayErrorMessage(elementId, message) {
                 const errorElement = document.getElementById(elementId);

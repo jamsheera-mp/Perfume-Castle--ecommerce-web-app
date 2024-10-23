@@ -1,0 +1,343 @@
+<script>
+
+    //----------------------------------------------------------- Form validation functions--------------------------
+    function validateAddressForm(formData) {
+        const validations = {
+            name: {
+                test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
+                message: 'Name must be 2-50 characters long and contain only letters'
+            },
+            phone: {
+                test: value => /^\d{10}$/.test(value),
+                message: 'Phone must be exactly 10 digits'
+            },
+            pincode: {
+                test: value => /^\d{6}$/.test(value),
+                message: 'Pincode must be exactly 6 digits'
+            },
+            city: {
+                test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
+                message: 'City must be 2-50 characters long and contain only letters'
+            },
+            landMark: {
+                test: value => value.length >= 3,
+                message: 'Landmark must be at least 3 characters long'
+            },
+            district: {
+                test: value => value.length >= 2 && /^[a-zA-Z\s]{2,50}$/.test(value),
+                message: 'District must be 2-50 characters long and contain only letters'
+            },
+            state: {
+                test: value => value.length > 0,
+                message: 'Please select a state'
+            }
+        };
+
+        const errors = {};
+        let isValid = true;
+
+        for (const [field, validation] of Object.entries(validations)) {
+            const value = formData.get(field);
+            if (!validation.test(value)) {
+                errors[field] = validation.message;
+                isValid = false;
+            }
+        }
+
+        return { isValid, errors };
+
+    }
+    //--------------------------form validation ends-------------------------------------------------------------
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        
+        //---------------------------------------coupon mgmt ends------------------------------------->
+
+
+
+       
+
+        // Address Form Toggle
+        const addAddressToggle = document.getElementById('addAddressToggle');
+        const newAddressForm = document.getElementById('new-address');
+
+        addAddressToggle.addEventListener('click', function () {
+            if (newAddressForm.style.display === 'none' || newAddressForm.style.display === '') {
+                newAddressForm.style.display = 'block';
+            } else {
+                newAddressForm.style.display = 'none';
+            }
+        });
+
+        // Add Address Form Submission
+        const addAddressForm = document.getElementById('addAddressForm');
+        if (addAddressForm) {
+            addAddressForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const { isValid, errors } = validateAddressForm(formData);
+
+                if (!isValid) {
+                    Object.keys(errors).forEach(field => {
+                        const input = document.getElementById(field);
+                        const feedback = input.nextElementSibling;
+                        input.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = errors[field];
+                    });
+                    return;
+                }
+
+                fetch('/addAddress', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Address added successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error adding address: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        }
+
+        // Address Deletion
+        function deleteAddress(addressId) {
+            if (confirm('Are you sure you want to delete this address?')) {
+                fetch(`/deleteAddress/${addressId}`, {
+                    method: 'POST',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('address deleting message:', data);
+
+                        if (data.success) {
+                            Swal.fire('success', data.message, 'success')
+                            const addressCard = document.querySelector(`#address-${addressId}`);
+                            if (addressCard) {
+                                addressCard.remove();
+                            }
+                        } else {
+                            Swal.fire('Error', data.message, 'error')
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Something went wrong', 'error')
+                        console.error('Error:', error)
+                    })
+            }
+        }
+
+        // Edit Address
+        function toggleEditForm(index) {
+            const editForm = document.getElementById(`editForm-${index}`);
+            if (editForm.style.display === 'none' || editForm.style.display === '') {
+                editForm.style.display = 'block';
+            } else {
+                editForm.style.display = 'none';
+            }
+        }
+
+        function submitEditForm(index) {
+            const form = document.getElementById(`editAddressForm-${index}`);
+            const formData = new FormData(form);
+
+            fetch(form.getAttribute('action'), {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload()
+                        updateAddressOnPage(index, data.address);
+                        toggleEditForm(index);
+                    } else {
+                        alert('Error updating address. Please try again.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateAddressOnPage(index, updatedAddress) {
+            const addressElement = document.querySelector(`#editForm-${index}`).previousElementSibling;
+            addressElement.querySelector('strong').innerText = updatedAddress.name || 'No Name';
+            addressElement.querySelectorAll('p')[1].innerText = `${updatedAddress.city}, ${updatedAddress.landMark}, ${updatedAddress.district}, ${updatedAddress.state}, ${updatedAddress.pincode}`;
+        }
+
+        // Edit Address Form
+        const editForms = document.querySelectorAll('[id^="editAddressForm-"]');
+        editForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const { isValid, errors } = validateAddressForm(formData);
+
+                if (!isValid) {
+                    Object.keys(errors).forEach(field => {
+                        const input = this.querySelector(`[name="${field}"]`);
+                        const feedback = input.nextElementSibling;
+                        input.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = errors[field];
+                    });
+                    return;
+                }
+
+                fetch(this.getAttribute('action'), {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error updating address: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+
+
+
+
+
+        // Place Order
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        if (placeOrderBtn) {
+
+            placeOrderBtn.addEventListener('click', function () {
+                const selectedAddressRadio = document.querySelector('input[name="addressType"]:checked');
+                const selectedPaymentRadio = document.querySelector('input[name="payment_option"]:checked');
+                console.log('Selected address:', selectedAddressRadio.value);
+                console.log('Selected payment method:', selectedPaymentRadio.value);
+
+                if (!selectedAddressRadio) {
+                    alert('Please select a delivery address');
+                    return;
+                }
+
+                if (!selectedPaymentRadio) {
+                    alert('Please select a payment method');
+                    return;
+                }
+                const addressId = selectedAddressRadio.value;
+                const paymentMethod = selectedPaymentRadio.value
+                placeOrder(addressId, paymentMethod);
+            })
+        }
+
+        //---------------------------------place order function----------------------------
+        function placeOrder(addressId, paymentMethod) {
+            fetch('/placeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ address: addressId, paymentMethod: paymentMethod })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (paymentMethod === 'CashOnDelivery') {
+                            window.location.href = '/orderSuccess?orderId=' + data.orderId;
+                        } else if (paymentMethod === 'Online') {
+                            initiateRazorpayPayment(data);
+                        }
+                    } else {
+                        alert(data.message || 'Error occurred while placing order');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while placing the order');
+                });
+        }
+        //-------------------------------------Razor pay initialization-------------------------------
+
+        function initiateRazorpayPayment(orderData) {
+            const options = {
+                key: 'rzp_test_trhZpz0cQLRJsN',
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: 'Perfume Castle',
+                description: 'Purchase Description',
+                order_id: orderData.razorpayOrderId,
+                handler: function (response) {
+                    verifyPayment(response, orderData.orderId);
+                },
+                prefill: {
+                    name: 'Customer Name',
+                    email: 'customer@example.com',
+                    contact: '9999999999'
+                },
+                theme: {
+                    color: '#3399cc'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                alert('Payment failed. Please try again.');
+
+            });
+            rzp.open();
+        }
+
+        //------------------------------verify razorpay payment----------------------
+
+        function verifyPayment(paymentResponse, orderId) {
+            fetch('/verifyRazorpayPayment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                    razorpay_order_id: paymentResponse.razorpay_order_id,
+                    razorpay_signature: paymentResponse.razorpay_signature
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/orderSuccess?orderId=' + data.orderId;
+                    } else {
+                        alert(data.message || 'Payment verification failed');
+                        // You might want to redirect to a payment failure page here
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while verifying the payment');
+                });
+        }
+
+
+        //----------------------------------------------------------------------------
+        // Reset validation state when input changes
+        document.addEventListener('input', function (e) {
+            if (e.target.classList.contains('is-invalid')) {
+                e.target.classList.remove('is-invalid');
+                const feedback = e.target.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = '';
+                }
+            }
+        });
+    });
+
+</script>
+<!------------------------------- Place Order Form Submission Ends-------------------------------->
+
+
+
+<!---------------------------------------coupon mgmt begins------------------------------------->
+
+

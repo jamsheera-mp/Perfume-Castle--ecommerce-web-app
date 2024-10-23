@@ -200,12 +200,14 @@
                                             <div class="mb-3">
                                                 <label for="editName" class="form-label">Name</label>
                                                 <input type="text" class="form-control" id="editName" name="name"
-                                                    required>
+                                                    pattern="[A-Za-z\s]{2,}" title="Name should contain only letters">
+                                                <div id="nameError" class="invalid-feedback" style="color:red;"></div>
+
                                             </div>
                                             <div class="mb-3">
                                                 <label for="editEmail" class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="editEmail" name="email"
-                                                    required>
+                                                <input type="email" class="form-control" id="editEmail" name="email">
+                                                <div id="emailError" class="invalid-feedback" style="color:red;"></div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
                                             <button type="button" class="btn btn-secondary"
@@ -222,26 +224,33 @@
                                             <div class="mb-3 position-relative">
                                                 <label for="currentPassword" class="form-label">Current Password</label>
                                                 <input type="password" class="form-control" id="currentPassword"
-                                                    name="currentPassword" required>
+                                                    name="currentPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('currentPassword')"></i>
+                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                </div>
+
                                             </div>
                                             <div class="mb-3 position-relative">
                                                 <label for="newPassword" class="form-label">New Password</label>
                                                 <input type="password" class="form-control" id="newPassword"
-                                                    name="newPassword" required>
+                                                    name="newPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('newPassword')"></i>
+                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                </div>
                                             </div>
                                             <div class="mb-3 position-relative">
                                                 <label for="confirmNewPassword" class="form-label">Confirm New
                                                     Password</label>
                                                 <input type="password" class="form-control" id="confirmNewPassword"
-                                                    name="confirmNewPassword" required>
+                                                    name="confirmNewPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('confirmNewPassword')"></i>
+                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                </div>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Change Password</button>
+                                            <button type="submit" class="btn btn-primary">Save New Password</button>
                                             <button type="button" class="btn btn-secondary"
                                                 id="cancelChangePassword">Cancel</button>
                                         </form>
@@ -296,8 +305,8 @@
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-3 text-end">
-                                                                    <h6 class="mb-0">₹<%= (item.quantity * item.price || 0).toFixed(2)
-                                                                            %>
+                                                                    <h6 class="mb-0">₹<%= (item.quantity * item.price ||
+                                                                            0).toFixed(2) %>
                                                                     </h6>
                                                                 </div>
                                                             </div>
@@ -361,7 +370,7 @@
                                                                             class="form-control"
                                                                             pattern="[A-Za-z\s]{2,}"
                                                                             title="Name should contain only letters"
-                                                                            placeholder="Name" required>
+                                                                            placeholder="Name">
                                                                         <div class="invalid-feedback">Please enter the
                                                                             house
                                                                             name.</div>
@@ -370,7 +379,7 @@
                                                                         <input type="text" name="phone"
                                                                             class="form-control"
                                                                             placeholder="10-digit mobile number"
-                                                                            pattern="\d{10}" required>
+                                                                            pattern="\d{10}">
                                                                         <div class="invalid-feedback">Please enter a
                                                                             valid
                                                                             10-digit mobile
@@ -381,7 +390,7 @@
                                                                     <div class="col-6">
                                                                         <input type="text" name="pincode"
                                                                             class="form-control" placeholder="Pincode"
-                                                                            pattern="\d{6}" required>
+                                                                            pattern="\d{6}">
                                                                         <div class="invalid-feedback">Please enter a
                                                                             valid
                                                                             6-digit pincode.</div>
@@ -390,15 +399,14 @@
                                                                         <input type="text" name="city"
                                                                             class="form-control"
                                                                             pattern="[A-Za-z\s]{2,}"
-                                                                            placeholder="City/Town" required>
+                                                                            placeholder="City/Town">
                                                                         <div class="invalid-feedback">Please enter the
                                                                             city/town.</div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <input type="text" name="landMark"
-                                                                        class="form-control" placeholder="Landmark"
-                                                                        required>
+                                                                        class="form-control" placeholder="Landmark">
                                                                     <div class="invalid-feedback">Please enter a
                                                                         landmark.
                                                                     </div>
@@ -406,14 +414,13 @@
                                                                 <div class="mb-3">
                                                                     <input type="text" name="district"
                                                                         class="form-control" pattern="[A-Za-z\s]{2,}"
-                                                                        placeholder="District" required>
+                                                                        placeholder="District">
                                                                     <div class="invalid-feedback">Please enter your
                                                                         district.
                                                                     </div>
                                                                 </div>
                                                                 <div class="mb-3">
-                                                                    <select name="state" id="state" class="form-select"
-                                                                        required>
+                                                                    <select name="state" id="state" class="form-select">
 
                                                                         <option value="" selected disabled>--Select
                                                                             State--
@@ -443,8 +450,7 @@
                                                                     </div>
                                                                     <div class="col-6">
                                                                         <label for="addressType">Address Type</label>
-                                                                        <select name="addressType" class="form-select"
-                                                                            required>
+                                                                        <select name="addressType" class="form-select">
                                                                             <option value="Home">Home</option>
                                                                             <option value="Work">Work</option>
                                                                         </select>
@@ -514,8 +520,7 @@
                                                                                             class="form-control"
                                                                                             pattern="[A-Za-z\s]{2,}"
                                                                                             title="Name should contain only letters"
-                                                                                            value="<%= addressItem.name %>"
-                                                                                            required>
+                                                                                            value="<%= addressItem.name %>">
                                                                                         <div class="invalid-feedback">
                                                                                             Please
                                                                                             enter the house name.</div>
@@ -525,8 +530,7 @@
                                                                                         <input type="text" name="phone"
                                                                                             class="form-control"
                                                                                             pattern="\d{10}"
-                                                                                            value="<%= addressItem.phone %>"
-                                                                                            required>
+                                                                                            value="<%= addressItem.phone %>">
                                                                                         <div class="invalid-feedback">
                                                                                             Please
                                                                                             enter a valid 10-digit
@@ -540,8 +544,7 @@
                                                                                             name="pincode"
                                                                                             class="form-control"
                                                                                             pattern="\d{6}"
-                                                                                            value="<%= addressItem.pincode %>"
-                                                                                            required>
+                                                                                            value="<%= addressItem.pincode %>">
                                                                                         <div class="invalid-feedback">
                                                                                             Please
                                                                                             enter a valid 6-digit
@@ -553,8 +556,7 @@
                                                                                         <input type="text" name="city"
                                                                                             class="form-control"
                                                                                             pattern="[A-Za-z\s]{2,}"
-                                                                                            value="<%= addressItem.city %>"
-                                                                                            required>
+                                                                                            value="<%= addressItem.city %>">
                                                                                         <div class="invalid-feedback">
                                                                                             Please
                                                                                             enter
@@ -564,8 +566,7 @@
                                                                                 <div class="mb-3">
                                                                                     <input type="text" name="landMark"
                                                                                         class="form-control"
-                                                                                        value="<%= addressItem.landMark %>"
-                                                                                        required>
+                                                                                        value="<%= addressItem.landMark %>">
                                                                                     <div class="invalid-feedback">Please
                                                                                         enter a
                                                                                         landmark.</div>
@@ -573,15 +574,14 @@
                                                                                 <div class="mb-3">
                                                                                     <input type="text" name="district"
                                                                                         class="form-control"
-                                                                                        value="<%= addressItem.district %>"
-                                                                                        required>
+                                                                                        value="<%= addressItem.district %>">
                                                                                     <div class="invalid-feedback">Please
                                                                                         enter
                                                                                         your district.</div>
                                                                                 </div>
                                                                                 <div class="mb-3">
                                                                                     <select name="state" id="state"
-                                                                                        class="form-select" required>
+                                                                                        class="form-select">
 
                                                                                         <option value="" selected
                                                                                             disabled>
@@ -598,7 +598,7 @@
                                                                                         </option>
 
                                                                                     </select>
-                                                                                    <!--<input type="text" name="state" class="form-control" value="<%= addressItem.state %>" required>-->
+                                                                                    <!--<input type="text" name="state" class="form-control" value="<%= addressItem.state %>" >-->
                                                                                     <div class="invalid-feedback">Please
                                                                                         select
                                                                                         a state.</div>
@@ -619,8 +619,7 @@
                                                                                     </div>
                                                                                     <div class="col-6">
                                                                                         <select name="addressType"
-                                                                                            class="form-select"
-                                                                                            required>
+                                                                                            class="form-select">
                                                                                             <option value="Home"
                                                                                                 <%=addressItem.addressType==='Home'
                                                                                                 ? 'selected' : '' %>
@@ -688,9 +687,6 @@
                 });
             });
 
-
-
-
             // Debug logging for orders
             console.log('Checking orders container...');
             const ordersContainer = document.getElementById('ordersContainer');
@@ -700,40 +696,68 @@
             } else {
                 console.error('Orders container not found');
             }
-
-
-
-
-
-
-            // Profile edit functionality
-            function toggleProfileEdit() {
-                const infoElement = document.getElementById('profileInfo');
-                const formElement = document.getElementById('profileEditForm');
-
-                if (infoElement.style.display !== 'none') {
-                    infoElement.style.display = 'none';
-                    formElement.style.display = 'block';
-                    populateProfileForm();
-                } else {
-                    infoElement.style.display = 'block';
-                    formElement.style.display = 'none';
-                }
-            }
-
-            function populateProfileForm() {
-                const nameInput = document.getElementById('editName');
-                const emailInput = document.getElementById('editEmail');
-                if (nameInput && emailInput) {
-                    nameInput.value = '<%= user.name %>';
-                    emailInput.value = '<%= user.email %>';
-                }
-            }
         })
+        // Profile edit functionality
+        function toggleProfileEdit() {
+            const infoElement = document.getElementById('profileInfo');
+            const formElement = document.getElementById('profileEditForm');
+
+            if (infoElement.style.display !== 'none') {
+                infoElement.style.display = 'none';
+                formElement.style.display = 'block';
+                populateProfileForm();
+            } else {
+                infoElement.style.display = 'block';
+                formElement.style.display = 'none';
+            }
+        }
+
+
+        function populateProfileForm() {
+            const nameInput = document.getElementById('editName');
+            const emailInput = document.getElementById('editEmail');
+            if (nameInput && emailInput) {
+                nameInput.value = '<%= user.name %>';
+                emailInput.value = '<%= user.email %>';
+            }
+        }
+
         document.getElementById('editProfileForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            let isValid = true;
+
+            // Name validation
             const name = document.getElementById('editName').value;
+            const nameError = document.getElementById('nameError');
+            const namePattern = /^[A-Za-z\s]{2,}$/;
+
+            if (!namePattern.test(name)) {  // Fix this line
+                nameError.textContent = "Please enter a valid name (only letters and at least 2 characters).";
+                nameError.style.display = 'block';  // Display the error message
+                isValid = false;
+            } else {
+                nameError.textContent = "";
+                nameError.style.display = 'none';  // Hide the error message when valid
+            }
+
+            // Email validation
             const email = document.getElementById('editEmail').value;
+            const emailError = document.getElementById('emailError');
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simplified email regex
+
+            if (!emailPattern.test(email)) {
+                emailError.textContent = "Please enter a valid email address.";
+                emailError.style.display = 'block';  // Display the error message
+                isValid = false;
+            } else {
+                emailError.textContent = "";
+                emailError.style.display = 'none';  // Hide the error message when valid
+            }
+
+            // Check form validity before proceeding
+            if (!isValid) {
+                return;  // Do not proceed if form is invalid
+            }
 
             // Send AJAX request to update profile
             fetch('/updateProfile', {
@@ -750,18 +774,37 @@
                         document.querySelector('#profileInfo p:first-child').textContent = `Name: ${name}`;
                         document.querySelector('#profileInfo p:nth-child(2)').textContent = `Email: ${email}`;
                         toggleProfileEdit(); // Hide the form
-                        showMessage('Profile updated successfully', 'success');
+
+                        Swal.fire({
+                            title: 'Profile updated successfully',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+
+                        })
                     } else {
-                        showMessage('Failed to update profile', 'error');
+
+                        console.error(data.error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to update profile' || data.error,
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+
+                        })
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showMessage('An error occurred while updating the profile', 'error');
+
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while updating the profile',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+
+                    })
                 });
         });
-
-
 
         //  change password functionality
         document.getElementById('showChangePasswordForm').addEventListener('click', function () {
@@ -780,10 +823,33 @@
             const currentPassword = document.getElementById('currentPassword').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            const passwordError = document.getElementById('passwordError')
+            passwordPattern = `^.{6}$
+`
+
 
             if (newPassword !== confirmNewPassword) {
-                showMessage('New passwords do not match', 'error');
+
+                Swal.fire({
+                    title: 'Error',
+                    text: 'New passwords do not match',
+                    icon: 'error',
+                    confirmButtonText: 'Try again'
+                })
                 return;
+            }
+            if (!passwordPattern.test(newPassword) && !passwordPattern.test(confirmNewPassword)) {
+                passwordError.textContent = 'Password must be at least 6 characters long';
+                passwordError.style.display = 'block';
+                isValid = false;
+            } else {
+                passworderror.textContent = '';
+                passwordError.style.display = 'none';
+
+            }
+            // Check form validity before proceeding
+            if (!isValid) {
+                return;  // Do not proceed if form is invalid
             }
 
             // Send AJAX request to change password
@@ -843,229 +909,315 @@
     </script>
     <!--------------------------------------------------------------Edit Address Section---------------------------->
     <script>
-        function toggleEditForm(addressId) {
-            const editForm = document.getElementById(`editForm-${addressId}`);
-            editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function submitEditForm(addressId, event) {
+        function validateForm(addressId, event) {
             event.preventDefault();
             const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+            let isValid = true;
 
-            fetch(`/editAddress/${addressId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            // Reset all error states
+            const errorMessages = form.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => msg.remove());
+
+            // Validation rules
+            const validations = {
+                name: {
+                    pattern: /^[A-Za-z\s]{2,}$/,
+                    message: 'Name should contain only letters and be at least 2 characters long'
                 },
-                body: JSON.stringify(data),
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        // Update the address display
-                        const addressBox = document.getElementById(`address-${addressId}`);
-                        addressBox.querySelector('.fw-bold').textContent = data.addressType;
-                        addressBox.querySelector('div:nth-child(2)').textContent = data.name;
-                        addressBox.querySelector('div:nth-child(3)').textContent = `${data.city}, ${data.landMark}, ${data.district}`;
-                        addressBox.querySelector('div:nth-child(4)').textContent = `${data.state}, ${data.pincode}`;
-                        addressBox.querySelector('div:nth-child(5)').textContent = `Phone: ${data.phone}`;
+                phone: {
+                    pattern: /^\d{10}$/,
+                    message: 'Please enter a valid 10-digit mobile number'
+                },
+                pincode: {
+                    pattern: /^\d{6}$/,
+                    message: 'Please enter a valid 6-digit pincode'
+                },
+                city: {
+                    pattern: /^[A-Za-z\s]{2,}$/,
+                    message: 'City should contain only letters and be at least 2 characters long'
+                },
+                landMark: {
+                    required: true,
+                    message: 'Please enter a landmark'
+                },
+                district: {
+                    required: true,
+                    message: 'Please enter your district'
+                },
+                state: {
+                    required: true,
+                    message: 'Please select a state'
+                },
+                altPhone: {
+                    pattern: /^\d{10}$/,
+                    required: false,
+                    message: 'Please enter a valid 10-digit alternate phone number'
+                }
+            };
 
-                        toggleEditForm(addressId);
-                        showMessage('Address updated successfully', 'success');
-                    } else {
-                        showMessage('Failed to update address', 'error');
+            // Helper function to show error message
+            function showError(input, message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = 'red';
+                errorDiv.style.fontSize = '12px';
+                errorDiv.style.marginTop = '5px';
+                errorDiv.textContent = message;
+                input.parentNode.appendChild(errorDiv);
+                input.style.borderColor = 'red';
+                isValid = false;
+            }
+
+            // Validate each field
+            Object.keys(validations).forEach(fieldName => {
+                const input = form.querySelector(`[name="${fieldName}"]`);
+                if (!input) return;
+
+                const validation = validations[fieldName];
+                const value = input.value.trim();
+
+                // Reset styles
+                input.style.borderColor = '';
+
+                // Required field validation
+                if (validation.required !== false && !value) {
+                    showError(input, validation.message);
+                    return;
+                }
+
+                // Pattern validation
+                if (validation.pattern && value) {
+                    if (!validation.pattern.test(value)) {
+                        showError(input, validation.message);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showMessage('An error occurred while updating the address', 'error');
-                });
-        }
+                }
+            });
+            function toggleEditForm(addressId) {
+                const editForm = document.getElementById(`editForm-${addressId}`);
+                editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+            }
 
-        function deleteAddress(addressId) {
-            if (confirm('Are you sure you want to delete this address?')) {
-                fetch(`/deleteAddress/${addressId}`, {
+            function submitEditForm(addressId, event) {
+                event.preventDefault();
+                const form = event.target;
+                if (!validateForm(addressId, event)) return
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+
+                fetch(`/editAddress/${addressId}`, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
                 })
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            // Remove the address from the DOM
+                            // Update the address display
                             const addressBox = document.getElementById(`address-${addressId}`);
-                            addressBox.remove();
-                            showMessage('Address deleted successfully', 'success');
+                            addressBox.querySelector('.fw-bold').textContent = data.addressType;
+                            addressBox.querySelector('div:nth-child(2)').textContent = data.name;
+                            addressBox.querySelector('div:nth-child(3)').textContent = `${data.city}, ${data.landMark}, ${data.district}`;
+                            addressBox.querySelector('div:nth-child(4)').textContent = `${data.state}, ${data.pincode}`;
+                            addressBox.querySelector('div:nth-child(5)').textContent = `Phone: ${data.phone}`;
+
+                            toggleEditForm(addressId);
+                            showMessage('Address updated successfully', 'success');
                         } else {
-                            showMessage('Failed to delete address', 'error');
+                            showMessage('Failed to update address', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showMessage('An error occurred while deleting the address', 'error');
+                        showMessage('An error occurred while updating the address', 'error');
                     });
             }
-        }
 
-        function showMessage(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show mt-3`;
-            alertDiv.innerHTML = `
+            function deleteAddress(addressId) {
+                if (confirm('Are you sure you want to delete this address?')) {
+                    fetch(`/deleteAddress/${addressId}`, {
+                        method: 'POST',
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Remove the address from the DOM
+                                const addressBox = document.getElementById(`address-${addressId}`);
+                                addressBox.remove();
+                                showMessage('Address deleted successfully', 'success');
+                            } else {
+                                showMessage('Failed to delete address', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showMessage('An error occurred while deleting the address', 'error');
+                        });
+                }
+            }
+
+            function showMessage(message, type) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show mt-3`;
+                alertDiv.innerHTML = `
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 `;
 
-            const addressesSection = document.getElementById('addresses');
-            addressesSection.insertBefore(alertDiv, addressesSection.firstChild);
+                const addressesSection = document.getElementById('addresses');
+                addressesSection.insertBefore(alertDiv, addressesSection.firstChild);
 
-            setTimeout(() => alertDiv.remove(), 5000);
-        }
+                setTimeout(() => alertDiv.remove(), 5000);
+            }
     </script>
 
     </script>
     <!-----------------------------------------toggle address form------------------------------------------------------>
     <script>
-        function toggleAddForm() {
-            const form = document.getElementById('addAddressForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        }
+            function toggleAddForm() {
+                const form = document.getElementById('addAddressForm');
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
 
-        function toggleEditForm(addressId) {
-            const editForm = document.getElementById(`editForm-${addressId}`);
-            editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+            function toggleEditForm(addressId) {
+                const editForm = document.getElementById(`editForm-${addressId}`);
+                editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
 
-        }
+            }
     </script>
     <!-------------------------------------------------address form ----------------------------------------------------------------------------->
 
     <script>
-        // Form validation and submission handling
-        document.addEventListener('DOMContentLoaded', function () {
-            const addressForm = document.getElementById('addressForm');
+            // Form validation and submission handling
+            document.addEventListener('DOMContentLoaded', function () {
+                const addressForm = document.getElementById('addressForm');
 
-            if (!addressForm) return;
+                if (!addressForm) return;
 
-            // Form submission handler
-            addressForm.addEventListener('submit', async function (event) {
-                event.preventDefault();
+                // Form submission handler
+                addressForm.addEventListener('submit', async function (event) {
+                    event.preventDefault();
 
-                // Get form data
-                const formData = {
-                    name: addressForm.name.value.trim(),
-                    phone: addressForm.phone.value.trim(),
-                    pincode: addressForm.pincode.value.trim(),
-                    city: addressForm.city.value.trim(),
-                    landMark: addressForm.landMark.value.trim(),
-                    district: addressForm.district.value.trim(),
-                    state: addressForm.state.value,
-                    altPhone: addressForm.altPhone.value.trim(),
-                    addressType: addressForm.addressType.value
-                };
+                    // Get form data
+                    const formData = {
+                        name: addressForm.name.value.trim(),
+                        phone: addressForm.phone.value.trim(),
+                        pincode: addressForm.pincode.value.trim(),
+                        city: addressForm.city.value.trim(),
+                        landMark: addressForm.landMark.value.trim(),
+                        district: addressForm.district.value.trim(),
+                        state: addressForm.state.value,
+                        altPhone: addressForm.altPhone.value.trim(),
+                        addressType: addressForm.addressType.value
+                    };
 
-                // Validate required fields
-                const requiredFields = ['name', 'phone', 'pincode', 'city', 'landMark', 'district', 'state', 'addressType'];
-                let isValid = true;
+                    // Validate required fields
+                    const requiredFields = ['name', 'phone', 'pincode', 'city', 'landMark', 'district', 'state', 'addressType'];
+                    let isValid = true;
 
-                requiredFields.forEach(field => {
-                    const input = addressForm[field];
-                    if (!formData[field]) {
-                        input.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
-                    }
-                });
-
-                if (!isValid) {
-                    showMessage('Please fill all required fields', 'error');
-                    return;
-                }
-
-                // Validate phone number format
-                if (!/^\d{10}$/.test(formData.phone)) {
-                    addressForm.phone.classList.add('is-invalid');
-                    showMessage('Please enter a valid 10-digit phone number', 'error');
-                    return;
-                }
-
-                // Validate pincode format
-                if (!/^\d{6}$/.test(formData.pincode)) {
-                    addressForm.pincode.classList.add('is-invalid');
-                    showMessage('Please enter a valid 6-digit pincode', 'error');
-                    return;
-                }
-
-                // Validate alternate phone if provided
-                if (formData.altPhone && !/^\d{10}$/.test(formData.altPhone)) {
-                    addressForm.altPhone.classList.add('is-invalid');
-                    showMessage('Please enter a valid alternate phone number', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/addAddress', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
+                    requiredFields.forEach(field => {
+                        const input = addressForm[field];
+                        if (!formData[field]) {
+                            input.classList.add('is-invalid');
+                            isValid = false;
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
                     });
 
-                    const result = await response.json();
+                    if (!isValid) {
+                        showMessage('Please fill all required fields', 'error');
+                        return;
+                    }
 
-                    if (result.success) {
-                        // Add the new address to the list
-                        if (result.addresses && result.addresses.length > 0) {
-                            addAddressToList(result.addresses[result.addresses.length - 1]);
-                        }
+                    // Validate phone number format
+                    if (!/^\d{10}$/.test(formData.phone)) {
+                        addressForm.phone.classList.add('is-invalid');
+                        showMessage('Please enter a valid 10-digit phone number', 'error');
+                        return;
+                    }
 
-                        // Reset form and validation states
-                        addressForm.reset();
-                        addressForm.querySelectorAll('.is-valid, .is-invalid').forEach(input => {
-                            input.classList.remove('is-valid', 'is-invalid');
+                    // Validate pincode format
+                    if (!/^\d{6}$/.test(formData.pincode)) {
+                        addressForm.pincode.classList.add('is-invalid');
+                        showMessage('Please enter a valid 6-digit pincode', 'error');
+                        return;
+                    }
+
+                    // Validate alternate phone if provided
+                    if (formData.altPhone && !/^\d{10}$/.test(formData.altPhone)) {
+                        addressForm.altPhone.classList.add('is-invalid');
+                        showMessage('Please enter a valid alternate phone number', 'error');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/addAddress', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
                         });
 
-                        // Hide form and show success message
-                        toggleAddForm();
-                        showMessage('Address added successfully', 'success');
-                    } else {
-                        showMessage(result.message || 'Error adding address', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showMessage('An error occurred while saving the address', 'error');
-                }
-            });
-        });
+                        const result = await response.json();
 
-        // Helper function to show messages
-        function showMessage(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-            alertDiv.innerHTML = `
+                        if (result.success) {
+                            // Add the new address to the list
+                            if (result.addresses && result.addresses.length > 0) {
+                                addAddressToList(result.addresses[result.addresses.length - 1]);
+                            }
+
+                            // Reset form and validation states
+                            addressForm.reset();
+                            addressForm.querySelectorAll('.is-valid, .is-invalid').forEach(input => {
+                                input.classList.remove('is-valid', 'is-invalid');
+                            });
+
+                            // Hide form and show success message
+                            toggleAddForm();
+                            showMessage('Address added successfully', 'success');
+                        } else {
+                            showMessage(result.message || 'Error adding address', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showMessage('An error occurred while saving the address', 'error');
+                    }
+                });
+            });
+
+            // Helper function to show messages
+            function showMessage(message, type) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 `;
 
-            const addressesSection = document.getElementById('addresses');
-            const existingAlert = addressesSection.querySelector('.alert');
-            if (existingAlert) {
-                existingAlert.remove();
+                const addressesSection = document.getElementById('addresses');
+                const existingAlert = addressesSection.querySelector('.alert');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                addressesSection.insertBefore(alertDiv, addressesSection.firstChild);
+
+                setTimeout(() => alertDiv.remove(), 5000);
             }
+            // Modified addAddressToList function
+            function addAddressToList(address) {
+                const addressesContainer = document.querySelector('.saved-addresses');
+                if (addressesContainer.querySelector('p')?.textContent === 'No addresses found.') {
+                    addressesContainer.innerHTML = '';
+                }
 
-            addressesSection.insertBefore(alertDiv, addressesSection.firstChild);
-
-            setTimeout(() => alertDiv.remove(), 5000);
-        }
-        // Modified addAddressToList function
-        function addAddressToList(address) {
-            const addressesContainer = document.querySelector('.saved-addresses');
-            if (addressesContainer.querySelector('p')?.textContent === 'No addresses found.') {
-                addressesContainer.innerHTML = '';
-            }
-
-            const newAddressHtml = `
+                const newAddressHtml = `
     <div class="address-box" id="address-${address._id}">
         <div class="d-flex justify-content-between mb-2">
             <span class="fw-bold">${address.addressType}</span>
@@ -1081,6 +1233,6 @@
         ${address.altPhone ? `<div>Alt Phone: ${address.altPhone}</div>` : ''}
     </div>
 `;
-            addressesContainer.insertAdjacentHTML('beforeend', newAddressHtml);
-        }
+                addressesContainer.insertAdjacentHTML('beforeend', newAddressHtml);
+            }
     </script>

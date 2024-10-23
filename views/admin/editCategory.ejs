@@ -21,7 +21,7 @@
                       <form id="editCategoryForm" action="/admin/editCategory/<%= category._id %>" method="post">
                         <div class="col-md-9">
                             <div class="mb-4">
-                                <label class="form-label" for="name">Category Name</label>
+                                <label class="form-label" for="categoryName">Category Name</label>
                                 <input type="text"  id="categoryName" name="categoryName" value="<%= category.name %>" class="form-control">
                                 <div id="name-error" class="error-message" style="display:none; color: red;"></div>
                             </div>
@@ -46,8 +46,8 @@
 </section> <!-- content-main end// -->
 
 
-<!-- 
-<script>
+
+<!--<script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editCategoryForm'); 
 
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: 'Category updated successfully',
                     icon: 'success'
                 }).then(() => {
-                    window.location.href = '/admin/category'; // Redirect after success
+                    window.location.href = '/admin/category';
                 });
             }
         })
@@ -93,23 +93,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error'
             });
         });
-    });
-
+    });-->
+ 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editCategoryForm');
+    
+    // Define validation functions in the outer scope
     function validateForm() {
-        // Your form validation logic
         clearErrorMessages();
         let isValid = true;
         
-        const name = document.getElementById('name').value.trim();
+        const name = document.getElementById('categoryName').value.trim();
         const description = document.getElementById('description').value.trim();
 
+        // Validate category name
         if (name === "") {
-            displayErrorMessage('name-error', 'Please enter a name');
+            displayErrorMessage('name-error', 'Please enter a category name');
+            isValid = false;
+        } else if (name.length < 2) {
+            displayErrorMessage('name-error', 'Category name must be at least 2 characters long');
             isValid = false;
         }
         
+        // Validate description
         if (description === "") {
             displayErrorMessage('description-error', 'Please enter a description');
+            isValid = false;
+        } else if (description.length < 10) {
+            displayErrorMessage('description-error', 'Description must be at least 10 characters long');
             isValid = false;
         }
 
@@ -118,20 +130,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayErrorMessage(elementId, message) {
         const errorElement = document.getElementById(elementId);
-        errorElement.innerText = message;
-        errorElement.style.display = 'block';
+        if (errorElement) {
+            errorElement.innerText = message;
+            errorElement.style.display = 'block';
+            // Highlight the invalid input field
+            const inputField = errorElement.previousElementSibling;
+            if (inputField) {
+                inputField.classList.add('is-invalid');
+            }
+        }
     }
 
     function clearErrorMessages() {
+        // Clear all error messages
         const errorElements = document.getElementsByClassName('error-message');
         Array.from(errorElements).forEach(element => {
             element.style.display = 'none';
-            element.innerText = "";
+            element.innerText = '';
+        });
+        
+        // Remove invalid class from all inputs
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.classList.remove('is-invalid');
         });
     }
+
+    // Add form submit event listener
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        if (validateForm()) {
+            // If validation passes, submit the form
+            this.submit();
+        }
+    });
+
+    // Add input event listeners for real-time validation
+    const inputs = form.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // Clear the error message for this input when user starts typing
+            const errorElement = this.nextElementSibling;
+            if (errorElement && errorElement.classList.contains('error-message')) {
+                errorElement.style.display = 'none';
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
 });
 </script>
- -->
+
 
 
 

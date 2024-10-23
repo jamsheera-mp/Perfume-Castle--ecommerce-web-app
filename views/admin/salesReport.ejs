@@ -1,0 +1,162 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/header.ejs') %>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+
+        <div class="container mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Sales Report</h1>
+                <div>
+                    <button type="button" onclick="downloadReport('excel')" class="btn btn-success me-2">
+                        <i class="fas fa-file-excel me-2"></i>Download Excel
+                    </button>
+                    <button type="button" onclick="downloadReport('pdf')" class="btn btn-danger">
+                        <i class="fas fa-file-pdf me-2"></i>Download PDF
+                    </button>
+                </div>
+            </div>
+            <form id="reportForm" class="mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <select id="reportType" name="reportType" class="form-select">
+                            <option value="">Select Report Type</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 custom-date d-none">
+                        <input type="date" id="startDate" name="startDate" class="form-control"
+                            placeholder="Start Date">
+                    </div>
+                    <div class="col-md-3 custom-date d-none">
+                        <input type="date" id="endDate" name="endDate" class="form-control" placeholder="End Date">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Generate Report</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="reportSummary" class=" row mb-4">
+                <h3>Summary</h3>
+                <p>Total Sales: <%= salesReport.totalSales %>
+                </p>
+                <p>Total Amount: ₹<%= salesReport.totalAmount%>
+                </p>
+                <p>Total Discount: ₹<%= salesReport.totalDiscount %>
+                </p>
+            </div>
+            <div class="card">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Total Price</th>
+                            <th>Final Amount</th>
+                            <th>Discount</th>
+                            <th>Coupon Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% salesReport.orders.forEach(order=> { %>
+                            <tr>
+                                <td>
+                                    <%= order.orderId %>
+                                </td>
+                                <td>
+                                    <%= new Date(order.date).toLocaleDateString() %>
+                                </td>
+                                <td>₹<%= order.amount %>
+                                </td>
+
+
+                                <td>₹<%= order.discount %>
+                                </td>
+                                <td>₹<%= order.finalAmount %>
+                                </td>
+                                <td>
+                                    <%= order.couponCode %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Store the current URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentReportType = urlParams.get('reportType');
+                const currentStartDate = urlParams.get('startDate');
+                const currentEndDate = urlParams.get('endDate');
+            
+                // Set initial values from URL if they exist
+                if (currentReportType) {
+                    $('#reportType').val(currentReportType);
+                    if (currentReportType === 'custom') {
+                        $('.custom-date').removeClass('d-none');
+                        $('#startDate').val(currentStartDate);
+                        $('#endDate').val(currentEndDate);
+                    }
+                }
+            
+                // Handle report type changes
+                $('#reportType').change(function() {
+                    if ($(this).val() === 'custom') {
+                        $('.custom-date').removeClass('d-none');
+                    } else {
+                        $('.custom-date').addClass('d-none');
+                        $('#startDate').val('');
+                        $('#endDate').val('');
+                    }
+                });
+            
+                // Form submission
+                $('#reportForm').submit(function(e) {
+                    e.preventDefault();
+                    const formData = $(this).serialize();
+                    window.location.href = `/admin/sales-report?${formData}`;
+                });
+            });
+            
+            function downloadReport(format) {
+                // Get current form values
+                const reportType = $('#reportType').val();
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                
+                // Create URL parameters object
+                const params = new URLSearchParams();
+                params.append('format', format);
+            
+                // Add appropriate date parameters based on report type
+                if (reportType === 'custom' && startDate && endDate) {
+                    params.append('startDate', startDate);
+                    params.append('endDate', endDate);
+                } else if (reportType && reportType !== 'custom') {
+                    params.append('reportType', reportType);
+                }
+            
+                // Log the parameters for debugging
+                console.log('Download parameters:', {
+                    format,
+                    reportType,
+                    startDate,
+                    endDate
+                });
+            
+                // Redirect to download URL with parameters
+                window.location.href = `/admin/download-report?${params.toString()}`;
+            }
+            </script>

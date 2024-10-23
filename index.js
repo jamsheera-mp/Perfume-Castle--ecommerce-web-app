@@ -2,11 +2,12 @@ require('dotenv').config()
 const express = require('express')
 const session = require('express-session')
 const MongoStore = require('connect-mongo');
-const Swal = require('sweetalert2')
-//const flash = require('connect-flash')
 const passport = require('./config/passport')
+//const helmet = require("helmet")
 const categoryBrandMiddleware = require('./middlewares/categoriesLoad')
 const cartMiddleware = require('./middlewares/cart')
+const wishlistMiddleware = require('./middlewares/wishlist')
+
 
 const app = express()
 
@@ -38,11 +39,11 @@ app.use(session({
     }
 }));
 
-//app.use(flash)
+
 //passport initialize
 app.use(passport.initialize())
 app.use(passport.session())
-
+//app.use(helmet())
 
 app.use((req,res,next)=>{
     res.set('cache-control','no-store')
@@ -54,11 +55,10 @@ app.use((req, res, next) => {
 });
 app.use(categoryBrandMiddleware);
 app.use(cartMiddleware);
+app.use(wishlistMiddleware)
 
 
 //view engine set up
-
-
 app.set('view engine','ejs')
 app.set('views', path.join(__dirname, 'views'))
 
@@ -67,8 +67,8 @@ app.use(express.static('public')) //static files
 
 //routes
 app.use('/',userRoutes)
-
 app.use('/admin',adminRoutes)
+
 
 app.listen(PORT,()=>{
     console.log(`Server started on ${PORT}`);

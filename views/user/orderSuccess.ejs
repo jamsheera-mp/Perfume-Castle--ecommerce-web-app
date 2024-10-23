@@ -146,15 +146,21 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <th>Subtotal:</th>
-                                    <td>$<%= subtotal.toFixed(2) %></td>
+                                    <td> ₹<%= totalPrice %></td>
                                 </tr>
                                 <tr>
                                     <th>Shipping:</th>
                                     <td>Free Shipping</td>
                                 </tr>
+                                <% if (couponDiscount && couponDiscount > 0) { %>
+                                    <tr>
+                                    <th>Coupon Discount:</th>
+                                        <td>-₹<%= couponDiscount %></td> 
+                                </tr>
+                                <% } %>
                                 <tr>
                                     <th>Total:</th>
-                                    <td><strong>$<%= total.toFixed(2) %></strong></td>
+                                    <td><strong>₹<%= total %></strong></td>
                                 </tr>
                             </table>
                         </div>

@@ -15,6 +15,10 @@
     <meta property="og:url" content="">
     <meta property="og:image" content="">
     <link rel="stylesheet" href="/user/assets/css/brand.css">
+    <!-- Add SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+
     <!-- <link rel="stylesheet" href="/user/assets/css/slider.css"> -->
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/admin/assets/imgs/logo/PCL_WS.jpg">
@@ -75,6 +79,7 @@
                                             <li><a class="dropdown-item" href="/cart">Cart</a></li>
                                             <li><a class="dropdown-item" href="/Orders">Orders</a></li>
                                             <li><a class="dropdown-item" href="/wishlist">Wishlist</a></li>
+                                            <li><a class="dropdown-item" href="/wallet">Wallet</a></li>
                                             <li><a class="dropdown-item" href="/logout">Logout</a></li>
                                             <% } else { %>
                                                 <li><a class="dropdown-item" href="/register">Sign Up</a></li>
@@ -106,42 +111,42 @@
                                     <ul>
                                         <li><a class="active" href=""></a>
                                         <li><a class="active" href="/">Home </a>
-    
+
                                         </li>
-    
+
                                         <li><a href="/product">Shop <i class="fi-rs-angle-down"></i></a>
-    
+
                                         </li>
                                         <li><a href="#">Categories<i class="fi-rs-angle-down"></i></a>
                                             <ul class="sub-menu">
                                                 <% categories.forEach(category=>{ %>
-    
+
                                                     <li>
                                                         <a href="#">
                                                             <%= category.name%>
                                                         </a>
-    
+
                                                     </li>
                                                     <% }) %>
-    
+
                                             </ul>
                                         </li>
                                         <li><a href="">Brand <i class="fi-rs-angle-down"></i></a>
                                             <ul class="sub-menu">
                                                 <% brands.forEach(brand=>{ %>
-    
+
                                                     <li><a href="">
                                                             <%= brand.brandName%>
                                                         </a></li>
-    
-    
+
+
                                         </li>
                                         <% })%>
-    
+
                                     </ul>
                                     </li>
                                     <li><a href="#">About Us </a>
-    
+
                                     </li>
                                     <li>
                                         <a href="">Contact</a>
@@ -149,7 +154,7 @@
                                     </ul>
                                 </nav>
                             </div>
-                           
+
                         </div>
                         <div class="header-action-right">
                             <div class="header-action-2">
@@ -157,13 +162,15 @@
                                     <a href="/wishlist">
                                         <img class="svgInject" alt="Evara"
                                             src="/user/assets/imgs/theme/icons/icon-heart.svg">
-                                        <span class="pro-count blue"></span>
+                                        <span class="pro-count blue"><%= wishlistCount %></span>
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
                                     <a class="mini-cart-icon" href="/cart">
                                         <img alt="Evara" src="/user/assets/imgs/theme/icons/icon-cart.svg">
-                                        <span class="pro-count blue"><%= cartCount %></span>
+                                        <span class="pro-count blue">
+                                            <%= cartCount %>
+                                        </span>
                                     </a>
                                     <!--<div class="cart-dropdown-wrap cart-dropdown-hm2">
                                         <ul>
@@ -172,7 +179,7 @@
                                                     <a href="shop-product-right.html"><img alt="Evara"
                                                             src="assets/imgs/shop/thumbnail-3.jpg"></a>
                                                 </div> -->
-                                                <!--<div class="shopping-cart-title">
+                                    <!--<div class="shopping-cart-title">
                                                     <h4><a href="shop-product-right.html">Daisy Casual Bag</a></h4>
                                                     <h4><span>1 × </span>$800.00</h4>
                                                 </div>
@@ -209,10 +216,10 @@
                         <div class="main-categori-wrap d-none d-lg-block">
                             <div class="categori-dropdown-wrap categori-dropdown-active-large">
                                 <ul></ul>
-                                </div>
+                            </div>
 
                         </div>
-                        
+
                     </div>
                     <div class="hotline d-none d-lg-block">
                         <p></p>
@@ -307,15 +314,15 @@
             </div>
             <div class="mobile-header-content-area">
                 <div class="mobile-search search-style-3 mobile-header-border">
-                    
+
                 </div>
                 <div class="mobile-menu-wrap mobile-header-border">
                     <div class="main-categori-wrap mobile-header-border">
-                       
+
                         <div class="categori-dropdown-wrap categori-dropdown-active-small">
 
                             <ul>
-                                
+
 
                             </ul>
                         </div>

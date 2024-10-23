@@ -2,44 +2,39 @@
     <%- include('../partials/admin/header.ejs') %>
 
 
+
         <section class="content-main">
             <div class="content-header">
                 <div>
                     <h2 class="content-title card-title">Brand</h2>
                     <p>Add, edit or delete a brand</p>
                 </div>
-                <div>
-                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
-                </div>
+                
             </div>
             <div class="card">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <form action="/admin/addBrand" method="post" enctype="multipart/form-data">
-
-
+                            <form id="addBrandForm" enctype="multipart/form-data">
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label"> BrandName</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="name"
-                                        name="name" />
+                                    <input type="text" class="form-control" id="brandName" name="brandName">
                                     <small id="name-error" class="error-message text-danger"
                                         style="display:none;"></small>
                                 </div>
-
-
                                 <div class="mb-4">
                                     <label class="form-label">Brand Image</label>
                                     <div class="input-upload">
                                         <img src="" alt="" />
-                                        <input class="form-control border" name="image" type="file" />
+                                        <input class="form-control border" id="brandImage" name="image" type="file">
                                     </div>
 
-                                    <small id="description-error" class="error-message text-danger"
+                                    <small id="image-error" class="error-message text-danger"
                                         style="display:none;"></small>
                                 </div>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary" id="createCategoryButton">Add New Brand</button>
+                                    <button type="submit" class="btn btn-primary">Add New
+                                        Brand</button>
                                 </div>
                             </form>
                         </div>
@@ -63,62 +58,66 @@
                                     </thead>
                                     <tbody>
                                         <% if(data.length>0){ %>
-                                        <% data.reverse().forEach((brand,index)=>{ %>
-                                            <tr>
-                                                <td>
-                                                    <%= brand.brandName %>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center justify-content-center"
-                                                    style=
-                                                    "width:40px;
+                                            <% data.reverse().forEach((brand,index)=>{ %>
+                                                <tr>
+                                                    <td>
+                                                        <%= brand.brandName %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center justify-content-center"
+                                                            style="width:40px;
                                                     height:40px;
                                                     border-radius: 50%;
-                                                    overflow: hidden;"
-                                                    >
+                                                    overflow: hidden;">
 
-                                                   <img
-                                                    src="/uploads/re-image/<%= brand.brandImage[0] %>" 
-                                                    alt="<%= brand.brandName %>"
-                                                    class="img-fluid rounded-circle"
-                                                    style="width:100%;height:auto;">
+                                                            <img src="/uploads/re-image/<%= brand.brandImage[0] %>"
+                                                                alt="<%= brand.brandName %>"
+                                                                class="img-fluid rounded-circle"
+                                                                style="width:100%;height:auto;">
 
-                                                    </div>
-                                                   
-                                                </td>
-                                                <td>
-                                                    <% if(brand.isBlocked === true) { %>
-                                                        Blocked
-                                                        <% }else{ %>
-                                                            Active
-                                                            <% } %>
-                                                </td>
-                                                <td class="text-end">
-                                                    <div class="dropdown">
-                                                        <a href="#" data-bs-toggle="dropdown"
-                                                            class="btn btn-light rounded btn-sm font-sm"> <i
-                                                                class="material-icons md-more_horiz"></i> </a>
-                                                        <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="#">View detail</a>
-                                                            <% if(brand.isBlocked===false){ %>
-                                                                <a class="dropdown-item"
-                                                                    href="/admin/blockBrand?id=<%= brand._id %>">Block</a>
-                                                                <% }else{ %>
-                                                                    <a class="dropdown-item"
-                                                                        href="/admin/unBlockBrand?id=<%= brand._id %>">Unblock</a>
-                                                                    <% } %>
-                                
-                                                            <a class="dropdown-item text-danger" href="/admin/deleteBrand?id=<%=brand._id%>">Delete</a>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <% }) %>
-                                            <% }else{ %>
-                                                <tr>
-                                                    <td colspan="3"> No brands found.</td>
+
+                                                    </td>
+                                                    <td>
+                                                        <% if(brand.isBlocked===true) { %>
+                                                            Blocked
+                                                            <% }else{ %>
+                                                                Active
+                                                                <% } %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <div class="dropdown">
+                                                            <a href="#" data-bs-toggle="dropdown"
+                                                                class="btn btn-light rounded btn-sm font-sm"> <i
+                                                                    class="material-icons md-more_horiz"></i> </a>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="#">View detail</a>
+                                                                <% if(brand.isBlocked===false){ %>
+                                                                    <!-- Block button -->
+                                                                    <button
+                                                                        class="dropdown-item text-warning block-brand"
+                                                                        data-id="<%= brand._id %>">Block</button>
+                                                                    <% }else{ %>
+                                                                        <!-- Unblock button -->
+                                                                        <button
+                                                                            class="dropdown-item text-success unblock-brand"
+                                                                            data-id="<%= brand._id %>">Unblock</button>
+                                                                        <% } %>
+
+                                                                            <button
+                                                                                class="dropdown-item text-danger delete-brand"
+                                                                                data-id="<%= brand._id %>">Delete</button>
+
+                                                            </div>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                                <% } %>
+                                                <% }) %>
+                                                    <% }else{ %>
+                                                        <tr>
+                                                            <td colspan="3"> No brands found.</td>
+                                                        </tr>
+                                                        <% } %>
                                     </tbody>
                                 </table>
                             </div>
@@ -152,6 +151,270 @@
 
 
         </section> <!-- content-main end// -->
+
+
+
+        <script>
+           document.addEventListener('DOMContentLoaded', () => {
+    // Add brand
+    const addBrandForm = document.getElementById('addBrandForm');
+
+    if (addBrandForm) {
+        addBrandForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Call validateForm before proceeding
+            if (!validateForm()) {
+                return; // If validation fails, stop form submission
+            }
+
+            const formData = new FormData(addBrandForm);
+
+            try {
+                const response = await fetch('/admin/addBrand', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Brand Added!',
+                        text: 'Brand added successfully.',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        window.location.reload(); // Reload the page to reflect the changes
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
+                        confirmButtonText: 'OK',
+                    });
+                }
+            } catch (error) {
+                console.error('Error adding brand:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error adding brand, please try again.',
+                    confirmButtonText: 'OK',
+                });
+            }
+        });
+    }
+
+    // Delete brand
+    document.querySelectorAll('.delete-brand').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const brandId = e.target.getAttribute('data-id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to delete this brand?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/deleteBrand/${brandId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Brand deleted successfully.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                window.location.reload(); // Reload the page to reflect the changes
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message,
+                                confirmButtonText: 'OK',
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error deleting brand:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error deleting brand, please try again.',
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    // Block brand
+    document.querySelectorAll('.block-brand').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const brandId = e.target.getAttribute('data-id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to block this brand?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, block it!',
+                cancelButtonText: 'Cancel',
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/blockBrand/${brandId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Blocked!',
+                                text: 'Brand blocked successfully.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                window.location.reload(); // Reload the page to reflect the changes
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message,
+                                confirmButtonText: 'OK',
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error blocking brand:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error blocking brand, please try again.',
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    // Unblock brand
+    document.querySelectorAll('.unblock-brand').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const brandId = e.target.getAttribute('data-id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to unblock this brand?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, unblock it!',
+                cancelButtonText: 'Cancel',
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/unBlockBrand/${brandId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Unblocked!',
+                                text: 'Brand unblocked successfully.',
+                                confirmButtonText: 'OK',
+                            }).then(() => {
+                                window.location.reload(); // Reload the page to reflect the changes
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message,
+                                confirmButtonText: 'OK',
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error unblocking brand:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error unblocking brand, please try again.',
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                }
+            });
+        });
+    });
+});
+
+
+            // The validateForm function checks the form inputs before submission
+            function validateForm() {
+                let isValid = true;
+
+                // Validate Brand Name
+                const nameInput = document.getElementById('brandName');
+                const nameError = document.getElementById('name-error');
+                const nameRegex = /^[A-Za-z]{2,}$/;
+
+                if (!nameInput.value.trim()) {
+                    showError(nameError, 'Brand name is required');
+                    isValid = false;
+                } else if (!nameRegex.test(nameInput.value.trim())) {
+                    showError(nameError, 'Brand name should contain only alphabets and be at least 2 characters long');
+                    isValid = false;
+                } else {
+                    hideError(nameError);
+                }
+
+                // Validate Image
+                const imageInput = document.querySelector('input[name="image"]');
+                const imageError = document.getElementById('image-error');
+
+                if (!imageInput.files || imageInput.files.length === 0) {
+                    showError(imageError, 'Please select an image');
+                    isValid = false;
+                } else {
+                    const file = imageInput.files[0];
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        showError(imageError, 'Please select a valid image file (JPEG, PNG, or GIF)');
+                        isValid = false;
+                    } else {
+                        hideError(imageError);
+                    }
+                }
+
+                return isValid;
+            }
+
+            function showError(element, message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+
+            function hideError(element) {
+                element.textContent = '';
+                element.style.display = 'none';
+            }
+
+        </script>
 
 
         <%- include('../partials/admin/footer.ejs') %>

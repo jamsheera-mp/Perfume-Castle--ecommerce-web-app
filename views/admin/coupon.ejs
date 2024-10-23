@@ -1,0 +1,224 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+  <%- include('../partials/admin/header.ejs') %>
+
+
+    <!-- CSS for active page highlighting -->
+    <style>
+      .pagination a.active {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+    </style>
+
+    <div class="container mt-4">
+      <h2>Coupon Management</h2>
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <!-- Create Coupon Form -->
+              <form action="/admin/createCoupons" method="POST" class="mb-4">
+                <div class="form-group">
+                  <label for="name">Coupon Name</label>
+                  <input type="text" class="form-control" id="name" name="name" >
+                </div>
+                <div class="form-group">
+                  <label for="expireOn">Expiry Date</label>
+                  <input type="date" class="form-control" id="expireOn" name="expireOn" >
+                </div>
+                <div class="form-group">
+                  <label for="offerPrice">Offer Price</label>
+                  <input type="number" class="form-control" id="offerPrice" name="offerPrice" >
+                </div>
+                <div class="form-group">
+                  <label for="minimumPrice">Minimum Price</label>
+                  <input type="number" class="form-control" id="minimumPrice" name="minimumPrice" >
+                </div>
+                <button type="submit" class="btn btn-primary">Create Coupon</button>
+              </form>
+            </div>
+            <div class="col-md-9">
+              <div>
+                <!-- Coupon List -->
+                <h3>Existing Coupons</h3>
+                <div class=" table-responsive">
+                  <table class="table table-hover ">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Coupon Code</th>
+                        <th>Expiry Date</th>
+                        <th>Offer Price</th>
+                        <th>Minimum Price</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% coupons.forEach(coupon=> { %>
+                        <tr>
+                          <td>
+                            <%= coupon.name %>
+                          </td>
+                          <td>
+                            <%= coupon.code %>
+                          </td>
+                          <td>
+                            <%= coupon.expireOn.toLocaleDateString() %>
+                          </td>
+                          <td>
+                            <%= coupon.offerPrice %>
+                          </td>
+                          <td>
+                            <%= coupon.minimumPrice %>
+                          </td>
+                          <td>
+                            <form action="/admin/deleteCoupons/<%= coupon._id %>" method="POST"
+                              style="display: inline;">
+                              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                          </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <% if (currentPage> 1) { %>
+        <a href="?page=<%= currentPage - 1 %>">Previous</a>
+        <% } %>
+
+          <% for (let i=1; i <=totalPages; i++) { %>
+            <a href="?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>">
+              <%= i %>
+            </a>
+            <% } %>
+
+              <% if (currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %>">Next</a>
+                <% } %>
+    </div>
+
+    <script>
+
+
+      const form = document.querySelector('form[action="/admin/createCoupons"]');
+      const nameInput = document.getElementById('name');
+      const expiryInput = document.getElementById('expireOn');
+      const offerPriceInput = document.getElementById('offerPrice');
+      const minimumPriceInput = document.getElementById('minimumPrice');
+
+      // Create error message elements
+      const errorElements = {};
+      ['name', 'expireOn', 'offerPrice', 'minimumPrice'].forEach(fieldName => {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.style.fontSize = '12px';
+        errorDiv.style.marginTop = '5px';
+        errorDiv.style.display = 'none';
+        document.getElementById(fieldName).parentNode.appendChild(errorDiv);
+        errorElements[fieldName] = errorDiv;
+      });
+
+      // Show error message function
+      function showError(element, message) {
+        const errorDiv = errorElements[element.id];
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        element.style.borderColor = 'red';
+      }
+
+      // Clear error message function
+      function clearError(element) {
+        const errorDiv = errorElements[element.id];
+        errorDiv.style.display = 'none';
+        element.style.borderColor = '';
+      }
+
+      // Validation function
+      function validateForm(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        // Clear all previous errors
+        Object.values(errorElements).forEach(error => error.style.display = 'none');
+        [nameInput, expiryInput, offerPriceInput, minimumPriceInput].forEach(input => {
+          input.style.borderColor = '';
+        });
+
+        // Name validation
+        if (nameInput.value.trim() === '') {
+          showError(nameInput, 'Coupon name is required');
+          isValid = false;
+        } else if (nameInput.value.length < 3) {
+          showError(nameInput, 'Coupon name must be at least 3 characters long');
+          isValid = false;
+        } else {
+          clearError(nameInput);
+        }
+
+        // Expiry date validation
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const expiryDate = new Date(expiryInput.value);
+
+        if (!expiryInput.value) {
+          showError(expiryInput, 'Expiry date is required');
+          isValid = false;
+        } else if (expiryDate < today) {
+          showError(expiryInput, 'Expiry date cannot be in the past');
+          isValid = false;
+        } else {
+          clearError(expiryInput);
+        }
+
+        // Offer price validation
+        if (!offerPriceInput.value) {
+          showError(offerPriceInput, 'Offer price is required');
+          isValid = false;
+        } else if (parseFloat(offerPriceInput.value) <= 0) {
+          showError(offerPriceInput, 'Offer price must be greater than 0');
+          isValid = false;
+        } else {
+          clearError(offerPriceInput);
+        }
+
+        // Minimum price validation
+        if (!minimumPriceInput.value) {
+          showError(minimumPriceInput, 'Minimum price is required');
+          isValid = false;
+        } else if (parseFloat(minimumPriceInput.value) <= 0) {
+          showError(minimumPriceInput, 'Minimum price must be greater than 0');
+          isValid = false;
+        } else if (parseFloat(minimumPriceInput.value) <= parseFloat(offerPriceInput.value)) {
+          showError(minimumPriceInput, 'Minimum price must be greater than offer price');
+          isValid = false;
+        } else {
+          clearError(minimumPriceInput);
+        }
+
+        // If all validations pass, submit the form
+        if (isValid) {
+          form.submit();
+        }
+      }
+
+      // Add event listener for form submission
+      form.addEventListener('submit', validateForm);
+
+      // Add real-time validation on input
+      [nameInput, expiryInput, offerPriceInput, minimumPriceInput].forEach(input => {
+        input.addEventListener('input', () => {
+          clearError(input);
+        });
+      });
+    </script>

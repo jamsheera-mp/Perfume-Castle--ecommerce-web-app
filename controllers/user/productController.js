@@ -280,10 +280,67 @@ const getProductDetails = async (req, res) => {
         res.status(500).render('user/404', { message: 'Error fetching product details:${error.message}' });
     }
 }
+const addToWishlist = async(req,res)=>{
+    try {
+        const userId = req.session.user
+        const productId = req.params.productId;
+    
+        const user = await User.findById(userId);
+        const product = await Product.findById(productId);
+    
+        if (!product) {
+          return res.status(404).json({ message: 'Product not found' });
+        }
+    
+        if (user.wishlist.includes(productId)) {
+          return res.status(400).json({ message: 'Product already in wishlist' });
+        }
+    
+        user.wishlist.push(productId);
+        await user.save();
+    
+        res.status(200).json({ message: 'Product added to wishlist' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding product to wishlist', error: error.message });
+  
+    }
+}
 
+const removeFromWishlist = async(req,res)=>{
+    try {
+        const userId = req.session.user
+        const productId = req.params.productId;
+    
+        const user = await User.findById(userId);
+    
+        if (!user.wishlist.includes(productId)) {
+          return res.status(400).json({ message: 'Product not in wishlist' });
+        }
+    
+        user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
+        await user.save();
+    
+        res.status(200).json({ message: 'Product removed from wishlist' });
+      } catch (error) {
+        res.status(500).json({ message: 'Error removing product from wishlist', error: error.message });
+      }
+}
+const getWishlist = async(req,res)=>{
+    try {
+        const userId = req.user._id; // Assuming you have user authentication middleware
+    
+        const user = await User.findById(userId).populate('wishlist');
+    
+        res.status(200).json({ wishlist: user.wishlist });
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching wishlist', error: error.message });
+      }
+}
 module.exports = {
     getProductList,
     searchProducts,
-    getProductDetails
+    getProductDetails,
+   
+
 
 }

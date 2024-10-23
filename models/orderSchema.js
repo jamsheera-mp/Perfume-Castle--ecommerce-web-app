@@ -29,15 +29,17 @@ const orderSchema = new Schema({
         type : Number,
         required : true
     },
-    discount:{
-        type : Number,
-        default : 0
-    },
-    finalAmount:{
-        type :  Number,
-        required : true
-
-    },
+    
+    appliedCouponId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Coupon',
+        default: null
+      },
+      
+      finalAmount: {
+        type: Number,
+        required: true
+      },
     address: {
         addressId: {
             type: Schema.Types.ObjectId,
@@ -56,17 +58,14 @@ const orderSchema = new Schema({
     status:{
         type : String,
         required : true,
-        enum : ['Pending','Processing','Shipped','Delivered','Cancelled','Return Request','Returned']
+        enum : ['Placed','Pending','Processing','Shipped','Confirmed','Delivered','Cancelled','Return Request','Returned']
     },
     createdOn:{
         type : Date,
         default : Date.now,
         required : true
     },
-    couponApplied:{
-        type : Boolean,
-        default : false
-    },
+   
     paymentMethod: {
         type : String,
         enum : ['CashOnDelivery','Online','wallet'],
@@ -74,9 +73,27 @@ const orderSchema = new Schema({
     },
     paymentStatus:{
         type: String,
-        enum :['Pending','Paid','Failed'],
+        enum :['Pending','Paid','Failed','Refunded', 'Refund Pending','Payment Pending'],
         default: 'Pending'
-    }
+    },
+    cancellationReason: {
+        type: String,
+        default: ''
+    },
+    returnReason: {
+        type: String,
+        default: ''
+    },
+    razorpayOrderId:{
+        type : String,
+        default : ''
+    },
+    refundId: {
+        type: String,
+        default: ''
+    },
+    
+    
 },{
     timestamps : true
 })
