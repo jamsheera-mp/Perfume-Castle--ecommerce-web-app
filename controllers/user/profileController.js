@@ -66,19 +66,15 @@ try {
             console.log('Attempting to render verifyOtpForPwd');
             
             //console.log('otp:',otp);
-            res.render('user/verifyOtpForPwd')
-            
-            
-
+            return res.status(200).json({success:true,message:'Email verified,redirectiong to otp page'})
+             //return res.render('user/verifyOtpForPwd')
         }else{
             console.log('Failed to send OTP');
-            
-            res.json({success:false,message:'Failed to send otp,please try again'})
+             return res.status(400).json({success:false,message:'Failed to send otp,please try again'})
         }
     }else{
         console.log('User not found');
-        
-         return res.render('user/forgotPassword',{
+         return res.send(404).json({success: false,
             message:'User with this email does not exist.'
         })
     }
@@ -86,7 +82,7 @@ try {
 } catch (error) {
     console.log('Error in passwordReset:',error);
     
-   return res.json({success:'false',message:'An error occured',error:error.message})
+   return resstatus(500).json({success:'false',message:'An error occured',error:error.message})
 }
 }
 function generateOtpForPasswordReset(){
@@ -98,27 +94,56 @@ function generateOtpForPasswordReset(){
     return otp
 }
 
+
+const getOtpPage = async(req,res)=>{
+    try {
+        res.render('user/verifyOtpForPwd')
+    } catch (error) {
+        console.log('error loading verify otp  page:',error);
+
+    }
+}
 const verifyPwdForgotOTP = async(req,res)=>{
     try {
         const enteredOtp = req.body.otp
-        if(enteredOtp === req.session.userOtp){
-            res.json({success:'true',redirectUrl:'/reset-password'})
-        }else{
-            res.json({success:'false',message:'OTP not matching'})
+        console.log('Entered OTP:',enteredOtp)
+        console.log('Session OTP:',req.session.userOtp)
+        
+        if (!enteredOtp) {
+            return res.json({
+                success: false,  // Changed from string to boolean
+                message: 'Please enter OTP'
+            });
         }
         
+        if(enteredOtp !== req.session.userOtp){
+            return res.json({success:'false',message:'Invalid OTP.Please try again.',redirectUrl:'/forgotPassword'})
+           
+        }
+        return  res.json({success:'true',message:'Otp Verified',redirectUrl:'/reset-password'})
+        
     } catch (error) {
-        res.status(500).json({success:'false',message:'An error occured while sending otp'})
+        console.log('error verifying otp:',error.message)
+        return res.json({success:'false',message:'An error occured while sending otp'})
     }
 }
 const getResetPwdPage = async(req,res)=>{
     try {
+         // Check if user has verified OTP
+         if (!req.session.userOtp) {
+            return res.redirect('/forgot-password');
+        }
         res.render('user/reset-pwd-page')
     } catch (error) {
         console.log('error loading reset pwd page',error);
+        res.status(500).json({
+            success: false,
+            message: 'Error loading reset password page'
+        });
+    }
         
     }
-}
+
 const resendOtp = async(req,res)=>{
     try {
         const otp = generateOtpForPasswordReset()
@@ -149,25 +174,44 @@ const securePassword = async(password)=>{
 const postNewPwd = async(req,res)=>{
     try {
         const {newPwd1,newPwd2} = req.body
+        
         const email = req.session.email
+        // Validate session
         if (!email) {
-            return res.status(400).render('user/reset-pwd-page', { message: 'Email not found in session.' });
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Session expired. Please try again.' 
+            });
         }
-        if(newPwd1 === newPwd2){
+        // Check password match
+        if (newPwd1 !== newPwd2) {
+            return res.status(400).json({
+                success: false,
+                message: 'Passwords do not match'
+            });
+        }
+        
             const passwordHash = await securePassword(newPwd1)
             await User.updateOne(
                 {email:email},
                 {$set:{password:passwordHash}}
             )
-            res.redirect('/login')
-        }else{
-            res.render('user/reset-pwd-page',{message:'Password do not match'})
-        }
+            //res.redirect('/login')
+            // Clear session
+        req.session.destroy();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password updated successfully'
+        });
+      
     } catch (error) {
         console.log('Error occured while resetting password');
-        res.status(500).render('user/reset-pwd-page', { message: 'Internal server error.' });
+        res.status(500).json( {success:false, message: 'Internal server error.' });
     }
 }
+
+//change password in user profile
 
 const cahngePassword = async (req,res)=>{
     
@@ -204,6 +248,7 @@ module.exports ={
     verifyPwdForgotOTP ,
     getResetPwdPage,
     resendOtp,
+    getOtpPage,
     postNewPwd,
     cahngePassword
 }

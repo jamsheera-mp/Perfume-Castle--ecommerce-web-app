@@ -1,3 +1,4 @@
+const { calculateProductPrices } = require('../../middlewares/priceCalculator')
 
 
 const Product = require('../../models/productSchema')
@@ -36,6 +37,23 @@ const addToCart = async (req, res) => {
     //Max quantity a user can add to cart for a product
     const maxQuantityPerUser = 5;
 
+
+    // Store product in request for middleware
+    req.products = product;
+        
+    // Calculate price with offers
+    await calculateProductPrices(req, res, () => {});
+    const processedProduct = req.products;
+
+   
+    console.log('requested product:',req.products)
+    if (!processedProduct) {
+      return res.status(500).json({ success: false, error: 'Error processing product prices' });
+    }
+
+    const finalPrice = processedProduct.finalPrice;
+    console.log('final price:',finalPrice)
+
     // Update cart items
     const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
 
@@ -62,9 +80,22 @@ const addToCart = async (req, res) => {
         })
 
       }
+      //update existing item
+      cart.items[existingItemIndex] = {
+        ...existingItem,
+        quantity: newQuantity,
+        price:  finalPrice,
+        totalPrice:  newQuantity * finalPrice,
+        
+      }
+      
       //update existing item's quantity and price
-      existingItem.quantity = newQuantity;
-      existingItem.totalPrice = newQuantity * existingItem.price;
+      //existingItem.quantity = newQuantity;
+      //existingItem.price =  finalPrice;
+      //existingItem.totalPrice = newQuantity *  finalPrice;
+      
+
+
     } else {
       // product is not in cart,add new item
       //check if requested quantity exceeds maxQuantityPerUser
@@ -79,27 +110,39 @@ const addToCart = async (req, res) => {
       cart.items.push({
         productId: product._id,
         quantity: requestedQuantity,
-        price: product.salePrice,
-        totalPrice: requestedQuantity * product.salePrice
+        price:  finalPrice,
+        totalPrice: requestedQuantity *  finalPrice,
+       
+        
       });
     }
+    console.log('final cart',cart)
 
     // Update cart subtotal
     cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-     
+
     await cart.save();
+
     return res.json({
       success: true,
       cart: {
-        items: cart.items,
+        items: cart.items.map(item=>({
+          productId:item.productId,
+          quantity: item.quantity,
+          price: finalPrice,
+          finalPrice: finalPrice,
+          totalPrice:item.totalPrice
+ 
+        })),
+        
         cartSubTotal: cart.cartSubTotal,
         cartItemCount: cart.items.length,
-        
+
       }
     });
   } catch (error) {
-    console.error('Error adding item to cart:', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
+    console.error('Error adding item to cart:', error.message);
+    res.status(500).json({ success: false, error: 'Internal server error' + error.message });
   }
 };
 
@@ -173,9 +216,24 @@ const updateCart = async (req, res) => {
         error: `You can only add up to ${maxQuantityPerUser} of this item`
       });
     }
+
+    // Get the processed product with final price from middleware
+    req.products = product;
+        
+    // Calculate price with offers
+    await calculateProductPrices(req, res, () => {});
+    const processedProduct = req.products;
+
+    if (!processedProduct) {
+      return res.status(500).json({ success: false, error: 'Error processing product prices' });
+    }
+
+    const finalPrice = processedProduct.finalPrice;
+
     // Update quantity and calculate new price
     cart.items[itemIndex].quantity = newQuantity;
-    cart.items[itemIndex].totalPrice = newQuantity * product.salePrice;
+    cart.items[itemIndex].price = finalPrice;
+    cart.items[itemIndex].totalPrice = newQuantity * finalPrice;
 
     // Recalculate cart totals
     cart.cartSubTotal = cart.items.reduce((total, item) =>
@@ -187,6 +245,8 @@ const updateCart = async (req, res) => {
     // Return updated cart details
     return res.json({
       success: true,
+      
+
       cartSubTotal: cart.cartSubTotal,
       itemTotalPrice: cart.items[itemIndex].totalPrice,
       quantity: newQuantity,
@@ -244,7 +304,7 @@ const clearCart = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Cart not found' });
     }
 
-
+    // Clear all items and reset subtotal
     cart.items = [];
     cart.cartSubTotal = 0;
     await cart.save();
@@ -256,7 +316,7 @@ const clearCart = async (req, res) => {
     res.status(500).json({ success: 'false', error: 'Internal server error' });
   }
 };
-
+//-------------------------------------------------------------------------
 const listCartItems = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -266,26 +326,55 @@ const listCartItems = async (req, res) => {
       return res.render('user/cart', {
         cartItems: [],
         cartTotalPrice: 0,
-        hasOutOfStockItem: false ,// Add default value for empty cart
-       
+        hasOutOfStockItem: false,// Add default value for empty cart
+
       });
     }
 
+
+    // Filter out any items where product no longer exists
+    cart.items = cart.items.filter(item => item.productId);
+
+    // Process each item through price calculator
+    for (const item of cart.items) {
+      if (item.productId) {
+        // Set product for price calculation
+        req.products = item.productId;
+        
+        // Calculate price with offers
+        await calculateProductPrices(req, res, () => {});
+        
+        // Get processed product with final price
+        const processedProduct = req.products;
+        
+        if (processedProduct) {
+          // Update item prices with calculated values
+          item.price = processedProduct.finalPrice;
+          item.totalPrice = item.quantity * processedProduct.finalPrice;
+        }
+      }
+    }
     // Check if any item in cart is out of stock
     const hasOutOfStockItem = cart.items.some(item =>
-      !item.productId || // Check if product exists
+      !item.productId || 
+      item.productId.quantity === 0||// Check if product exists
       item.productId.stockQuantity < item.quantity  // Check if enough stock
-      //!item.productId.isBlocked || //check  if product is blocked
-      // !item.productId.isDeleted //check  if product is deleted
+
 
     );
+
+         
   
+ // Recalculate cart subtotal with new prices
+    cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    await cart.save();
 
     res.render('user/cart', {
       cartItems: cart.items,
+      
       cartTotalPrice: cart.cartSubTotal,
-      hasOutOfStockItem, 
-    
+      hasOutOfStockItem,
+
     });
 
   } catch (error) {
@@ -300,5 +389,5 @@ module.exports = {
   updateCart,
   clearCart,
   removeCartItem,
-  
+
 }

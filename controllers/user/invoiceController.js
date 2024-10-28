@@ -1,4 +1,4 @@
-// utils/invoiceGenerator.js
+
 const PDFDocument = require('pdfkit-table');
 const fs = require('fs');
 const path = require('path');
@@ -13,7 +13,7 @@ class InvoiceGenerator {
 
     async generateHeader() {
         try {
-            const logoPath = path.join(process.cwd(), 'admin', 'logo', 'PCL_WS.jpg');
+            const logoPath = path.join(process.cwd(),'public', 'uploads', 'logo', 'PCL_WL.jpg');
             
             // Check if file exists
             if (fs.existsSync(logoPath)) {
@@ -27,7 +27,12 @@ class InvoiceGenerator {
                 .fillColor('#444444')
                 .fontSize(20)
                 .text('Perfume Castle', 110, 57)
-                // ... rest of the header
+                .fontSize(10)
+                .text('Address: Calicut road,Valanchery',  110, 75)
+                .fontSize(10)
+                .text('Contact:9778452220')
+                
+
         } catch (error) {
             console.error('Error loading logo:', error);
             // Continue without logo
@@ -35,6 +40,15 @@ class InvoiceGenerator {
     }
 
     async generateCustomerInformation() {
+        // Find the specific address from the array
+        const addressDocument = this.order.address.parentAddressId;
+        const specificAddress = addressDocument.address.find(addr =>
+            addr._id.toString() === this.order.address.addressId.toString()
+        );
+
+        if (!specificAddress) {
+            throw new Error('Selected address not found');
+        }
         const customerTableData = {
             headers: ['INVOICE DETAILS', 'SHIPPING ADDRESS'],
             rows: [
@@ -44,11 +58,11 @@ class InvoiceGenerator {
                     `Status: ${this.order.status}\n` +
                     `Payment Method: ${this.order.paymentMethod}`,
                     
-                    `${this.order.address.parentAddressId.name}\n` +
-                    `${this.order.address.parentAddressId.landMark}\n` +
-                    `${this.order.address.parentAddressId.city}, ${this.order.address.parentAddressId.district}\n` +
-                    `${this.order.address.parentAddressId.state} - ${this.order.address.parentAddressId.pincode}\n` +
-                    `Phone: ${this.order.address.parentAddressId.phone}`
+                    `${specificAddress.name}\n` +
+                    `${specificAddress.landMark}\n` +
+                    `${specificAddress.city}, ${specificAddress.district}\n` +
+                    `${specificAddress.state} - ${specificAddress.pincode}\n` +
+                    `Phone: ${specificAddress.phone}`
                 ]
             ]
         };
@@ -69,9 +83,9 @@ class InvoiceGenerator {
 
     async generateInvoiceTable() {
         const tableData = {
-            headers: ['Item', 'Description', 'Unit Cost', 'Quantity', 'Line Total'],
+            headers: ['Item', 'Description', 'Unit Price', 'Quantity', 'Total Price'],
             rows: this.order.orderedItems.map(item => [
-                item.product.name,
+                item.product.productName,
                 item.product.description.substring(0, 30) + '...',
                 formatCurrency(item.price),
                 item.quantity.toString(),
@@ -125,22 +139,22 @@ class InvoiceGenerator {
         });
     }
 
-    generateFooter() {
-        this.doc
-            .fontSize(10)
-            .text(
-                'Payment is due within 15 days. Thank you for your business.',
-                50,
-                780,
-                { align: 'center', width: 500 }
-            );
-    }
+    //generateFooter() {
+        //this.doc
+           // .fontSize(10)
+            //.text(
+                //'Thank you for your business.',
+               // 50,
+                //780,
+                //{ align: 'center', width: 500 }
+            //);
+    //}
 
     async generate() {
         await this.generateHeader();
         await this.generateCustomerInformation();
         await this.generateInvoiceTable();
-        this.generateFooter();
+        //this.generateFooter();
         this.doc.end();
     }
 }

@@ -1,5 +1,218 @@
 <%- include('../partials/user/header.ejs') %>
+<style>
+/* Card Base Styles */
+.card-product-grid {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
 
+.card-product-grid:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Image Container */
+.img-wrap {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+    display: block;
+}
+
+.img-wrap img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.img-wrap:hover img {
+    transform: scale(1.05);
+}
+
+/* Product Info Container */
+.info-wrap {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Product Title */
+.info-wrap .title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-decoration: none;
+    height: 2.5rem;
+}
+
+/* Price Section */
+.price-section {
+    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.price-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.original-price {
+    font-size: 0.9rem;
+    color: #666;
+    text-decoration: line-through;
+}
+
+.final-price {
+    font-size: 1.1rem;
+    color: #2c2c2c;
+    font-weight: bold;
+}
+
+/* Offers Section */
+.offers-applied {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Stock Info */
+.stock-info {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+/* Button Container */
+.button-container {
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.btn-brand {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* Grid Layout */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+/* wishlist */
+.wishlist-btn {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			z-index: 10;
+			border: none;
+			padding: 8px;
+			background: transparent !important;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		/* Default state - outlined heart */
+		.wishlist-btn .wishlist-icon-outline {
+			display: block;
+			color: #ff4b4b;
+		}
+
+		.wishlist-btn .wishlist-icon-filled {
+			display: none;
+			color: #ff4b4b;
+		}
+
+		/* Hover state */
+		.wishlist-btn:hover .wishlist-icon-outline,
+		.wishlist-btn:hover .wishlist-icon-filled {
+			transform: scale(1.1);
+			color: #ff0000;
+		}
+
+		/* Active state (in wishlist) */
+		.wishlist-btn.in-wishlist .wishlist-icon-outline {
+			display: none;
+		}
+
+		.wishlist-btn.in-wishlist .wishlist-icon-filled {
+			display: block;
+		}
+
+		/* Animation */
+		@keyframes heartBeat {
+			0% {
+				transform: scale(1);
+			}
+
+			50% {
+				transform: scale(1.2);
+			}
+
+			100% {
+				transform: scale(1);
+			}
+		}
+
+		.wishlist-btn.animate .wishlist-icon-outline,
+		.wishlist-btn.animate .wishlist-icon-filled {
+			animation: heartBeat 0.3s ease-in-out;
+		}
+</style>
     <section class="content-main mt-5">
         <div class="content-header pt-5">
             <div>
@@ -115,78 +328,112 @@
                         </div>
                     </div>
                     <!------------------------------Product Filter Section Ends------------------------------>
-
                     <div class="col-lg-10 col-md-9">
-                        <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
-                            <% if (products.length===0) { %>
+                        <div class="product-grid">
+                            <% if (products.length === 0) { %>
                                 <div class="col-12">
                                     <div class="alert alert-danger text-center" role="alert">
                                         No products available in this category or in the brands.
                                     </div>
                                 </div>
-                                <% } else { %>
-                                    <% products.forEach(product=> { %>
-                                        <div class="col">
-                                            <div class="card card-product-grid ms-5 ps-5">
-                                                <a href="/product/<%= product._id %>" class="img-wrap">
-                                                    <img src="/uploads/re-image/<%= product.productImage[0] %>"
-                                                        alt="<%= product.productName %>">
-                                                </a>
-                                                <div class="info-wrap text-center">
-                                                    <a href="#" class="title text-truncate">
-                                                        <%= product.productName %>
-                                                    </a>
-                                                    <div class="price mb-2 text-center">₹<%=
-                                                            product.salePrice.toFixed(2) %>
-                                                    </div>
+                            <% } else { %>
+                                <% products.forEach(product => { %>
+                                    <div class="card-product-grid">
+                                        
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/product/<%= product._id %>" class="img-wrap" style="position:relative;">
+                                                <img src="/uploads/re-image/<%= product.productImage[0] %>" 
+                                                     alt="<%= product.productName %>">
+                                            </a>
 
-                                                    <!-- Display Stock Left -->
-                                                    <div class="stock-info mb-2 text-center">
-                                                        <%= product.quantity> 0 ? `Stock left: ${product.quantity}` :
-                                                            'Out of stock' %>
-                                                    </div>
-
-                                                    <form id="addToCartForm-<%= product._id %>" action="/addToCart"
-                                                        method="POST">
-                                                        <input type="hidden" name="productId"
-                                                            value="<%= product._id %>">
-                                                        <input type="hidden" name="quantity" value="1">
-
-                                                        <% if (product.isInCart) { %>
-                                                            <!-- If the product is already in the cart, show "Go to Cart" button -->
-                                                            <a href="/cart"
-                                                                class="btn btn-sm font-sm rounded btn-brand">
-                                                                <i class="material-icons md-shopping_cart"></i> Go to
-                                                                Cart
-                                                            </a>
-                                                            <% } else { %>
-                                                                <!-- Otherwise, show the "Add to Cart" button -->
-                                                                <button type="submit"
-                                                                    class="btn btn-sm font-sm rounded btn-brand addToCartBtn"
-                                                                    <%=product.quantity===0 ? 'disabled' : '' %> >
-                                                                    <i class="material-icons md-add_shopping_cart"></i>
-                                                                    Add to Cart
-                                                                </button>
-                                                                <% } %>
-                                                                 <!-- Error/Success Message placeholders -->
-                                                    <div id="cartMessage-<%= product._id %>" class="cart-message"
-                                                        style="display: none;"></div>
-                                                    </form>
-
-                                                   
-
-                                                    <% if (product.productOffer) { %>
-                                                        <p class="discount">
-                                                            <%= product.productOffer %>% OFF
-                                                        </p>
-                                                        <% } %>
+                                            <!-- Wishlist button at top-right -->
+													<button type="button"
+                                                    class="wishlist-btn <%= product.isInWishlist ? 'in-wishlist' : '' %>"
+                                                    onclick="toggleWishlist(event, '<%= product._id %>')"
+                                                    aria-label="Toggle Wishlist">
+                                                    <svg class="wishlist-icon-outline"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path
+                                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                        </path>
+                                                    </svg>
+                                                    <svg class="wishlist-icon-filled"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="currentColor"
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                        </div>
+                                        <!-- wishlist ends -->
+                                        <div class="info-wrap">
+                                            <a href="/product/<%= product._id %>" class="title">
+                                                <%= product.productName %>
+                                            </a>
+                                            
+                                            <div class="price-section">
+                                                <div class="price-row">
+                                                    <% if (product.hasOffer) { %>
+                                                        <span class="original-price">₹<%= product.basePrice.toFixed(2) %></span>
+                                                        <span class="final-price">₹<%= product.finalPrice.toFixed(2) %></span>
+                                                    <% } else { %>
+                                                        <span class="final-price">₹<%= product.basePrice.toFixed(2) %></span>
+                                                    <% } %>
                                                 </div>
-                                            </div><!-- card-product end -->
-                                        </div><!-- col end -->
-                                        <% }) %>
-                                            <% } %>
+                                                
+                                                <% if (product.hasOffer && product.offer) { %>
+                                                    <div class="offers-applied">
+                                                        
+                                                            <span class="badge bg-success">
+                                                                 <%= product.discountPercentage %>% off
+                                                            </span>
+                                                        
+                                                        
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                    
+                                            <div class="stock-info">
+                                                <% if (product.quantity > 0) { %>
+                                                    Stock left: <%= product.quantity %>
+                                                <% } else { %>
+                                                    <span class="out-of-stock" style=" color:red;">Out of stock</span>
+                                                <% } %>
+                                            </div>
+                                            
+                    
+                                            <div class="button-container">
+                                                <% if (product.isInCart) { %>
+                                                    <a href="/cart" class="btn btn-sm font-sm rounded btn-brand">
+                                                        <i class="material-icons md-shopping_cart"></i>
+                                                        Go to Cart
+                                                    </a>
+                                                <% } else { %>
+                                                    <button type="button" 
+                                                            onclick="window.addToCart('<%= product._id %>', 1)"
+                                                            class="btn btn-sm font-sm rounded btn-brand"
+                                                            <%= product.quantity === 0 ? 'disabled' : '' %>>
+                                                        <i class="material-icons md-add_shopping_cart"></i>
+                                                        Add to Cart
+                                                    </button>
+                                                <% } %>
+                                            </div>
+
+                                            
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } %>
                         </div>
                     </div>
+<!-- product card ends-->
+
                 </div>
             </div>
         </div>
@@ -249,55 +496,119 @@
     </script>
 
     <script>
-     document.querySelectorAll('.addToCartBtn').forEach(button => {
-    button.addEventListener('click', async function (event) {
-        event.preventDefault();  // Prevent page refresh or redirect
-        const form = event.target.closest('form'); // Get the related form
-        const formData = new FormData(form); // Extract form data
-        const productId = formData.get('productId');
-        
-
+      window.addToCart = async function(productId, quantity = 1) {
         try {
             const response = await fetch('/addToCart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    productId: formData.get('productId'),
-                    quantity: formData.get('quantity')
-                })
+                body: JSON.stringify({ productId, quantity })
             });
 
             const result = await response.json();
-
             if (result.success) {
+                // Show success message
                 Swal.fire({
-                icon: 'success',
-                title: 'Product added to cart',
-                text: 'Item successfully added to your cart!',
-                confirmButtonText: 'OK'
-            });
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Item added to cart successfully'
+                });
 
-                // Optionally update the button to "Go to Cart" or disable it
-                event.target.innerHTML = '<i class="material-icons md-shopping_cart"></i> Go to Cart';
-                event.target.disabled = true; // Disable button after adding
+                // Update cart count if available
+                if (result.cart && result.cart.cartItemCount) {
+                    updateCartCount(result.cart.cartItemCount);
+                }
+
+                // Update button to "Go to Cart"
+                const button = document.querySelector(`button[onclick="window.addToCart('${productId}', 1)"]`);
+                if (button) {
+                    const parent = button.parentElement;
+                    parent.innerHTML = `
+                        <a href="/cart" class="btn btn-sm font-sm rounded btn-brand">
+                            <i class="material-icons md-shopping_cart"></i>
+                            Go to Cart
+                        </a>
+                    `;
+                }
             } else {
-                throw new Error(data.error || 'Failed to add to cart');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.error || 'Failed to add item to cart'
+                });
             }
         } catch (error) {
-            console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.message || 'An error occurred while adding to cart',
-            confirmButtonText: 'OK'
-        });
+            console.error('Error adding to cart:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while adding item to cart'
+            });
         }
-    });
-});
+    };
+
+    // Helper function to update cart count if you have one in your UI
+    function updateCartCount(count) {
+        const cartCountElement = document.querySelector('.cart-count'); // Add appropriate selector
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+        }
+    }
 
 
     </script>
+    <script>
+		function toggleWishlist(event, productId) {
+			event.preventDefault();
+
+			const button = event.currentTarget;
+
+			fetch(`/toggleWishlist/${productId}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						// Toggle the wishlist state visually
+						button.classList.toggle('in-wishlist');
+						button.classList.add('animate');
+
+						// Remove animation class after animation completes
+						setTimeout(() => {
+							button.classList.remove('animate');
+						}, 300);
+
+						// Show success message
+						Swal.fire({
+							icon: 'success',
+							title: data.action === 'added' ? 'Added to Wishlist' : 'Removed from Wishlist',
+							text: data.message,
+							confirmButtonText: 'OK'
+						});
+					} else {
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							text: data.message || 'Failed to update wishlist',
+							confirmButtonText: 'OK'
+						});
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					Swal.fire({
+						icon: 'error',
+						title: 'Oops...',
+						text: 'An error occurred while updating wishlist',
+						confirmButtonText: 'OK'
+					});
+				});
+			return false;
+		}
+	</script>
 
     <%- include('../partials/user/footer.ejs') %>

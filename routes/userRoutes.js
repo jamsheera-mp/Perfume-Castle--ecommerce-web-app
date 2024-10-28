@@ -10,6 +10,7 @@ const couponController = require('../controllers/user/couponController')
 const paymentController = require('../controllers/user/paymentController')
 const walletController = require('../controllers/user/walletController')
 const invoiceControlller = require('../controllers/user/invoiceController')
+const { calculateProductPrices } = require('../middlewares/priceCalculator');
 const {userAuth} =  require('../middlewares/auth')
 
 
@@ -20,7 +21,7 @@ const passport =  require('passport')
 
 
 //login mgmt
-router.get('/',userController.loadHome)
+router.get('/',calculateProductPrices ,userController.loadHome)
 router.get('/pageNotFound',userController.pageNotFound)
 router.get('/login',userController.loadLogin)
 router.get('/register',userController.loadRegister)
@@ -43,6 +44,7 @@ router.post('/resend-otp',userController.resendOtp)
 //password
 router.get('/forgotPassword',profileController.getForgotPassword)
 router.post('/passwordReset',profileController.passwordReset)
+router.get('/verify-otp-forPwd',profileController.getOtpPage)
 router.post('/verify-pwdforgot-otp',profileController.verifyPwdForgotOTP)
 router.get('/reset-password',profileController.getResetPwdPage)
 router.post('/resend-otp-for-pwdReset',profileController.resendOtp)
@@ -63,19 +65,19 @@ router.post('/changePassword',userAuth,profileController.cahngePassword)
 
 
 //product mgmt
-router.get('/product',userAuth,productController.getProductList)
-router.get('/product/:id',userAuth,productController.getProductDetails)
-router.get('/search', userAuth,productController.searchProducts); //search
+router.get('/product',userAuth,calculateProductPrices ,productController.getProductList)
+router.get('/product/:id',userAuth,calculateProductPrices ,productController.getProductDetails)
+router.get('/search', userAuth,calculateProductPrices ,productController.searchProducts); //search
 
 
 
 
 //cart mgmt
- router.get('/cart',userAuth, cartController.listCartItems)
-router.post('/addToCart',userAuth, cartController.addToCart)
-router.post('/updateCart',userAuth, cartController.updateCart)
-router.post('/deleteCartItem/:productId', userAuth, cartController.removeCartItem)
-router.post('/clearCart', userAuth,cartController.clearCart)
+ router.get('/cart',userAuth,calculateProductPrices, cartController.listCartItems)
+router.post('/addToCart',userAuth,calculateProductPrices, cartController.addToCart)
+router.post('/updateCart',userAuth,calculateProductPrices, cartController.updateCart)
+router.post('/deleteCartItem/:productId',calculateProductPrices, userAuth, cartController.removeCartItem)
+router.post('/clearCart', userAuth,calculateProductPrices,cartController.clearCart)
 
 
 //online payment
@@ -85,13 +87,14 @@ router.post('/verifyRazorpayPayment', paymentController.verifyRazorpayPayment);
 
 
 //order mgmt
-router.get('/checkout',userAuth,orderController.getCheckout)
-router.post('/placeOrder',userAuth,orderController.placeOrder)
-router.get('/orderSuccess',userAuth,orderController.getOrderSuccess)
-router.get('/orders', userAuth,orderController.getOrderList);
-router.get('/track-order/:orderId', userAuth,orderController.trackOrder);
-router.post('/cancelOrder/:orderId',userAuth,orderController.cancelOrder)
-router.post('/returnOrder/:orderId',userAuth,orderController.returnOrder)
+router.get('/checkout',userAuth,calculateProductPrices,orderController.getCheckout)
+router.post('/placeOrder',userAuth,calculateProductPrices,orderController.placeOrder)
+router.post('/updatePaymentStatus',calculateProductPrices,userAuth,orderController.updatePaymentStatus)
+router.get('/orderSuccess',userAuth,calculateProductPrices,orderController.getOrderSuccess)
+router.get('/orders', userAuth,calculateProductPrices,orderController.getOrderList);
+router.get('/track-order/:orderId', userAuth,calculateProductPrices,orderController.trackOrder);
+router.post('/cancelOrder/:orderId',userAuth,calculateProductPrices,orderController.cancelOrder)
+router.post('/returnOrder/:orderId',userAuth,calculateProductPrices,orderController.returnOrder)
 
 
 //wallet mgmt
@@ -99,11 +102,11 @@ router.get('/wallet',userAuth,walletController.getWallet)
 
 
 //wishlist management
-router.get('/wishlist',userAuth,wishlistController.getWishlist)
-router.post('/toggleWishlist/:productId', wishlistController.toggleWishlist);
+router.get('/wishlist',userAuth,calculateProductPrices,wishlistController.getWishlist)
+router.post('/toggleWishlist/:productId',calculateProductPrices, wishlistController.toggleWishlist);
 
 //router.post('/addToWishlist/:productId',userAuth,wishlistController.addToWishlist)
-router.post('/removeFromWishlist/:productId', userAuth, wishlistController.removeFromWishlist)
+router.post('/removeFromWishlist/:productId', userAuth,calculateProductPrices, wishlistController.removeFromWishlist)
 
 
 

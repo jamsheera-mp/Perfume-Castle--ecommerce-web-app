@@ -25,18 +25,13 @@ const productSchema = new Schema({
         ref : "Category",
         required : true 
     },
-    regularPrice:{
-        type : Number,
-        required : true
-    },
+  
     salePrice:{
         type : Number,
         required : true
     },
-    productOffer:{
-        type : Number,
-        default : 0
-    },
+   
+   
     quantity:{
         type : Number,
         default : 0

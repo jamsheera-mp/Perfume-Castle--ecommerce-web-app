@@ -212,9 +212,9 @@
                                 <div class="card-body">
                                     <!--------------------------------------------Existing addresses selection  ---------------------------------------->
                                     <div class="mb-4">
-                                        
-                                            <h6>Use Existing Address</h6>
-                                       
+
+                                        <h6>Use Existing Address</h6>
+
                                         <div class="card-body p-2">
                                             <% if (addresses && addresses.length> 0) { %>
                                                 <% addresses.forEach((addr, index)=> { %>
@@ -231,7 +231,8 @@
                                                                     <span class="badge bg-secondary">
                                                                         <%= addressItem.addressType %>
                                                                     </span>
-                                                                    <p> <%= addressItem.name %><br>
+                                                                    <p>
+                                                                        <%= addressItem.name %><br>
                                                                             <%= addressItem.phone %>
 
                                                                                 <br>
@@ -263,8 +264,7 @@
                                                                                 Name</label>
                                                                             <input type="text" class="form-control"
                                                                                 id="name-<%= index %>" name="name"
-                                                                                value="<%= addressItem.name %>"
-                                                                                >
+                                                                                value="<%= addressItem.name %>">
                                                                             <div class="invalid-feedback">Please
                                                                                 enter
                                                                                 the name.
@@ -276,7 +276,7 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="phone-<%= index %>" name="phone"
                                                                                 value="<%= addressItem.phone %>"
-                                                                                pattern="\d{10}" >
+                                                                                pattern="\d{10}">
                                                                             <div class="invalid-feedback">Please
                                                                                 enter a
                                                                                 valid
@@ -292,7 +292,7 @@
                                                                             <input type="text" class="form-control"
                                                                                 id="pincode-<%= index %>" name="pincode"
                                                                                 value="<%= addressItem.pincode %>"
-                                                                                pattern="\d{6}" >
+                                                                                pattern="\d{6}">
                                                                             <div class="invalid-feedback">Please
                                                                                 enter a
                                                                                 valid
@@ -304,8 +304,7 @@
                                                                                 class="form-label">City/Town</label>
                                                                             <input type="text" class="form-control"
                                                                                 id="city-<%= index %>" name="city"
-                                                                                value="<%= addressItem.city %>"
-                                                                                >
+                                                                                value="<%= addressItem.city %>">
                                                                             <div class="invalid-feedback">Please
                                                                                 enter
                                                                                 the
@@ -318,8 +317,7 @@
                                                                             class="form-label">Landmark</label>
                                                                         <input type="text" class="form-control"
                                                                             id="landmark-<%= index %>" name="landMark"
-                                                                            value="<%= addressItem.landMark %>"
-                                                                            >
+                                                                            value="<%= addressItem.landMark %>">
                                                                         <div class="invalid-feedback">Please enter a
                                                                             landmark.</div>
                                                                     </div>
@@ -329,8 +327,7 @@
                                                                             class="form-label">District</label>
                                                                         <input type="text" class="form-control"
                                                                             id="district-<%= index %>" name="district"
-                                                                            value="<%= addressItem.district %>"
-                                                                            >
+                                                                            value="<%= addressItem.district %>">
                                                                         <div class="invalid-feedback">Please enter
                                                                             your
                                                                             district.
@@ -341,7 +338,7 @@
                                                                         <label for="state-<%= index %>"
                                                                             class="form-label">State</label>
                                                                         <select name="state" id="state-<%= index %>"
-                                                                            class="form-select" >
+                                                                            class="form-select">
                                                                             <option value="" selected disabled>
                                                                                 --Select
                                                                                 State--
@@ -380,7 +377,7 @@
                                                                             <label for="addressType">Address
                                                                                 Type</label>
                                                                             <select name="addressType"
-                                                                                class="form-select" >
+                                                                                class="form-select">
                                                                                 <option value="Home"
                                                                                     <%=addressItem.addressType==='Home'
                                                                                     ? 'selected' : '' %>>Home
@@ -425,7 +422,7 @@
                                                                         class="btn btn-sm btn-danger">Delete</button>
                                                                 </form>
                                                             </div>
-                                                            
+
                                                             <% }); %>
                                                                 <% }) %>
                                                                     <% } else { %>
@@ -1036,11 +1033,47 @@
 
                     const rzp = new Razorpay(options);
                     rzp.on('payment.failed', function (response) {
-                        alert('Payment failed. Please try again.');
-
+                        // Immediately update order status to Failed
+                        fetch('/updatePaymentStatus', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                orderId: orderData.orderId,
+                                razorpayOrderId: response.error.metadata.order_id,
+                                status: 'Failed',
+                                error: response.error.description
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Payment Failed',
+                                        text: 'Payment failed: ' + response.error.description,
+                                        icon: 'error',
+                                        confirmButtonText: 'Ok'
+                                    }).then(() => {
+                                        // Redirect to orders page or retry payment
+                                        window.location.href = '/orders';
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error updating payment status:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'An error occurred while processing payment failure',
+                                    icon: 'error',
+                                    confirmButtonText: 'Ok'
+                                });
+                            });
                     });
                     rzp.open();
                 }
+
+               
 
                 //------------------------------verify razorpay payment----------------------
 
@@ -1053,7 +1086,8 @@
                         body: JSON.stringify({
                             razorpay_payment_id: paymentResponse.razorpay_payment_id,
                             razorpay_order_id: paymentResponse.razorpay_order_id,
-                            razorpay_signature: paymentResponse.razorpay_signature
+                            razorpay_signature: paymentResponse.razorpay_signature,
+                            orderId: orderId
                         })
                     })
                         .then(response => response.json())
@@ -1061,7 +1095,7 @@
                             if (data.success) {
                                 window.location.href = '/orderSuccess?orderId=' + data.orderId;
                             } else {
-                                //alert(data.message || 'Payment verification failed');
+
                                 Swal.fire({
                                     title: 'Payment verification failed',
                                     text: data.message || 'Payment verification failed',
@@ -1074,7 +1108,8 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            //alert('An error occurred while verifying the payment');
+                            // Update payment status on error
+                            updatePaymentStatus(orderId, paymentResponse.razorpay_order_id);
                             Swal.fire({
                                 title: 'Payment error',
                                 text: 'An error occurred while verifying the payment',

@@ -3,23 +3,30 @@ const mongoose = require('mongoose');
 const offerSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['product', 'category', 'referral'],
+        enum: ['Products', 'Category','Referral'],
         required: true
     },
-    title: {
+    name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
-    description: String,
-    discountPercentage: {
+    description: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    offerPercentage: {
         type: Number,
-        required: true
+        required: true,
+        min: 0,
+        max: 100
     },
     validFrom: {
         type: Date,
-        required: true
+        default: Date.now
     },
-    validTo: {
+    validity: {
         type: Date,
         required: true
     },
@@ -31,11 +38,12 @@ const offerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     },
-    referralCode: String,
-    isActive: {
+    status: {
         type: Boolean,
         default: true
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Offer', offerSchema);

@@ -1,10 +1,16 @@
 
+const { calculateProductPrices } = require('../../middlewares/priceCalculator')
+
 const Product = require('../../models/productSchema');
 const Review = require('../../models/reviewSchema');
 const Category = require('../../models/categorySchema')
 const Brand = require('../../models/brandSchema')
 const User = require('../../models/userSchema')
 const Cart = require('../../models/cartSchema')
+
+
+
+
 // Product listing
 const getProductList = async (req, res) => {
     try {
@@ -19,7 +25,7 @@ const getProductList = async (req, res) => {
         const sortBy = req.query.sortBy || 'dateAdded';
         const searchQuery = req.query.search?.trim() || '';
 
-        // Extract filter parameters and ensure they're arrays even if single value
+        // Extract filter parameters 
         const selectedCategories = Array.isArray(req.query.category)
             ? req.query.category
             : req.query.category
@@ -63,6 +69,9 @@ const getProductList = async (req, res) => {
 
         const sort = sortMapping[sortBy] || sortMapping.dateAdded;
 
+       
+
+
         // Run queries in parallel
         const [categories, brands, products, totalProducts,cart] = await Promise.all([
             Category.find({ isListed: true }).lean(),
@@ -73,19 +82,29 @@ const getProductList = async (req, res) => {
                 .limit(limit)
                 .populate('category', 'name')
                 .populate('brand', 'brandName')
+                
                 .lean(),
             Product.countDocuments(baseQuery),
             Cart.findOne({userId})
         ]);
 
-        //if a cart exists,create a list of  products in the cart
-        const cartProductIds = cart ? cart.items.map(item=>item.productId.toString()):[]
-        // Add isInCart flag to each product
-        const updatedProducts = products.map(product => ({
-            ...product,
-            isInCart: cartProductIds.includes(product._id.toString())
-        }));
 
+         // Store products in request for middleware
+         req.products = products;
+        
+         // Calculate prices with offers (middleware will process this)
+         await calculateProductPrices(req, res, () => {});
+         const processedProducts = req.products;
+ 
+
+       // Add cart status to products
+       const cartProductIds = cart ? cart.items.map(item => item.productId.toString()) : [];
+       const productsWithCartStatus = processedProducts.map(product => ({
+           ...product,
+           isInCart: cartProductIds.includes(product._id.toString())
+       }));
+       
+        
         // store the search history for user
         if (user) {
             const userId = req.session.user;
@@ -107,7 +126,7 @@ const getProductList = async (req, res) => {
             );
         }
 
-        // Check if products were found
+        // no products 
         let noProductsMessage = '';
         if (products.length === 0) {
             if (searchQuery) {
@@ -129,7 +148,7 @@ const getProductList = async (req, res) => {
 
         // Prepare response data
         const responseData = {
-            products:updatedProducts,
+            products: productsWithCartStatus,
             pagination: {
                 currentPage: page,
                 totalPages,
@@ -242,9 +261,11 @@ const searchProducts = async (req, res) => {
 // Product detail
 const getProductDetails = async (req, res) => {
     try {
+        
         const product = await Product.findById(req.params.id)
         .populate('brand','brandName')
         .populate('category','name')
+        .lean()
 
         if (!product) {
             return res.status(404).render('user/404', { message: 'Product not found' });
@@ -254,7 +275,12 @@ const getProductDetails = async (req, res) => {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
 
+        // Store product in request for middleware
+        req.products = product;
         
+        // Calculate price with offers
+        await calculateProductPrices(req, res, () => {});
+        const processedProduct = req.products;
 
         const reviews = await Review.find({ productId: product._id })
         const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0
@@ -265,77 +291,26 @@ const getProductDetails = async (req, res) => {
             _id: { $ne: product._id },
             
         }).populate('brand','brandName')
-        .limit(4)||[];
-        console.log(relatedProducts);
-
+        .limit(4)||[]
+        .lean();
+       
+        // Calculate prices for related products
+        req.products = relatedProducts;
+        await calculateProductPrices(req, res, () => {});
+        const processedRelatedProducts = req.products;
 
         res.render('user/details', {
-            product,
+            product: processedProduct,
             reviews,
             averageRating,
-            relatedProducts
+            relatedProducts: processedRelatedProducts
         });
     } catch (error) {
         console.error('Error fetching product details:', error);
         res.status(500).render('user/404', { message: 'Error fetching product details:${error.message}' });
     }
 }
-const addToWishlist = async(req,res)=>{
-    try {
-        const userId = req.session.user
-        const productId = req.params.productId;
-    
-        const user = await User.findById(userId);
-        const product = await Product.findById(productId);
-    
-        if (!product) {
-          return res.status(404).json({ message: 'Product not found' });
-        }
-    
-        if (user.wishlist.includes(productId)) {
-          return res.status(400).json({ message: 'Product already in wishlist' });
-        }
-    
-        user.wishlist.push(productId);
-        await user.save();
-    
-        res.status(200).json({ message: 'Product added to wishlist' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error adding product to wishlist', error: error.message });
-  
-    }
-}
 
-const removeFromWishlist = async(req,res)=>{
-    try {
-        const userId = req.session.user
-        const productId = req.params.productId;
-    
-        const user = await User.findById(userId);
-    
-        if (!user.wishlist.includes(productId)) {
-          return res.status(400).json({ message: 'Product not in wishlist' });
-        }
-    
-        user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
-        await user.save();
-    
-        res.status(200).json({ message: 'Product removed from wishlist' });
-      } catch (error) {
-        res.status(500).json({ message: 'Error removing product from wishlist', error: error.message });
-      }
-}
-const getWishlist = async(req,res)=>{
-    try {
-        const userId = req.user._id; // Assuming you have user authentication middleware
-    
-        const user = await User.findById(userId).populate('wishlist');
-    
-        res.status(200).json({ wishlist: user.wishlist });
-      } catch (error) {
-        res.status(500).json({ message: 'Error fetching wishlist', error: error.message });
-      }
-}
 module.exports = {
     getProductList,
     searchProducts,

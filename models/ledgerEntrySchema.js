@@ -36,6 +36,18 @@ const ledgerEntrySchema = new mongoose.Schema({
         ref: 'Category',
         required: true
     },
+    Brand:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+    },
+    product:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+    },
+    user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     paymentMethod: {
         type: String,
         required: true,

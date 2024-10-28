@@ -1,0 +1,261 @@
+<%- include('../partials/admin/sidebar.ejs') %>
+    <%- include('../partials/admin/header.ejs') %>
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Add New Offer</h2>
+            </div>
+        </div>
+        <div class="d-flex message m-3"> 
+            <%
+            if(typeof message !== 'undefined'){
+                %>
+                <p><br><%= message %></p>
+                <%
+            }
+            %>
+        </div>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Offer Details</h4>
+                </div>
+                <div class="card-body">
+                    <form id="offer-form">
+                        <div class="mb-4">
+                            <label for="coupon-name" class="form-label" >Offer Name</label>
+                            <input type="text" placeholder="Type here" name="offerName" class="form-control" />
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Offer description</label>
+                            <textarea placeholder="Type here" name="offerDescription" class="form-control" rows="4" ></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-6">
+                                    <label class="form-label">Offer Percentage</label>
+                                    <div class="row gx-2">
+                                        <input placeholder="%" type="number" name="offerPercentage" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">Validity</label>
+                                    <input type="date" name="offerValidity" class="form-control" >
+                                </div>
+                            </div>                               
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-6">
+                                    <label class="form-label">Offer Type</label>
+                                    <select id="offer-type-select" class="form-select" name="offerType">
+                                        <option disabled selected>--choose option--</option>
+                                        <option value="Products">Products</option>
+                                        <option value="Category">Category</option>
+                                        <option value="Referral">Referral</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">Select Option</label>
+                                
+
+                                    <select id="offer-category-select" class="form-select" name="offerTypeName">
+                                        <option disabled selected>--choose option--</option>
+                                       
+                                        
+                                    </select>
+                                </div>
+                            </div>                               
+                            <div>
+                                <button class="btn btn-md rounded font-sm hover-up" type="submit">Add Offer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- card end// -->
+            
+        </div>
+        
+    </div>
+
+</section>
+<!-- content-main end// -->
+
+</main>
+
+
+
+<script src="/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
+<script src="/admin/assets/js/vendors/bootstrap.bundle.min.js"></script>
+<script src="/admin/assets/js/vendors/select2.min.js"></script>
+<script src="/admin/assets/js/vendors/perfect-scrollbar.js"></script>
+<script src="/admin/assets/js/vendors/jquery.fullscreen.min.js"></script>
+
+<!--Sweet Alert  -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<!-- Main Script -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+// Add this script to your addOffer.ejs file, replacing the existing script
+<script>
+$(document).ready(function() {
+    const populateSelectOptions = (options) => {
+        var select = $('#offer-category-select');
+        select.empty();
+        select.append('<option disabled selected>--choose option--</option>');
+        options.forEach(option => {
+            select.append(`<option value="${option.id}">${option.name}</option>`);
+        });
+    };
+
+    // Handle offer type selection
+    $('#offer-type-select').change(function() {
+        var selectedType = $(this).val();
+        const categorySelectContainer = $('#offer-category-select').closest('.col-lg-6');
+        
+        if (selectedType === 'Referral') {
+            // Hide the category/product selection for referral offers
+            categorySelectContainer.hide();
+        } else {
+            categorySelectContainer.show();
+            
+            if (selectedType === 'Products') {
+                fetch('/admin/getProducts')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.products && data.products.length > 0) {
+                            populateSelectOptions(data.products);
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                text: 'No products found',
+                                timer: 1500
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else if (selectedType === 'Category') {
+                fetch('/admin/getCategories')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.categories && data.categories.length > 0) {
+                            populateSelectOptions(data.categories);
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                text: 'No categories found',
+                                timer: 1500
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+    });
+
+    // Handle form submission
+    $('#offer-form').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Validate form data
+        if (!data.offerName?.trim()) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please enter offer name'
+            });
+            return;
+        }
+
+        if (!data.offerDescription?.trim()) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please enter offer description'
+            });
+            return;
+        }
+
+        if (!data.offerPercentage || data.offerPercentage < 1 || data.offerPercentage > 100) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please enter a valid offer percentage between 1 and 100'
+            });
+            return;
+        }
+
+        if (!data.offerValidity) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please select offer validity date'
+            });
+            return;
+        }
+
+        if (!data.offerType) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please select offer type'
+            });
+            return;
+        }
+
+        // For non-referral offers, validate selection
+        if (data.offerType !== 'Referral' && !data.offerTypeName) {
+            Swal.fire({
+                icon: 'error',
+                text: 'Please select a product or category'
+            });
+            return;
+        }
+
+        // Send form data to server
+        fetch('/admin/addOffer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.error
+                });
+            } else if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message
+                }).then(() => {
+                    window.location.href = '/admin/offers';
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong'
+            });
+        });
+    });
+});
+</script>
+
+
+
+

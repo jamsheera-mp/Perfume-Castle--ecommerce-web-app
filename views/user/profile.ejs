@@ -1,5 +1,5 @@
 <%- include('../partials/user/header.ejs') %>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
@@ -144,6 +144,14 @@
         .position-relative {
             position: relative;
         }
+       
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
     </style>
     <div class="section">
         <div class="profile-container">
@@ -157,12 +165,13 @@
                                 <div class="user-name">
                                     <%= user.name %>
                                 </div>
+                                <small>Your referral code: <%= referralCode %></small>
                             </div>
                             <div class="nav nav-pills flex-column">
                                 <a class="nav-link active" data-bs-toggle="pill" href="#profile">Profile Information</a>
                                 <a class="nav-link" data-bs-toggle="pill" href="#addresses">Manage Addresses</a>
                                 <a class="nav-link" data-bs-toggle="pill" href="#orders">My Orders</a>
-                                <a class="nav-link" data-bs-toggle="pill" href="#wishlist">Wishlist</a>
+                               
                                 <a class="nav-link text-danger" href="/logout" id="logoutLink">Logout</a>
                             </div>
                         </div>
@@ -227,7 +236,8 @@
                                                     name="currentPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('currentPassword')"></i>
-                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                <div id="currentPasswordError" class="invalid-feedback"
+                                                    style="color:red;">
                                                 </div>
 
                                             </div>
@@ -237,7 +247,7 @@
                                                     name="newPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('newPassword')"></i>
-                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                <div id="newPasswordError" class="invalid-feedback" style="color:red;">
                                                 </div>
                                             </div>
                                             <div class="mb-3 position-relative">
@@ -247,7 +257,8 @@
                                                     name="confirmNewPassword">
                                                 <i class="eye-icon fas fa-eye-slash"
                                                     onclick="togglePasswordVisibility('confirmNewPassword')"></i>
-                                                <div id="passwordError" class="invalid-feedback" style="color:red;">
+                                                <div id="confirmPasswordError" class="invalid-feedback"
+                                                    style="color:red;">
                                                 </div>
                                             </div>
                                             <button type="submit" class="btn btn-primary">Save New Password</button>
@@ -335,6 +346,8 @@
                                                         <% } %>
                                     </div>
                                 </div>
+<!-----------------------------------------------order section ends--------------------------------------->
+
 
                                 <!-------------------------------------------- Address Management Section ---------------------------------------------------->
 
@@ -473,6 +486,7 @@
 
                                                     <!--------------------------------- List of saved addresses ------------------------------------>
                                                     <div class="saved-addresses" id="addressList">
+
                                                         <% if(typeof addresses !=='undefined' && addresses.length> 0) {
                                                             %>
                                                             <% addresses.forEach((addr,index)=> { %>
@@ -511,138 +525,161 @@
 
                                                                         <!--------------------------------- Hidden Edit Form ------------------------------------>
                                                                         <div id="editForm-<%= addressItem._id %>"
-                                                                            class="edit-form" style="display: none;">
-                                                                            <form
-                                                                                onsubmit="submitEditForm('<%= addressItem._id %>', event)">
-                                                                                <div class="mb-3">
-                                                                                    <div class="col-6">
-                                                                                        <input type="text" name="name"
-                                                                                            class="form-control"
-                                                                                            pattern="[A-Za-z\s]{2,}"
-                                                                                            title="Name should contain only letters"
-                                                                                            value="<%= addressItem.name %>">
-                                                                                        <div class="invalid-feedback">
-                                                                                            Please
-                                                                                            enter the house name.</div>
-                                                                                    </div>
+                                                                            class="edit-form mt-2 card mb-3"
+                                                                            style="max-width: 700px; display:none; font: size 14px;">
+                                                                            <div class="card-body">
+                                                                                <form
+                                                                                    onsubmit="submitEditForm('<%= addressItem._id %>', event)">
+                                                                                    <div class=" row mb-3">
+                                                                                        <div class="col-6">
+                                                                                            <input type="text"
+                                                                                                name="name"
+                                                                                                class="form-control"
+                                                                                                pattern="[A-Za-z\s]{2,}"
+                                                                                                title="Name should contain only letters"
+                                                                                                value="<%= addressItem.name %>">
+                                                                                            <div
+                                                                                                class="invalid-feedback">
+                                                                                                Please
+                                                                                                enter the house name.
+                                                                                            </div>
+                                                                                        </div>
 
-                                                                                    <div class="col-6">
-                                                                                        <input type="text" name="phone"
-                                                                                            class="form-control"
-                                                                                            pattern="\d{10}"
-                                                                                            value="<%= addressItem.phone %>">
-                                                                                        <div class="invalid-feedback">
-                                                                                            Please
-                                                                                            enter a valid 10-digit
-                                                                                            mobile
-                                                                                            number.</div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="mb-3">
-                                                                                    <div class="col-6">
-                                                                                        <input type="text"
-                                                                                            name="pincode"
-                                                                                            class="form-control"
-                                                                                            pattern="\d{6}"
-                                                                                            value="<%= addressItem.pincode %>">
-                                                                                        <div class="invalid-feedback">
-                                                                                            Please
-                                                                                            enter a valid 6-digit
-                                                                                            pincode.
+                                                                                        <div class="col-6">
+                                                                                            <input type="text"
+                                                                                                name="phone"
+                                                                                                class="form-control"
+                                                                                                pattern="\d{10}"
+                                                                                                value="<%= addressItem.phone %>">
+                                                                                            <div
+                                                                                                class="invalid-feedback">
+                                                                                                Please
+                                                                                                enter a valid 10-digit
+                                                                                                mobile
+                                                                                                number.</div>
                                                                                         </div>
                                                                                     </div>
+                                                                                    <div class=" row mb-3">
+                                                                                        <div class="col-6">
+                                                                                            <input type="text"
+                                                                                                name="pincode"
+                                                                                                class="form-control"
+                                                                                                pattern="\d{6}"
+                                                                                                value="<%= addressItem.pincode %>">
+                                                                                            <div
+                                                                                                class="invalid-feedback">
+                                                                                                Please
+                                                                                                enter a valid 6-digit
+                                                                                                pincode.
+                                                                                            </div>
+                                                                                        </div>
 
-                                                                                    <div class="col-6">
-                                                                                        <input type="text" name="city"
+                                                                                        <div class="col-6">
+                                                                                            <input type="text"
+                                                                                                name="city"
+                                                                                                class="form-control"
+                                                                                                pattern="[A-Za-z\s]{2,}"
+                                                                                                value="<%= addressItem.city %>">
+                                                                                            <div
+                                                                                                class="invalid-feedback">
+                                                                                                Please
+                                                                                                enter
+                                                                                                the city/town.</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class=" mb-3">
+                                                                                        <input type="text"
+                                                                                            name="landMark"
                                                                                             class="form-control"
-                                                                                            pattern="[A-Za-z\s]{2,}"
-                                                                                            value="<%= addressItem.city %>">
+                                                                                            value="<%= addressItem.landMark %>">
+                                                                                        <div class="invalid-feedback">
+                                                                                            Please
+                                                                                            enter a
+                                                                                            landmark.</div>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <input type="text"
+                                                                                            name="district"
+                                                                                            class="form-control"
+                                                                                            value="<%= addressItem.district %>">
                                                                                         <div class="invalid-feedback">
                                                                                             Please
                                                                                             enter
-                                                                                            the city/town.</div>
+                                                                                            your district.</div>
                                                                                     </div>
-                                                                                </div>
-                                                                                <div class="mb-3">
-                                                                                    <input type="text" name="landMark"
-                                                                                        class="form-control"
-                                                                                        value="<%= addressItem.landMark %>">
-                                                                                    <div class="invalid-feedback">Please
-                                                                                        enter a
-                                                                                        landmark.</div>
-                                                                                </div>
-                                                                                <div class="mb-3">
-                                                                                    <input type="text" name="district"
-                                                                                        class="form-control"
-                                                                                        value="<%= addressItem.district %>">
-                                                                                    <div class="invalid-feedback">Please
-                                                                                        enter
-                                                                                        your district.</div>
-                                                                                </div>
-                                                                                <div class="mb-3">
-                                                                                    <select name="state" id="state"
-                                                                                        class="form-select">
+                                                                                    <div class="mb-3">
+                                                                                        <select name="state" id="state"
+                                                                                            class="form-select">
 
-                                                                                        <option value="" selected
-                                                                                            disabled>
-                                                                                            --<%= addressItem.state %>--
-                                                                                        </option>
-                                                                                        <option
-                                                                                            value="Andaman and Nicobar Islands">
-                                                                                            Andaman and Nicobar Islands
-                                                                                        </option>
+                                                                                            <option value="" selected
+                                                                                                disabled>
+                                                                                                --<%= addressItem.state
+                                                                                                    %>--
+                                                                                            </option>
+                                                                                            <option
+                                                                                                value="Andaman and Nicobar Islands">
+                                                                                                Andaman and Nicobar
+                                                                                                Islands
+                                                                                            </option>
 
-                                                                                        <option value="Kerala">Kerala
-                                                                                        </option>
-                                                                                        <option value="Ladakh">Ladakh
-                                                                                        </option>
+                                                                                            <option value="Kerala">
+                                                                                                Kerala
+                                                                                            </option>
+                                                                                            <option value="Ladakh">
+                                                                                                Ladakh
+                                                                                            </option>
 
-                                                                                    </select>
-                                                                                    <!--<input type="text" name="state" class="form-control" value="<%= addressItem.state %>" >-->
-                                                                                    <div class="invalid-feedback">Please
-                                                                                        select
-                                                                                        a state.</div>
-                                                                                </div>
-                                                                                <div class="row mb-3">
-                                                                                    <div class="col-6">
-                                                                                        <input type="text"
-                                                                                            name="altPhone"
-                                                                                            pattern="\d{10}"
-                                                                                            class="form-control"
-                                                                                            placeholder="Alternate Phone (Optional)">
+                                                                                        </select>
+                                                                                        <!--<input type="text" name="state" class="form-control" value="<%= addressItem.state %>" >-->
                                                                                         <div class="invalid-feedback">
                                                                                             Please
-                                                                                            enter a valid alternate
-                                                                                            phone
-                                                                                            number.
-                                                                                        </div>
+                                                                                            select
+                                                                                            a state.</div>
                                                                                     </div>
-                                                                                    <div class="col-6">
-                                                                                        <select name="addressType"
-                                                                                            class="form-select">
-                                                                                            <option value="Home"
-                                                                                                <%=addressItem.addressType==='Home'
-                                                                                                ? 'selected' : '' %>
-                                                                                                >Home
-                                                                                            </option>
-                                                                                            <option value="Work"
-                                                                                                <%=addressItem.addressType==='Work'
-                                                                                                ? 'selected' : '' %>
-                                                                                                >Work
-                                                                                            </option>
-                                                                                        </select>
+                                                                                    <div class="row mb-3">
+                                                                                        <div class="col-6">
+                                                                                            <input type="text"
+                                                                                                name="altPhone"
+                                                                                                pattern="\d{10}"
+                                                                                                class="form-control"
+                                                                                                placeholder="Alternate Phone (Optional)">
+                                                                                            <div
+                                                                                                class="invalid-feedback">
+                                                                                                Please
+                                                                                                enter a valid alternate
+                                                                                                phone
+                                                                                                number.
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-6">
+                                                                                            <select name="addressType"
+                                                                                                class="form-select">
+                                                                                                <option value="Home"
+                                                                                                    <%=addressItem.addressType==='Home'
+                                                                                                    ? 'selected' : '' %>
+                                                                                                    >Home
+                                                                                                </option>
+                                                                                                <option value="Work"
+                                                                                                    <%=addressItem.addressType==='Work'
+                                                                                                    ? 'selected' : '' %>
+                                                                                                    >Work
+                                                                                                </option>
+                                                                                            </select>
+                                                                                        </div>
                                                                                     </div>
                                                                                     <div
                                                                                         class="d-flex justify-content-between mt-3">
                                                                                         <button type="submit"
-                                                                                            class="btn btn-primary btn-sm">Save
+                                                                                            class="btn btn-primary btn-sm mb-2">Save
                                                                                             Changes</button>
                                                                                         <button type="button"
                                                                                             class="btn btn-secondary btn-sm"
                                                                                             onclick="toggleEditForm('<%= addressItem._id %>')">Cancel</button>
                                                                                     </div>
-                                                                            </form>
+                                                                                </form>
+                                                                            </div>
                                                                         </div>
+                                                                        <hr>
                                                                     </div>
                                                                     <% }) %>
                                                                         <% }) %>
@@ -818,35 +855,73 @@
             document.getElementById('changePasswordForm').reset();
         });
 
+
+
         document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            let isValid = true
+
             const currentPassword = document.getElementById('currentPassword').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            const passwordError = document.getElementById('passwordError')
-            passwordPattern = `^.{6}$
-`
+
+            const currentPasswordError = document.getElementById('currentPasswordError')
+            const confirmPasswordError = document.getElementById('confirmPasswordError')
+            const newPasswordError = document.getElementById('newPasswordError')
+
+            passwordPattern = /^.{6}$/
+
+            // Reset error messages
+            currentPasswordError.textContent = '';
+            currentPasswordError.style.display = 'none';
+
+            newPasswordError.textContent = '';
+            newPasswordError.style.display = 'none';
+
+            confirmPasswordError.textContent = '';
+            confirmPasswordError.style.display = 'none';
 
 
-            if (newPassword !== confirmNewPassword) {
+            if (!currentPassword) {
+                currentPasswordError.textContent = 'This  field is required'
+                currentPasswordError.style.display = 'block'
+                isValid = false
+            } else {
+                currentPasswordError.textContent = '';
+                currentPasswordError.style.display = 'none'
 
-                Swal.fire({
-                    title: 'Error',
-                    text: 'New passwords do not match',
-                    icon: 'error',
-                    confirmButtonText: 'Try again'
-                })
-                return;
             }
-            if (!passwordPattern.test(newPassword) && !passwordPattern.test(confirmNewPassword)) {
-                passwordError.textContent = 'Password must be at least 6 characters long';
-                passwordError.style.display = 'block';
+            if (!newPassword) {
+                newPasswordError.textContent = 'This  field is required'
+                newPasswordError.style.display = 'block'
+                isValid = false;
+            } else if (!passwordPattern.test(newPassword)) {
+                newPasswordError.textContent = 'Password must be at least 6 characters long';
+                newPasswordError.style.display = 'block';
                 isValid = false;
             } else {
-                passworderror.textContent = '';
-                passwordError.style.display = 'none';
-
+                newPasswordError.textContent = '';
+                newPasswordError.style.display = 'none';
             }
+            if (!confirmNewPassword) {
+                confirmPasswordError.textContent = 'This  field is required'
+                confirmPasswordError.style.display = 'block'
+                isValid = false;
+            } else if (newPassword !== confirmNewPassword) {
+                confirmPasswordError.textContent = 'Passwords do not match';
+                confirmPasswordError.style.display = 'block';
+                isValid = false;
+            } else {
+                confirmPasswordError.textContent = ''
+                confirmPasswordError.style.display = 'none';
+            }
+            // Ensure new password is not the same as the current password
+            if (currentPassword === newPassword && currentPassword) {
+                newPasswordError.textContent = 'New password cannot be the same as the current password';
+                newPasswordError.style.display = 'block';
+                isValid = false;
+            }
+
             // Check form validity before proceeding
             if (!isValid) {
                 return;  // Do not proceed if form is invalid
@@ -863,17 +938,35 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showMessage('Password changed successfully', 'success');
+                        Swal.fire({
+                            title: 'Password Changed',
+                            text: 'Your password has been changed successfully',
+                            icon: 'success',
+
+                        })
                         document.getElementById('changePasswordForm').reset();
                         document.getElementById('changePasswordForm').style.display = 'none';
                         document.getElementById('showChangePasswordForm').style.display = 'block';
+
                     } else {
-                        showMessage(data.message || 'Failed to change password', 'error');
+
+                        swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Failed to change password',
+                            icon: 'error',
+                            confirmButtonText: 'Try again'
+                        })
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showMessage('An error occurred while changing the password', 'error');
+
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while changing the password',
+                        icon: 'error',
+
+                    })
                 });
         });
 
@@ -1236,3 +1329,60 @@
                 addressesContainer.insertAdjacentHTML('beforeend', newAddressHtml);
             }
     </script>
+    <!--------------------------------------wishlist mgmt------------------------------->
+    <script>
+        
+        function removeFromWishlist(productId) {
+    // Add your AJAX call to remove item from wishlist
+    fetch(`/wishlist/remove/${productId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Refresh the wishlist section
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function addToCart(productId) {
+    console.log('reached add to cart route')
+    // Add your AJAX call to add item to cart
+    if(productId.quantity  < 0) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Product is  out of stock.',
+
+        })
+    }
+
+    fetch('/addToCart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId: productId })
+        
+    })
+    
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('success')
+            // Show success message or update cart count
+            alert('Item added to cart!');
+        }
+    })
+    .catch(error => {
+        console.error('add to cart failed')
+        console.error('Error:', error.message)
+});
+}
+        </script>
+    <!--Sweet alert-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

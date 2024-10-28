@@ -10,6 +10,9 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
 
+
+
+
 const getCheckout = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -70,6 +73,79 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 //---------------------------------------------------------
+// Verify Razorpay payment controller
+const verifyRazorpayPayment = async (req, res) => {
+    try {
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            orderId
+        } = req.body;
+
+        // Find the order
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        // Verify signature
+        const generatedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest('hex');
+
+        if (generatedSignature === razorpay_signature) {
+            // Payment is verified successfully
+            order.paymentStatus = 'Paid';
+            order.status = 'Placed';
+            order.razorpayPaymentId = razorpay_payment_id;
+            await order.save();
+
+            // Update inventory and clear cart only after successful payment
+            await Promise.all([
+                ...order.orderedItems.map(item =>
+                    Product.findByIdAndUpdate(
+                        item.product,
+                        { $inc: { quantity: -item.quantity } }
+                    )
+                ),
+                Cart.findOneAndUpdate(
+                    { userId: order.userId },
+                    { $set: { items: [] } }
+                )
+            ]);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Payment verified successfully',
+                orderId: order._id
+            });
+        } else {
+            // Signature verification failed
+            order.paymentStatus = 'Failed';
+            order.status = 'Failed';
+            order.paymentError = 'Signature verification failed';
+            await order.save();
+
+            return res.status(400).json({
+                success: false,
+                message: 'Payment verification failed'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error processing payment verification'
+        });
+    }
+};
+//-------------------------------------------------------------------------
 const placeOrder = async (req, res) => {
     try {
         console.log('Received order request:', req.body);
@@ -189,9 +265,9 @@ const placeOrder = async (req, res) => {
             paymentStatus: initialPaymentStatus,
 
         });
-
+        let razorpayOrder;
         if (paymentMethod === 'Online') {
-            const razorpayOrder = await razorpay.orders.create({
+            razorpayOrder = await razorpay.orders.create({
                 amount: finalAmount * 100,
                 currency: 'INR',
                 receipt: 'order_receipt_' + Date.now(),
@@ -207,27 +283,30 @@ const placeOrder = async (req, res) => {
         // Clear session coupon after order is created
         delete req.session.appliedCoupon;
 
-        // Update product quantities and clear cart
-        await Promise.all([
-            ...cart.items.map(item =>
-                Product.findByIdAndUpdate(item.productId._id, { $inc: { quantity: -item.quantity } })
-            ),
-            Cart.findOneAndUpdate({ userId: userObjectId }, { $set: { items: [] } }),
-            User.findByIdAndUpdate(userObjectId, { $push: { orderHistory: newOrder._id } })
-        ]);
+         // For COD orders, update inventory and clear cart immediately
+         if (paymentMethod === 'CashOnDelivery'|| paymentStatus  === 'Paid') {
 
-        if (paymentMethod === 'CashOnDelivery') {
+            await Promise.all([
+                ...cart.items.map(item =>
+                    Product.findByIdAndUpdate(item.productId._id, {
+                        $inc: { quantity: -item.quantity }
+                    })
+                ),
+                Cart.findOneAndUpdate({ userId: userObjectId }, { $set: { items: [] } })
+            ]);
+
             return res.status(200).json({
                 success: true,
                 message: 'Order placed successfully',
                 orderId: newOrder._id
             });
-        } else if (paymentMethod === 'Online') {
+        } else {
+            // For online payment, return Razorpay order details
             return res.status(200).json({
                 success: true,
                 message: 'Razorpay order created',
                 orderId: newOrder._id,
-                razorpayOrderId: newOrder.razorpayOrderId,
+                razorpayOrderId: razorpayOrder.id,
                 amount: finalAmount * 100,
                 currency: 'INR'
             });
@@ -238,6 +317,64 @@ const placeOrder = async (req, res) => {
         res.status(400).json({ success: false, message: 'Error placing order' });
     }
 };
+
+//------------------------------------------------------------------------------------------------
+const updatePaymentStatus = async(req,res)=>{
+    try {
+        const { orderId, razorpayOrderId, status ,error} = req.body;
+        
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Order not found' 
+            });
+        }
+
+        // Update order with payment failure details
+        order.paymentStatus = status;
+        order.status = status === 'Failed' ? 'Failed' : order.status;
+        
+
+        if (error) {
+            order.paymentError = error;
+        }
+        // If there's an error message, store it
+       // if (error) {
+            //updates.paymentFailureReason = error;
+       // }
+        await  order.save();
+
+        //////////////////////////////////////////
+        //const updatedOrder = await Order.findOneAndUpdate(
+            //{ _id: orderId },
+            //{ $set: updates },
+            //{ new: true }
+        //);
+        
+
+        // If payment failed, restore product quantities
+        //if (paymentStatus === 'Failed') {
+           // await Promise.all(order.orderedItems.map(async (item) => {
+               // await Product.findByIdAndUpdate(
+                    //item.product,
+                    //{ $inc: { quantity: item.quantity } }
+               // );
+           // }));
+        //}
+        /////////////////////////////////////////
+        res. status(200).json({ 
+            success: true, 
+            message: 'Payment status updated successfully',
+            //order: updatedOrder
+        });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ success: false, message: 'Failed to update payment status' });
+    }
+}
+
+//----------------------------------------------------------------------------------------
 const getOrderSuccess = async (req, res) => {
     try {
         const orderId = req.query.orderId
@@ -354,6 +491,8 @@ const trackOrder = async (req, res) => {
         }
 
         const { orderId } = req.params;
+        console.log('order id :', orderId);
+
 
         // Find the order for the current user
         const order = await Order.findOne({ orderId: orderId })
@@ -692,6 +831,7 @@ async function addToWallet(userId, amount, description) {
     module.exports = {
         getCheckout,
         placeOrder,
+        updatePaymentStatus,
         getOrderSuccess,
         getOrderList,
         returnOrder,

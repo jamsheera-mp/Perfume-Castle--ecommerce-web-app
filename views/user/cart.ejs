@@ -135,13 +135,18 @@
                                                             </span></p>
 
                                                         <% if (item.productId.quantity===0) { %>
-                                                            <p class="text-danger">Out of Stock</p>
+                                                            <p class="text-danger" style="color:red;">Out of Stock</p>
                                                             <% hasOutOfStockItem=true; %>
                                                                 <!-- Set the flag if out of stock -->
                                                                 <% } %>
                                                     </td>
-                                                    <td class="price" data-title="Price"> <span>$<%=
-                                                                item.price.toFixed(2) %></span></td>
+                                                    <td class="price" data-title="Price"> 
+                                                     
+                                                       <span>$<%=
+                                                                item.price%></span>
+                                                              
+                                                             
+                                                            </td>
 
                                                     <td class="text-center" data-title="Stock">
                                                         <div class="detail-qty border radius  m-auto">
@@ -309,514 +314,262 @@
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Toast functionality
-            function showToast(message, isError = false) {
-                const toastContainer = document.getElementById('toast-container') || createToastContainer();
-                const toast = document.createElement('div');
-                const toastId = 'toast-' + Date.now();
+       document.addEventListener("DOMContentLoaded", function () {
+    // Quantity change handler
+    window.handleQuantityChange = async function (event, isIncrement) {
+        event.preventDefault();
+        const row = event.target.closest('tr');
+        const productId = row.getAttribute('data-productid');
+        const qtyElement = row.querySelector('.qty-val');
+        const currentQty = parseInt(qtyElement.getAttribute('data-quantity'));
+        const maxStock = parseInt(qtyElement.getAttribute('data-max-stock'));
+        const maxQtyPerUser = parseInt(qtyElement.getAttribute('data-max-qty-per-user'));
 
-                toast.className = `custom-toast ${isError ? 'error' : 'success'}`;
-                toast.id = toastId;
-                toast.innerHTML = `
-            <div class="toast-content">
-                <span class="toast-icon">${isError ? '⚠️' : '✅'}</span>
-                <span class="toast-message">${message}</span>
-            </div>
-            <span class="toast-close" onclick="closeToast('${toastId}')">&times;</span>
-        `;
+        let newQuantity = isIncrement ? currentQty + 1 : currentQty - 1;
 
-                toastContainer.appendChild(toast);
-                setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => closeToast(toastId), 3000);
-                adjustToastPositions();
-            }
-
-            function createToastContainer() {
-                const container = document.createElement('div');
-                container.id = 'toast-container';
-                container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999;';
-                document.body.appendChild(container);
-                return container;
-            }
-
-            function closeToast(toastId) {
-                const toast = document.getElementById(toastId);
-                if (toast) {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        toast.remove();
-                        adjustToastPositions();
-                    }, 300);
-                }
-            }
-
-            function adjustToastPositions() {
-                const toasts = document.querySelectorAll('.custom-toast');
-                let bottomOffset = 20;
-                toasts.forEach((toast) => {
-                    toast.style.bottom = bottomOffset + 'px';
-                    bottomOffset += toast.offsetHeight + 10;
+        if (newQuantity < 1 || newQuantity > maxStock || newQuantity > maxQtyPerUser) {
+            if (newQuantity < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Quantity',
+                    text: 'Quantity cannot be less than 1'
+                });
+            } else if (newQuantity > maxStock) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Stock Limit Exceeded',
+                    text: `Only ${maxStock} items available in stock`
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Quantity Limit Exceeded',
+                    text: `You can only add up to ${maxQtyPerUser} of this item`
                 });
             }
+            return;
+        }
 
-            // Quantity change handler
-            window.handleQuantityChange = async function (event, isIncrement) {
-                event.preventDefault();
-                const row = event.target.closest('tr');
-                const productId = row.getAttribute('data-productid');
-                const qtyElement = row.querySelector('.qty-val');
-                const currentQty = parseInt(qtyElement.getAttribute('data-quantity'));
-                const maxStock = parseInt(qtyElement.getAttribute('data-max-stock'));
-                const maxQtyPerUser = parseInt(qtyElement.getAttribute('data-max-qty-per-user'));
-                const pricePerItem = parseFloat(qtyElement.getAttribute('data-price'));
-
-                let newQuantity = isIncrement ? currentQty + 1 : currentQty - 1;
-
-                if (newQuantity < 1 || newQuantity > maxStock || newQuantity > maxQtyPerUser) {
-                    showToast(newQuantity < 1 ? "Quantity cannot be less than 1" :
-                        newQuantity > maxStock ? `Only ${maxStock} items available in stock` :
-                            `You can only add up to ${maxQtyPerUser} of this item`, true);
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/updateCart', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId, newQuantity })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        qtyElement.innerText = newQuantity;
-                        qtyElement.setAttribute('data-quantity', newQuantity);
-                        row.querySelector('[data-title="Cart"] span').innerText = `$${(pricePerItem * newQuantity).toFixed(2)}`;
-                        updateCartTotals(data.cartSubTotal);
-                        showToast('Cart updated successfully');
-
-                        // Update stock info and button states
-                        const stockInfoElement = row.querySelector('.stock-quantity');
-                        if (stockInfoElement) stockInfoElement.innerText = maxStock - newQuantity;
-                        row.querySelector('.qty-down').classList.toggle('disabled', newQuantity <= 1);
-                        row.querySelector('.qty-up').classList.toggle('disabled', newQuantity >= Math.min(maxStock, maxQtyPerUser));
-                    } else {
-                        showToast(data.error || 'Failed to update cart', true);
-                    }
-                } catch (error) {
-                    console.error('Error updating cart:', error);
-                    showToast('An error occurred while updating the cart', true);
-                }
-            };
-
-            // Remove item handler
-            async function handleRemoveItem(event) {
-                const removeButton = event.target.closest('.remove-item');
-                if (!removeButton) return;
-
-                event.preventDefault();
-                const row = removeButton.closest('tr');
-                const productId = row.getAttribute('data-productid');
-
-                if (!confirm('Are you sure you want to remove this item?')) return;
-
-                try {
-                    const response = await fetch(`/deleteCartItem/${productId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        row.style.transition = 'opacity 0.3s';
-                        row.style.opacity = '0';
-                        setTimeout(() => {
-                            row.remove();
-                            updateCartTotals(data.cartSubTotal || 0);
-                            showToast('Item removed successfully');
-                            if (document.querySelectorAll('tr[data-productid]').length === 0) {
-                                location.reload();
-                            }
-                        }, 300);
-                    } else {
-                        throw new Error(data.error || 'Failed to remove item');
-                    }
-                } catch (error) {
-                    console.error('Error removing item:', error);
-                    showToast(error.message || 'Failed to remove item', true);
-                }
-            }
-
-            // Clear cart handler
-            async function handleClearCart(event) {
-                event.preventDefault();
-                if (!confirm('Are you sure you want to clear your cart?')) return;
-
-                try {
-                    const response = await fetch('/clearCart', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showToast('Cart cleared successfully');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        throw new Error(data.error || 'Failed to clear cart');
-                    }
-                } catch (error) {
-                    console.error('Error clearing cart:', error);
-                    showToast(error.message || 'Failed to clear cart', true);
-                }
-            }
-
-            // Update cart totals
-            function updateCartTotals(cartSubTotal) {
-                const formattedTotal = parseFloat(cartSubTotal).toFixed(2);
-                const subtotalElement = document.querySelector("#cart-subtotal");
-                const totalElement = document.querySelector("#cart-total");
-
-                if (subtotalElement) subtotalElement.innerText = `$${formattedTotal}`;
-                if (totalElement) totalElement.innerText = `$${formattedTotal}`;
-            }
-
-            // Set up event listeners
-            document.querySelector('table').addEventListener('click', handleRemoveItem);
-
-            document.querySelectorAll('.qty-up, .qty-down').forEach(button => {
-                button.addEventListener('click', (e) => handleQuantityChange(e, button.classList.contains('qty-up')));
+        try {
+            const response = await fetch('/updateCart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, newQuantity })
             });
 
-            const clearCartButton = document.querySelector(".clear-cart");
-            if (clearCartButton) {
-                clearCartButton.addEventListener('click', handleClearCart);
+            const result = await response.json();
+            if (result.success) {
+                // Update quantity
+                qtyElement.innerText = newQuantity;
+                qtyElement.setAttribute('data-quantity', newQuantity);
+                
+                // Update item total price
+                const itemTotalPriceElement = row.querySelector('[data-title="Cart"] span');
+                if (itemTotalPriceElement) {
+                    itemTotalPriceElement.innerText = `$${result.itemTotalPrice.toFixed(2)}`;
+                }
+
+                // Update cart subtotal
+                updateCartTotals(result.cartSubTotal);
+
+                // Update stock info and button states
+                const stockInfoElement = row.querySelector('.stock-quantity');
+                if (stockInfoElement) stockInfoElement.innerText = maxStock - newQuantity;
+                
+                // Update button states
+                row.querySelector('.qty-down').classList.toggle('disabled', newQuantity <= 1);
+                row.querySelector('.qty-up').classList.toggle('disabled', newQuantity >= Math.min(maxStock, maxQtyPerUser));
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: result.error || 'Failed to update cart'
+                });
             }
-
-            // Initial state check for quantity buttons
-            document.querySelectorAll('.qty-val').forEach((qtyVal) => {
-                const currentQty = parseInt(qtyVal.getAttribute('data-quantity'));
-                const maxStock = parseInt(qtyVal.getAttribute('data-max-stock'));
-                const maxQtyPerUser = parseInt(qtyVal.getAttribute('data-max-qty-per-user'));
-                const row = qtyVal.closest('tr');
-
-                row.querySelector('.qty-down').classList.toggle('disabled', currentQty <= 1);
-                row.querySelector('.qty-up').classList.toggle('disabled', currentQty >= Math.min(maxStock, maxQtyPerUser));
+        } catch (error) {
+            console.error('Error updating cart:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while updating the cart'
             });
+        }
+    };
+
+    // Add to cart handler
+    window.addToCart = async function(productId, quantity = 1) {
+        try {
+            const response = await fetch('/addToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, quantity })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Item added to cart successfully'
+                });
+                // Update cart count if you have a cart counter in your UI
+                if (result.cart && result.cart.cartItemCount) {
+                    updateCartCount(result.cart.cartItemCount);
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.error || 'Failed to add item to cart'
+                });
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while adding item to cart'
+            });
+        }
+    };
+
+    // Remove item handler
+    async function handleRemoveItem(event) {
+        const removeButton = event.target.closest('.remove-item');
+        if (!removeButton) return;
+
+        event.preventDefault();
+        const row = removeButton.closest('tr');
+        const productId = row.getAttribute('data-productid');
+
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to remove this item from cart?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it!'
         });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/deleteCartItem/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+            if (data.success === 'true') { // Backend sends string 'true'
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => {
+                    row.remove();
+                    updateCartTotals(data.cartSubTotal || 0);
+                    if (document.querySelectorAll('tr[data-productid]').length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+            } else {
+                throw new Error(data.error || 'Failed to remove item');
+            }
+        } catch (error) {
+            console.error('Error removing item:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to remove item'
+            });
+        }
+    }
+
+    // Clear cart handler
+    async function handleClearCart(event) {
+        event.preventDefault();
+        
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to clear your cart?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, clear it!'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch('/clearCart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                throw new Error(data.error || 'Failed to clear cart');
+            }
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to clear cart'
+            });
+        }
+    }
+
+    // Update cart totals
+    function updateCartTotals(cartSubTotal) {
+        const formattedTotal = parseFloat(cartSubTotal).toFixed(2);
+        const subtotalElement = document.querySelector("#cart-subtotal");
+        const totalElement = document.querySelector("#cart-total");
+
+        if (subtotalElement) subtotalElement.innerText = `$${formattedTotal}`;
+        if (totalElement) totalElement.innerText = `$${formattedTotal}`;
+    }
+
+    // Optional: Update cart count in UI
+    function updateCartCount(count) {
+        const cartCountElement = document.querySelector('.cart-count'); // Add this class to your cart count element
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+        }
+    }
+
+    // Set up event listeners
+    document.querySelector('table').addEventListener('click', handleRemoveItem);
+
+    document.querySelectorAll('.qty-up, .qty-down').forEach(button => {
+        button.addEventListener('click', (e) => handleQuantityChange(e, button.classList.contains('qty-up')));
+    });
+
+    const clearCartButton = document.querySelector(".clear-cart");
+    if (clearCartButton) {
+        clearCartButton.addEventListener('click', handleClearCart);
+    }
+
+    // Initial state check for quantity buttons
+    document.querySelectorAll('.qty-val').forEach((qtyVal) => {
+        const currentQty = parseInt(qtyVal.getAttribute('data-quantity'));
+        const maxStock = parseInt(qtyVal.getAttribute('data-max-stock'));
+        const maxQtyPerUser = parseInt(qtyVal.getAttribute('data-max-qty-per-user'));
+        const row = qtyVal.closest('tr');
+
+        row.querySelector('.qty-down').classList.toggle('disabled', currentQty <= 1);
+        row.querySelector('.qty-up').classList.toggle('disabled', currentQty >= Math.min(maxStock, maxQtyPerUser));
+    });
+});
     </script>
 
-    <!---
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const qtyUpButtons = document.querySelectorAll(".qty-up");
-            const qtyDownButtons = document.querySelectorAll(".qty-down");
-
-            const removeButtons = document.querySelectorAll(".remove-item");
-            const clearCartButton = document.querySelector(".clear-cart");
-
-            const cartSubtotal = document.getElementById('cart-subtotal');
-            const cartTotal = document.getElementById('cart-total');
-
-
-            //-----------------------------------------------------------------------------------------------------
-            function showToast(message, isError = false) {
-                const toastContainer = document.getElementById('toast-container') || createToastContainer();
-                const toast = document.createElement('div');
-                const toastId = 'toast-' + Date.now();
-
-                toast.className = `custom-toast ${isError ? 'error' : 'success'}`;
-                toast.id = toastId;
-
-                toast.innerHTML = `
-                <div class="toast-content">
-                    <span class="toast-icon">${isError ? '⚠️' : '✅'}</span>
-                    <span class="toast-message">${message}</span>
-                </div>
-                <span class="toast-close" onclick="closeToast('${toastId}')">&times;</span>
-            `;
-
-                toastContainer.appendChild(toast);
-
-                // Trigger animation
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 10);
-
-                // Auto-remove after duration
-                setTimeout(() => {
-                    closeToast(toastId);
-                }, 3000);
-
-                // Adjust positions of existing toasts
-                adjustToastPositions();
-            }
-
-            // Add these new helper functions
-            function createToastContainer() {
-                const container = document.createElement('div');
-                container.id = 'toast-container';
-                container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999;';
-                document.body.appendChild(container);
-                return container;
-            }
-
-            function closeToast(toastId) {
-                const toast = document.getElementById(toastId);
-                if (toast) {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        toast.remove();
-                        adjustToastPositions();
-                    }, 300);
-                }
-            }
-
-            function adjustToastPositions() {
-                const toasts = document.querySelectorAll('.custom-toast');
-                let bottomOffset = 20;
-
-                toasts.forEach((toast) => {
-                    toast.style.bottom = bottomOffset + 'px';
-                    bottomOffset += toast.offsetHeight + 10;
-                });
-            }
-
-
-            //---------------------------------handle quantity change ----------------------------------------------------
-            async function handleQuantityChange(event, isIncrement) {
-                event.preventDefault();
-                const row = event.target.closest('tr');
-                const productId = row.getAttribute('data-productid');
-                const qtyElement = row.querySelector('.qty-val');
-                const currentQty = parseInt(qtyElement.getAttribute('data-quantity'));
-                const maxStock = parseInt(qtyElement.getAttribute('data-max-stock'));
-                const maxQtyPerUser = parseInt(qtyElement.getAttribute('data-max-qty-per-user'));
-                const pricePerItem = parseFloat(qtyElement.getAttribute('data-price'));
-
-
-                let newQuantity = isIncrement ? currentQty + 1 : currentQty - 1;
-
-                if (newQuantity < 1) {
-                    showToast("Quantity cannot be less than 1", true);
-                    return;
-                }
-
-                if (newQuantity > maxStock) {
-                    showToast(`Only ${maxStock} items available in stock`, true);
-                    return;
-                }
-
-                if (newQuantity > maxQtyPerUser) {
-                    showToast(`You can only add up to ${maxQtyPerUser} of this item`, true);
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/updateCart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ productId, newQuantity })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        qtyElement.innerText = newQuantity;
-                        qtyElement.setAttribute('data-quantity', newQuantity);
-
-                        const itemTotalPrice = (pricePerItem * newQuantity).toFixed(2);
-                        row.querySelector('[data-title="Cart"] span').innerText = `$${itemTotalPrice}`;
-
-                        updateCartTotals(data.cartSubTotal);
-                        showToast('Cart updated successfully');
-
-                        // Update stock info
-                        const stockInfoElement = row.querySelector('.stock-quantity');
-                        if (stockInfoElement) {
-                            stockInfoElement.innerText = maxStock - newQuantity;
-                        }
-                        // Disable/enable buttons based on new quantity
-                        row.querySelector('.qty-down').classList.toggle('disabled', newQuantity <= 1);
-                        row.querySelector('.qty-up').classList.toggle('disabled', newQuantity >= Math.min(maxStock, maxQtyPerUser));
-                    } else {
-                        showToast(data.error || 'Failed to update cart', true);
-                    }
-                } catch (error) {
-                    console.error('Error updating cart:', error);
-                    showToast('An error occurred while updating the cart', true);
-                }
-
-
-
-
-                //---------------------------------------function to update cart total--------------------------
-
-
-                function updateCartTotals(subtotal, discount, finalTotal) {
-                    const formattedSubtotal = parseFloat(subtotal).toFixed(2);
-                  
-
-                    if (cartSubtotal) cartSubtotal.innerText = `$${formattedSubtotal}`;
-                   
-
-                    
-                }
-                
-                // Use event delegation for remove buttons
-                document.querySelector('table').addEventListener('click', handleRemoveItem);
-
-                // Add other event listeners
-                qtyUpButtons.forEach(button => {
-                    button.addEventListener('click', (e) => handleQuantityChange(e, true));
-                });
-
-                qtyDownButtons.forEach(button => {
-                    button.addEventListener('click', (e) => handleQuantityChange(e, false));
-                });
-
-                if (clearCartButton) {
-                    clearCartButton.addEventListener('click', handleClearCart);
-                }
-
-                // Initial state check for quantity buttons
-                document.querySelectorAll('.qty-val').forEach((qtyVal) => {
-                    const currentQty = parseInt(qtyVal.getAttribute('data-quantity'));
-                    const maxStock = parseInt(qtyVal.getAttribute('data-max-stock'));
-                    const maxQtyPerUser = parseInt(qtyVal.getAttribute('data-max-qty-per-user'));
-                    const row = qtyVal.closest('tr');
-
-                    row.querySelector('.qty-down').classList.toggle('disabled', currentQty <= 1);
-                    row.querySelector('.qty-up').classList.toggle('disabled', currentQty >= Math.min(maxStock, maxQtyPerUser));
-                });
-
-
-                //------------------------------------------------------------
-                async function handleRemoveItem(event) {
-                    event.preventDefault();
-
-                    // Check if the clicked element or its parent is a remove-item button
-                    const removeButton = event.target.closest('.remove-item');
-                    if (!removeButton) return;
-
-                    const row = removeButton.closest('tr');
-                    if (!row) {
-                        showToast('Could not find item to remove', true);
-                        return;
-                    }
-
-                    const productId = row.getAttribute('data-productid');
-                    if (!productId) {
-                        showToast('Invalid product information', true);
-                        return;
-                    }
-
-                    try {
-                        if (!confirm('Are you sure you want to remove this item?')) return;
-
-                        const response = await fetch(`/deleteCartItem/${productId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            // Fade out animation before removing
-                            row.style.transition = 'opacity 0.3s';
-                            row.style.opacity = '0';
-
-                            setTimeout(() => {
-                                row.remove();
-                                updateCartTotals(data.cartSubTotal || 0);
-                                showToast('Item removed successfully');
-
-                                // Check if cart is empty
-                                const remainingItems = document.querySelectorAll('tr[data-productid]');
-                                if (remainingItems.length === 0) {
-                                    location.reload();
-                                }
-                            }, 300);
-                        } else {
-                            throw new Error(data.error || 'Failed to remove item');
-                        }
-                    } catch (error) {
-                        console.error('Error removing item:', error);
-                        showToast(error.message || 'Failed to remove item', true);
-                    }
-                }
-
-                // Updated clear cart handler with better error handling
-                async function handleClearCart(event) {
-                    event.preventDefault();
-
-                    try {
-                        if (!confirm('Are you sure you want to clear your cart?')) return;
-
-                        const response = await fetch('/clearCart', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            showToast('Cart cleared successfully');
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            throw new Error(data.error || 'Failed to clear cart');
-                        }
-                    } catch (error) {
-                        console.error('Error clearing cart:', error);
-                        showToast(error.message || 'Failed to clear cart', true);
-                    }
-                }
-
-                // Helper function to update cart totals
-                function updateCartTotals(cartSubTotal) {
-                    const formattedTotal = parseFloat(cartSubTotal).toFixed(2);
-                    const subtotalElement = document.querySelector("#cart-subtotal");
-                    const totalElement = document.querySelector("#cart-total");
-
-                    if (subtotalElement) {
-                        subtotalElement.innerText = `$${formattedTotal}`;
-                    }
-                    if (totalElement) {
-                        totalElement.innerText = `$${formattedTotal}`;
-                    }
-                }
-
-                // Use event delegation for remove buttons
-                document.querySelector('table').addEventListener('click', handleRemoveItem);
-
-                // Add other event listeners
-                qtyUpButtons.forEach(button => {
-                    button.addEventListener('click', (e) => handleQuantityChange(e, true));
-                });
-
-                qtyDownButtons.forEach(button => {
-                    button.addEventListener('click', (e) => handleQuantityChange(e, false));
-                });
-
-                if (clearCartButton) {
-                    clearCartButton.addEventListener('click', handleClearCart);
-                }
-            })
-    </script>-->
+    
 
 
     <%- include('../partials/user/footer.ejs') %>

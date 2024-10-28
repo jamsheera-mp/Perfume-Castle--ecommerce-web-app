@@ -1,78 +1,125 @@
 <%- include('../partials/user/header.ejs') %>
 
-<style>
-    .order-card {
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-    .order-card:hover {
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    }
-    .table th, .table td {
-        vertical-align: middle;
-    }
-</style>
+    <style>
+        .order-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
 
-<main class="main">
-    <div class="container py-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">My Orders</li>
-            </ol>
-        </nav>
+        .order-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
 
-        <div class="card order-card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Your Orders</h3>
-            </div>
-            <div class="card-body">
-                <% if (orders.length === 0) { %>
-                    <p class="text-center">You haven't placed any orders yet.</p>
-                <% } else { %>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Date</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% orders.forEach(order => { %>
-                                    <tr>
-                                        <td><%= order.orderId %></td>
-                                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                                        <td>$<%= order.finalAmount.toFixed(2) %></td>
-                                        <td><span class="badge bg-<%= order.status === 'Delivered' ? 'success' : 'primary' %>"><%= order.status %></span></td>
-                                        <td>
-                                            <a href="/track-order/<%= order.orderId%>" class="btn btn-sm btn-outline-info">Track Order</a>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <% if (totalPages > 1) { %>
-                        <nav aria-label="Page navigation" class="mt-4">
-                            <ul class="pagination justify-content-center">
-                                <% for (let i = 1; i <= totalPages; i++) { %>
-                                    <li class="page-item <%= currentPage == i ? 'active' : '' %>">
-                                        <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
-                                    </li>
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+
+    <main class="main">
+        <div class="container py-5">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Orders</li>
+                </ol>
+            </nav>
+
+            <div class="card order-card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Your Orders</h3>
+                </div>
+                <div class="card-body">
+                    <% if (orders.length===0) { %>
+                        <p class="text-center">You haven't placed any orders yet.</p>
+                        <% } else { %>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Order Status</th>
+                                            <th>Payment Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% orders.forEach(order=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= order.orderId %>
+                                                </td>
+                                                <td>
+                                                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                                                </td>
+                                                <td>$<%= order.finalAmount.toFixed(2) %>
+                                                </td>
+
+
+                                                <td>
+                                                    <span class="badge bg-<%= 
+        order.status === 'Placed' ? 'primary' :
+        order.status === 'Pending' ? 'warning' :
+        order.status === 'Processing' ? 'info' :
+        order.status === 'Shipped' ? 'success' :
+        order.status === 'Confirmed' ? 'success' :
+        order.status === 'Delivered' ? 'success' :
+        order.status === 'Cancelled' ? 'danger' :
+        order.status === 'Return Request' ? 'warning' :
+        order.status === 'Returned' ? 'dark' : 'danger' 
+    %>">
+                                                        <%= order.status %>
+                                                    </span>
+                                                </td>
+                                                <% let badgeColor; if (order.paymentStatus==='Paid' ) {
+                                                    badgeColor='success' ; } else if (order.paymentStatus==='Failed' ) {
+                                                    badgeColor='danger' ; } else if (order.paymentStatus==='Pending' ) {
+                                                    badgeColor='warning' ; } else if (order.paymentStatus==='Refunded' )
+                                                    { badgeColor='info' ; }else
+                                                    if(order.paymentStatus==='Refund Pending' ){ badgeColor='secondary'
+                                                    }else if(order.paymentStatus==='Payment Pending' ){
+                                                    badgeColor='warning' } else { badgeColor='primary' ; } %>
+                                                    <td><span class="badge bg-<%= badgeColor %>">
+                                                            <%= order.paymentStatus %>
+                                                        </span></td>
+
+
+
+                                                    <td>
+                                                        <a href="/track-order/<%= order.orderId%>"
+                                                            class="btn btn-sm btn-outline-info">Track Order</a>
+                                                        <% if(order.paymentStatus==='Failed' ) {%>
+                                                            <a href="/checkout" class="btn  btn-sm"
+                                                                style="background-color:red;">Retry Payment</a>
+                                                            <% } %>
+
+                                                    </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <% if (totalPages> 1) { %>
+                                <nav aria-label="Page navigation" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <% for (let i=1; i <=totalPages; i++) { %>
+                                            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                                <a class="page-link" href="/orders?page=<%= i %>">
+                                                    <%= i %>
+                                                </a>
+                                            </li>
+                                            <% } %>
+                                    </ul>
+                                </nav>
                                 <% } %>
-                            </ul>
-                        </nav>
-                    <% } %>
-                <% } %>
+                                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<%- include('../partials/user/footer.ejs') %>
+    <%- include('../partials/user/footer.ejs') %>

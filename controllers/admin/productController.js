@@ -101,6 +101,7 @@ const addProducts = async (req, res) => {
                 return res.status(400).json({status: 'error', message: 'Brand not found'});
             }
         }
+        
 
         // Create new product
         const newProduct = new Product({

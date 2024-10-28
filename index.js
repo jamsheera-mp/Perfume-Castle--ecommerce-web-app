@@ -9,6 +9,7 @@ const cartMiddleware = require('./middlewares/cart')
 const wishlistMiddleware = require('./middlewares/wishlist')
 
 
+
 const app = express()
 
 const connectDB = require('./config/db')
@@ -56,6 +57,7 @@ app.use((req, res, next) => {
 app.use(categoryBrandMiddleware);
 app.use(cartMiddleware);
 app.use(wishlistMiddleware)
+
 
 
 //view engine set up

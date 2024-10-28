@@ -1,12 +1,14 @@
 <%- include('../partials/user/header.ejs') %>
-
+    <!-- Add SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="col-md-4">
             <div class="card shadow-lg p-4">
                 <h3 class="text-center mb-4">Verify OTP</h3>
                 <form id="otpForm" action="" method="POST">
                     <div class="form-group mb-3">
-                        <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter OTP" required
+                        <input type="text" id="otp" name="otp" class="form-control" placeholder="Enter OTP"
                             maxlength="6" pattern="\d*" />
                     </div>
                     <button type="submit" class="btn btn-primary btn-block w-100">
@@ -23,7 +25,7 @@
                         <div class="alert alert-danger text-center mt-3">
                             <%= message %>
                         </div>
-                    <% } %>
+                        <% } %>
                 </form>
                 <p class="text-center mt-3">
                     Already verified? <a href="/login">Login now</a>
@@ -53,28 +55,63 @@
 
         startTimer();
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 3000);
-        }
+
 
         $('#otpForm').submit(function (e) {
             e.preventDefault();
             const otp = $('#otp').val();
+            // Clear previous error messages
+            $('#errorMessage').hide();
+            if (!otp) {
+                $('#errorMessage').text('Please enter OTP').show();
+                return
+            }
 
-            $.post("/verify-pwdforgot-otp", { otp: otp }, function (data) {
-                if (data.success) {
-                    window.location.href = data.redirectUrl;
-                } else {
-                    showError(data.message || 'Invalid OTP. Please try again.');
+            // Show loading state
+            Swal.fire({
+                title: 'Verifying...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
+
+            $.ajax({
+                url: "/verify-pwdforgot-otp",
+                method: 'POST',
+                data: { otp: otp },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            text: response.message || 'OTP verified successfully',
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.href = response.redirectUrl;
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message || 'Invalid OTP. Please try again.',
+                            icon: 'error'
+                        })
+                        .then(()=>{
+                            window.location.reload()
+                        })
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Something went wrong. Please try again.',
+                        icon: 'error'
+                    });
+                }
+            });
+        
+            
         });
-       
+
         function resendOTP() {
             clearInterval(timerInterval);
             timer = 60;
@@ -84,15 +121,28 @@
             $.ajax({
                 type: 'POST',
                 url: '/resend-otp-for-pwdReset',
-                success: function(data) {
-                    if(data.success) {
-                        alert('OTP has been resent. Please check your email.');
+                success: function (data) {
+                    if (data.success) {
+
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'OTP has been resent. Please check your email.',
+                            icon: 'success',
+
+                        })
                     } else {
-                        alert('Failed to resend OTP. Please try again.');
+
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to resend OTP. Please try again.',
+                            confirmButtonText: 'Try again'
+                        })
                     }
                 }
             });
             return false;
         }
     </script>
-<%- include('../partials/user/footer.ejs') %>
+    <!--Sweet alert-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <%- include('../partials/user/footer.ejs') %>

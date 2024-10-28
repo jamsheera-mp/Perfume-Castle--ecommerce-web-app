@@ -1,3 +1,7 @@
+const { calculateProductPrices } = require('../../middlewares/priceCalculator')
+
+
+
 const User = require('../../models/userSchema')
 const Category = require('../../models/categorySchema')
 const Brand = require('../../models/brandSchema')
@@ -8,36 +12,52 @@ const env = require('dotenv').config()
 const bcryptjs = require('bcryptjs')
 const Address = require('../../models/addressSchema')
 const Order = require('../../models/orderSchema')
+const Wallet = require('../../models/walletSchema')
 
 //Load home page
 const loadHome = async (req, res) => {
     try {
-        const user = req.session.user
-        const categories = await Category.find({ isListed: true })
-        const brands = await Brand.find({ isBlocked: false })
-        let products = await Product.find({
-            isBlocked: false,
-            category: { $in: categories.map(category => category._id) },
-            quantity: { $gt: 0 }
-        }).sort({ createdOn: -1 }).limit(50)
+        const user = req.session.user;
+        const categories = await Category.find({ isListed: true }).lean();
+        // Fetch basic data
+        const [brands,products, userData ] = await Promise.all([
+           
+            Brand.find({ isBlocked: false }).lean(),
+            Product.find({
+                isBlocked: false,
+                category: { $in: categories.map(category => category._id) },
+                quantity: { $gt: 0 }
+            })
+            .sort({ createdOn: -1 })
+            .limit(50)
+            .lean() ,
+            user ? User.findById(user).lean() : null
+        ]);
 
+        // Store products in request for middleware
+        req.products = products;
+        
+        
+       // Use Promise to properly handle the middleware
+       await new Promise((resolve) => {
+        calculateProductPrices(req, res, resolve);
+    });
+        const processedProducts = req.products;
 
+        
 
-
-
-        if (user) {
-            const userData = await User.findById(user)
-            res.render('user/home', { user: userData, products, categories, brands })
-        } else {
-            return res.render('user/home', { products, categories, brands, })
-        }
+        res.render('user/home', {
+            user: userData,
+            products: processedProducts, // Use processed products with offers
+            categories:categories,
+            brands:brands
+        });
 
     } catch (error) {
         console.log("home page not found", error.message);
-        res.status(500).send('server error')
-
+        res.status(500).send('server error');
     }
-}
+};
 //Load page not found
 const pageNotFound = async (req, res) => {
     try {
@@ -96,10 +116,68 @@ async function sendEmail(email, otp) {
         return false
     }
 }
+//------------------------------------------------------------------------------------
+// Function to generate referral code
+const generateReferralCode = async () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const codeLength = 8;
+    let referralCode;
+    let isUnique = false;
+    
+    // Keep generating until we find a unique code
+    while (!isUnique) {
+        referralCode = '';
+        for (let i = 0; i < codeLength; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            referralCode += characters[randomIndex];
+        }
+        
+        // Check if code already exists
+        const existingCode = await User.findOne({ referalCode: referralCode });
+        if (!existingCode) {
+            isUnique = true;
+        }
+    }
+    
+    return referralCode;
+};
+//------------------------------------------------------------------------------------
+//// Function to handle referral rewards
+const handleReferralRewards = async (newUserId, referredByCode) => {
+    try {
+        const referringUser = await User.findOne({ referalCode: referredByCode });
+        
+        if (referringUser) {
+            // Add ₹100 to referring user's wallet
+            await handleWalletTransaction(
+                referringUser._id,
+                100,
+                'credit',
+                'Referral bonus - Someone used your referral code'
+            );
+            
+            // Add ₹50 to new user's wallet
+            await handleWalletTransaction(
+                newUserId,
+                50,
+                'credit',
+                'Welcome bonus - Registered with referral code'
+            );
+            
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error handling referral rewards:', error);
+        return false;
+    }
+};
+
+//-------------------------------------------------------------
 const register = async (req, res) => {
     try {
         console.log("Form data submitted: ", req.body);
-        const { name, email, password, confirmPassword } = req.body
+        const { name, email, password, confirmPassword ,referredBy } = req.body
         console.log("Email provided: ", email);
         if (password !== confirmPassword) {
             console.log(password);
@@ -110,11 +188,18 @@ const register = async (req, res) => {
         const findUser = await User.findOne({ email })
         if (findUser) {
             console.log(findUser);
-
             return res.render('user/register', { message: "User with this email already exists" })
-
-
         }
+          // Generate unique referral code for new user
+          const referralCode = await generateReferralCode();
+
+          // If user was referred by someone, validate the referral code
+          if (referredBy) {
+              const referringUser = await User.findOne({ referalCode: referredBy });
+              if (!referringUser) {
+                  return res.render('user/register', { message: "Invalid referral code" });
+              }
+          }
 
 
         //otp generation
@@ -124,7 +209,15 @@ const register = async (req, res) => {
             return res.json("email-error")
         }
         req.session.userOtp = otp
-        req.session.userData = { name, email, password }
+        req.session.userData = {
+             name,
+             email,
+            password,
+            referalCode: referralCode,
+            redeemed: referredBy ? true : false,
+            redeemedUsers: referredBy ? await User.findOne({ referalCode: referredBy })._id : null
+         }
+         req.session.referredBy = referredBy
 
         console.log("OTP sent", otp);
         res.json({ success: true, redirectUrl: '/verify-otp' })
@@ -158,11 +251,37 @@ const verifyOtp = async (req, res) => {
             const saveUserData = new User({
                 name: user.name,
                 email: user.email,
-                password: hashedPassword
+                password: hashedPassword,
+                
+
 
             })
+            const referredBy = req.session.referredBy
             await saveUserData.save()
             req.session.user = saveUserData._id
+
+            // Create wallet for new user
+        const wallet = await handleWalletTransaction(
+            saveUserData._id,
+            0,
+            'credit',
+            'Initial wallet creation'
+        );
+
+        // Update user with wallet reference
+        saveUserData.wallet = wallet._id;
+        await saveUserData.save();
+
+        // Handle referral rewards if applicable
+        if (referredBy) {
+            await handleReferralRewards(saveUserData._id, referredBy);
+        }
+
+        // Clear session data
+        delete req.session.userOtp;
+        delete req.session.userData;
+        delete req.session.referredBy;
+
             res.json({ success: true, redirectUrl: '/login' })
 
 
@@ -273,21 +392,30 @@ const loadProfile = async (req, res) => {
 
         const userId = req.session.user
         const user = await User.findById(userId)
+        const wallet = await  Wallet.findOne({userId })
+
         const addresses = await Address.find({ userId: userId })
         // Collect all address IDs of the user
         const addressIds = addresses.map(address => address._id);
 
         // Find orders associated with the user's addresses
-        const orders = await Order.find({ 'address.parentAddressId': { $in: addressIds } }).populate('orderedItems.product');
+        const orders = await Order.find({ 'address.parentAddressId': { $in: addressIds } }).populate('orderedItems.product').sort({createdAt:-1});
 
         
+
         console.log('Orders:', orders);
         console.log('Addresses:',addresses)
         if (!user) {
             return res.status(404).render('user/404', { message: "User not found" });
         }
 
-        res.render('user/profile', { user, addresses, orders });
+        res.render('user/profile', { user,
+            referralCode: user.referalCode,
+            walletBalance: wallet ? wallet.balance : 0,
+            walletTransactions: wallet ? wallet.transactions.reverse() : [],
+            addresses,
+            orders });
+
     } catch (error) {
         console.error('Error loading profile page:', error);
         res.redirect('/pageNotFound')

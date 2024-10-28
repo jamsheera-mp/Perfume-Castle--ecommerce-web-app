@@ -1,90 +1,173 @@
 <%- include('../partials/user/header.ejs') %>
+<!-- Add SweetAlert2 CSS -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+/>
 
 <section class="py-5 mt-5">
-    <div class="container py-5 mt-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 align-items-center">
-                <div class="card mt-5 py-5">
-                    <div class="card-body">
-                        <form id="resetForm" action="/reset-password" method="post" onsubmit="return validateForm()">
+  <div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 align-items-center">
+        <div class="card mt-5 py-5">
+          <div class="card-body">
+            <form id="resetForm" >
+              <div class="form-group position-relative">
+                <label for="new-password"
+                  >New Password <span style="color: red">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="new-password"
+                  name="newPwd1"
+                />
+                <span
+                  class="position-absolute top-50 end-0 translate-middle-y me-3"
+                  style="cursor: pointer"
+                  onclick="togglePassword('new-password', 'toggleIcon1')"
+                >
+                  <i class="bi bi-eye-slash fs-5" id="toggleIcon1"></i>
+                </span>
+                <div
+                
+                  style="color: red"
+                  id="new-password-feedback"
+                ></div>
+              </div>
 
-                            <div class="d-flex justify-content-center message">
-                                <% if (typeof message !== 'undefined') { %> 
-                                    <p><%= message %></p>
-                                <% } %>
-                            </div>
+              <div class="form-group position-relative">
+                <label for="confirm-password"
+                  >Confirm Password <span style="color: red">*</span></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirm-password"
+                  name="newPwd2"
+                />
+                <span
+                  class="position-absolute top-50 end-0 translate-middle-y me-3"
+                  style="cursor: pointer"
+                  onclick="togglePassword('confirm-password', 'toggleIcon2')"
+                >
+                  <i class="bi bi-eye-slash fs-5" id="toggleIcon2"></i>
+                </span>
+                <div
+                  
+                  style="color: red"
+                  id="confirm-password-feedback"
+                ></div>
+              </div>
 
-                            <div class="form-group position-relative">
-                                <label for="new-password">New Password *</label>
-                                <input type="password" class="form-control" id="new-password" name="newPwd1" required>
-                                <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
-                                      onclick="togglePassword('new-password', 'toggleIcon1')">
-                                    <i class="bi bi-eye-slash fs-5" id="toggleIcon1"></i>
-                                </span>
-                            </div>
-
-                            <div class="form-group position-relative">
-                                <label for="confirm-password">Confirm Password *</label>
-                                <input type="password" class="form-control" id="confirm-password" name="newPwd2" required>
-                                <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
-                                      onclick="togglePassword('confirm-password', 'toggleIcon2')">
-                                    <i class="bi bi-eye-slash fs-5" id="toggleIcon2"></i>
-                                </span>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-outline-primary-2">
-                                    <span>RESET</span>
-                                </button>
-                            </div>    
-                        </form>
-                    </div>
-                 </div>
-            </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-outline-primary-2">
+                  <span>RESET</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
 <script>
-    // Toggle password visibility
-    function togglePassword(inputId, iconId) {
-        var passwordInput = document.getElementById(inputId);
-        var passwordIcon = document.getElementById(iconId);
+  // Toggle password visibility
+  function togglePassword(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const passwordIcon = document.getElementById(iconId);
 
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            passwordIcon.classList.remove("bi-eye-slash");
-            passwordIcon.classList.add("bi-eye");
-        } else {
-            passwordInput.type = "password";
-            passwordIcon.classList.remove("bi-eye");
-            passwordIcon.classList.add("bi-eye-slash");
-        }
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      passwordIcon.classList.remove("bi-eye-slash");
+      passwordIcon.classList.add("bi-eye");
+    } else {
+      passwordInput.type = "password";
+      passwordIcon.classList.remove("bi-eye");
+      passwordIcon.classList.add("bi-eye-slash");
+    }
+  }
+
+  
+
+  document.getElementById("resetForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    let isValid = true;
+
+    const newPwd1 = document.getElementById("new-password").value.trim();
+    const newPwd2 = document.getElementById("confirm-password").value.trim();
+    const passwordFeedback = document.getElementById("new-password-feedback");
+    const confirmPasswordFeedback = document.getElementById("confirm-password-feedback");
+
+    // Clear previous feedback messages
+    passwordFeedback.textContent = "";
+    confirmPasswordFeedback.textContent = "";
+
+    // Check if both fields are filled
+    if (!newPwd1) {
+        passwordFeedback.textContent = "This field is required";
+        isValid = false;
     }
 
-    // Form validation
-    function validateForm() {
-        var newPwd1 = document.getElementById("new-password").value;
-        var newPwd2 = document.getElementById("confirm-password").value;
-
-        // Check if both fields are filled
-        if (!newPwd1 || !newPwd2) {
-            alert("Please fill in both password fields.");
-            return false;
-        }
-
-        // Check if passwords match
-        if (newPwd1 !== newPwd2) {
-            alert("Passwords do not match.");
-            return false;
-        }
-
-        // Check if password is at least 6 characters long
-        if (newPwd1.length < 6) {
-            alert("Password must be at least 6 characters long.");
-            return false;
-        }
-
-        return true;
+    if (!newPwd2) {
+        confirmPasswordFeedback.textContent = "This field is required";
+        isValid = false;
     }
+
+    // Check if passwords match
+    if (newPwd1 && newPwd2 && newPwd1 !== newPwd2) {
+        confirmPasswordFeedback.textContent = "Passwords do not match";
+        isValid = false;
+    }
+
+    // Check if password is at least 6 characters long
+    if (newPwd1 && newPwd1.length < 6) {
+        passwordFeedback.textContent = "Password must be at least 6 characters long.";
+        isValid = false;
+    }
+
+    // If validation passes, continue with form submission
+    if (isValid) {
+        // Form is valid, proceed with form submission logic
+        fetch("/reset-password", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ newPwd1, newPwd2 }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                Swal.fire({
+                    text: "Password reset successfully",
+                    icon: "success",
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+            } else {
+                Swal.fire({
+                    text: data.message || "Password reset failed",
+                    icon: "error",
+                });
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            Swal.fire({
+                text: "Password reset failed",
+                icon: "error",
+            });
+        });
+    }
+});
+
+
+        
 </script>
+
+<!--Sweet alert-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

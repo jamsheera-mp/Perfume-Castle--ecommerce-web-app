@@ -11,7 +11,7 @@ const orderController = require('../controllers/admin/orderController')
 const couponController = require('../controllers/admin/couponController')
 const offerController = require('../controllers/admin/offerController')
 const salesReportController = require('../controllers/admin/salesReportController')
-const ledgerController = require('../controllers/admin/ledgerController')
+
 const multer =  require('multer')
 const storage = require('../helpers/multer')
 const uploads = multer({storage:storage})
@@ -33,11 +33,7 @@ router.get('/dashboard/update-top-products', adminAuth, adminController.updateTo
 router.get('/dashboard/update-top-categories', adminAuth, adminController.updateTopCategories);
 router.get('/dashboard/update-top-brands', adminAuth, adminController.updateTopBrands);
 
-//ledger
-router.get('/ledger', ledgerController.getLedgerEntries);
-router.post('/ledger/add', ledgerController.addLedgerEntry);
-router.get('/ledger/export', ledgerController.exportLedger);
-router.post('/ledger/generate-from-orders', ledgerController.generateLedgerFromOrders);
+
 
 
 
@@ -94,22 +90,16 @@ router.post('/createCoupons', couponController.createCoupon);
 router.post('/deleteCoupons/:id', couponController.deleteCoupon);
 
 
+//offer route
+router.get('/offers',adminAuth,offerController.offerPageLoad);
+router.get('/add-offer',adminAuth,offerController.addOfferPage);
+router.post('/addOffer',adminAuth,offerController.addOffer);
+router.patch('/offerStatus/:offerId/:newStatus',adminAuth,offerController.changeOfferStatus);
+router.delete('/offer',adminAuth,  offerController.deleteOffer);
+router.get('/getProducts',adminAuth,offerController.getProducts)
+router.get('/getCategories',adminAuth,offerController.getCategories)
 
-//offer mgmt
-// Offer management routes using router chaining
-router
-  .route('/offers')
-  .get(offerController.renderOfferPage);
 
-router
-  .route('/api/offers')
-  .get(offerController.getAllOffers)
-  .post(offerController.addOffer);
-
-router
-  .route('/api/offers/:id')
-  .put(offerController.updateOffer)
-  .delete(offerController.deleteOffer);
 
 
 
