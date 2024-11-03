@@ -1,6 +1,36 @@
 <%- include('../partials/user/header.ejs') %>
 
+<style>
+.single-slider-img {
+    position: relative;
+    overflow: hidden; /* Ensure the pseudo-elements stay within bounds */
+}
 
+.single-slider-img img {
+    width: 100%; /* Ensures the image fits the container width */
+    height: 100%; /* Ensures the image fits the container height */
+    object-fit: cover; /* Ensures the image covers the container without distortion */
+    border: none;
+    box-shadow: none;
+    background-color: white; /* Match container background */
+}
+
+.single-slider-img::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, white 0%, transparent 20%, transparent 80%, white 100%),
+                linear-gradient(to right, white 0%, transparent 10%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+
+
+</style>
 
 
 	<!-----------------------------------------------main slider section starts  -------------------------------------------------------->
@@ -79,76 +109,17 @@
 
 		<!-----------------------------------------------main slider section ends  -------------------------------------------------------->
 
-		<!-- <section class="featured section-padding position-relative">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-1.png" alt="">
-						<h4 class="bg-1">Free Shipping</h4>
-					</div>
-				</div>
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-2.png" alt="">
-						<h4 class="bg-3">Online Order</h4>
-					</div>
-				</div>
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-3.png" alt="">
-						<h4 class="bg-2">Save Money</h4>
-					</div>
-				</div>
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-4.png" alt="">
-						<h4 class="bg-4">Promotions</h4>
-					</div>
-				</div>
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-5.png" alt="">
-						<h4 class="bg-5">Happy Sell</h4>
-					</div>
-				</div>
-				<div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
-					<div class="banner-features wow fadeIn animated hover-up">
-						<img src="assets/imgs/theme/icons/feature-6.png" alt="">
-						<h4 class="bg-6">24/7 Support</h4>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section> -->
+
 
 		<!-- ---------------------------------------------------------Product Listing Section Starts ------------------------------------------------->
 		<section class="product-tabs section-padding position-relative wow fadeIn animated">
-			<div class="bg-square"></div>
+			<!--<div class="bg-square"></div>-->
 			<div class="container">
-				<div class="tab-header">
-					<ul class="nav nav-tabs" id="myTab" role="tablist">
-						<li class="nav-item" role="presentation">
-							<button class="nav-link active" id="nav-tab-one" data-bs-toggle="tab"
-								data-bs-target="#tab-one" type="button" role="tab" aria-controls="tab-one"
-								aria-selected="true">Featured</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="nav-link" id="nav-tab-two" data-bs-toggle="tab" data-bs-target="#tab-two"
-								type="button" role="tab" aria-controls="tab-two" aria-selected="false">Popular</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="nav-link" id="nav-tab-three" data-bs-toggle="tab" data-bs-target="#tab-three"
-								type="button" role="tab" aria-controls="tab-three" aria-selected="false">New
-								added</button>
-						</li>
-					</ul>
-					<a href="/product" class="view-more d-none d-md-flex">View More<i
+				<div class="tab-header" style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+					<a href="/product" class="view-more d-inline-flex align-items-center">View More<i
 							class="fi-rs-angle-double-small-right"></i></a>
 				</div>
 				<!--End nav-tabs-->
-
-
 				<!----------------------------------- All products Listings ---------------------------------------------------->
 				<div class="tab-content wow fadeIn animated" id="myTabContent">
 					<div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
@@ -168,8 +139,8 @@
 															alt="<%= product.productName %>"
 															style="width: 100%; height: auto;">
 													</a>
-						
-													<!-- Wishlist button -->
+
+													<!------------ Wishlist button --------------->
 													<button type="button"
 														class="wishlist-btn <%= product.isInWishlist ? 'in-wishlist' : '' %>"
 														onclick="toggleWishlist(event, '<%= product._id %>')"
@@ -177,7 +148,7 @@
 														style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; cursor: pointer; padding: 5px; z-index: 10;">
 														<svg class="wishlist-icon-outline <%= product.isInWishlist ? 'd-none' : '' %>"
 															xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-															viewBox="0 0 24 24" fill="none" stroke="#ff0000"
+															viewBox="0 0 24 24" fill="none" stroke="#088178"
 															stroke-width="2" stroke-linecap="round"
 															stroke-linejoin="round">
 															<path
@@ -186,14 +157,15 @@
 														</svg>
 														<svg class="wishlist-icon-filled <%= product.isInWishlist ? '' : 'd-none' %>"
 															xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-															viewBox="0 0 24 24" fill="#ff0000"
-															stroke="#ff0000" stroke-width="2"
-															stroke-linecap="round" stroke-linejoin="round">
+															viewBox="0 0 24 24" fill="#088178" stroke="#088178"
+															stroke-width="2" stroke-linecap="round"
+															stroke-linejoin="round">
 															<path
 																d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
 															</path>
 														</svg>
 													</button>
+													<!------------wishlist button ends------------>
 												</div>
 											</div>
 											<div class="product-content-wrap" style="padding: 15px;">
@@ -202,57 +174,65 @@
 														<% product.Category %>
 													</a>
 												</div>
-												<h2 class="text-center" style="margin: 10px 0; font-size: 16px; font-weight: 600;">
+												<h2 class="text-center"
+													style="margin: 10px 0; font-size: 16px; font-weight: 600;">
 													<a href="" style="color: #333; text-decoration: none;">
 														<%= product.productName %>
 													</a>
 												</h2>
-												
+
 												<div class="price-section">
 													<div class="price-row text-center">
 														<% if (product.hasOffer) { %>
-															<span class="original-price "style="text-decoration: line-through;">₹<%= product.basePrice.toFixed(2) %></span>
-															<span class="final-price">₹<%= product.finalPrice.toFixed(2) %></span>
-														<% } else { %>
-															<span class="final-price">₹<%= product.basePrice.toFixed(2) %></span>
-														<% } %>
+															<span class="original-price "
+																style="text-decoration: line-through;">₹<%=
+																	product.basePrice.toFixed(2) %></span>
+															<span class="final-price">₹<%= product.finalPrice.toFixed(2)
+																	%></span>
+															<% } else { %>
+																<span class="final-price">₹<%=
+																		product.basePrice.toFixed(2) %></span>
+																<% } %>
 													</div>
-													
+
 													<% if (product.hasOffer && product.offer) { %>
 														<div class="offers-applied text-center">
-															
-																<span class="badge bg-success">
-																	 <%= product.discountPercentage %>% off
-																</span>
-															
-															
+
+															<span class="badge bg-success">
+																<%= product.discountPercentage %>% off
+															</span>
+
+
 														</div>
-													<% } %>
+														<% } %>
 												</div>
-						
+
 												<div class="stock-info text-center">
-													<% if (product.quantity > 0) { %>
+													<% if (product.quantity> 0) { %>
 														Stock left: <%= product.quantity %>
-													<% } else { %>
-														<span class="out-of-stock" style=" color:red;">Out of stock</span>
-													<% } %>
+															<% } else { %>
+																<span class="out-of-stock" style=" color:red;">Out of
+																	stock</span>
+																<% } %>
 												</div>
 												<!-- Add to Cart section  -->
 												<div class="button-container text-center">
-													<form id="addToCartForm" data-product-id="<%= product._id %>" data-quantity="1">
+													<form id="addToCartForm" data-product-id="<%= product._id %>"
+														data-quantity="1">
 														<% if (product.isInCart) { %>
-															<a href="/cart" class="btn btn-sm font-sm rounded btn-brand">
+															<a href="/cart"
+																class="btn btn-sm font-sm rounded btn-brand">
 																<i class="material-icons md-shopping_cart"></i>
 																Go to Cart
 															</a>
-														<% } else { %>
-															<button type="submit" 
-																	class="btn  font-sm rounded btn-brand addToCartBtn"
-																	<%= product.quantity === 0 ? 'disabled' : '' %>>
-																<i class="material-icons md-add_shopping_cart"></i>
-																Add to Cart
-															</button>
-														<% } %>
+															<% } else { %>
+																<button type="submit"
+																	class="btn  font-sm rounded btn-brand addToCartBtn mt-2"
+																	<%=product.quantity===0 ? 'disabled' : '' %>>
+																	<i class="material-icons md-add_shopping_cart"></i>
+																	Add to Cart
+																</button>
+																<% } %>
 													</form>
 												</div>
 
@@ -260,268 +240,26 @@
 											</div>
 										</div>
 									</div>
-								<% }) %>
-							<% } else { %>
-								<div class="col-12">
-									<p>No products available.</p>
-								</div>
-							<% } %>
+									<% }) %>
+										<% } else { %>
+											<div class="col-12">
+												<p>No products available.</p>
+											</div>
+											<% } %>
 						</div>
 					</div>
 				</div>
-				<!-----------------------------------En tab one (Featured)------------------------------------------->
-				<div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
-					<div class="row product-grid-4">
-						<div class="col-lg-3 col-md-4 col-12 col-sm-6">
-							<div class="product-cart-wrap mb-30">
-								<div class="product-img-action-wrap">
-									<div class="product-img product-img-zoom">
-										<a href="/product">
-											<img class="default-img" src="assets/imgs/shop/product-9-1.jpg" alt="">
-											<img class="hover-img" src="assets/imgs/shop/product-9-2.jpg" alt="">
-										</a>
-									</div>
-									<div class="product-action-1">
-										<a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal"
-											data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
-										<a aria-label="Add To Wishlist" class="action-btn hover-up"
-											href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-										<a aria-label="Compare" class="action-btn hover-up" href=""><i
-												class="fi-rs-shuffle"></i></a>
-									</div>
-									<div class="product-badges product-badges-position product-badges-mrg">
-										<span class="hot">Hot</span>
-									</div>
-								</div>
-								<div class="product-content-wrap">
-									<div class="product-category">
-										<a href="shop-grid-right.html">Donec </a>
-									</div>
-									<h2><a href="shop-product-right.html">Lorem ipsum dolor</a></h2>
-									<div class="rating-result" title="90%">
-										<span>
-											<span>90%</span>
-										</span>
-									</div>
-									<div class="product-price">
-										<span>$238.85 </span>
-										<span class="old-price">$245.8</span>
-									</div>
-									<div class="product-action-1 show">
-										<a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i
-												class="fi-rs-shopping-bag-add"></i></a>
-									</div>
-								</div>
-							</div>
-						</div>
-
-
-
-
-
-
-					</div>
-					<!--End product-grid-4-->
-				</div>
-				<!-------------------------------------------------En tab two (Popular)------------------------------------------>
-				<div class="tab-pane fade" id="tab-three" role="tabpanel" aria-labelledby="tab-three">
-					<div class="row product-grid-4">
-						<div class="col-lg-3 col-md-4 col-12 col-sm-6">
-							<div class="product-cart-wrap mb-30">
-								<div class="product-img-action-wrap">
-									<div class="product-img product-img-zoom">
-										<a href="shop-product-right.html">
-											<img class="default-img" src="assets/imgs/shop/product-2-1.jpg" alt="">
-											<img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt="">
-										</a>
-									</div>
-									<div class="product-action-1">
-										<a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal"
-											data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
-										<a aria-label="Add To Wishlist" class="action-btn hover-up" href="/wishlist"><i
-												class="fi-rs-heart"></i></a>
-										<a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i
-												class="fi-rs-shuffle"></i></a>
-									</div>
-									<div class="product-badges product-badges-position product-badges-mrg">
-										<span class="hot">Hot</span>
-									</div>
-								</div>
-								<div class="product-content-wrap">
-									<div class="product-category">
-										<a href="shop-grid-right.html">Music</a>
-									</div>
-									<h2><a href="shop-product-right.html">Donec ut nisl rutrum</a></h2>
-									<div class="rating-result" title="90%">
-										<span>
-											<span>90%</span>
-										</span>
-									</div>
-									<div class="product-price">
-										<span>$238.85 </span>
-										<span class="old-price">$245.8</span>
-									</div>
-									<div class="product-action-1 show">
-										<a aria-label="Add To Cart" class="action-btn hover-up" href="/addtocart"><i
-												class="fi-rs-shopping-bag-add"></i></a>
-									</div>
-								</div>
-							</div>
-						</div>
-
-					</div>
-					<!--End product-grid-4-->
-				</div>
-				<!----------------------------------------------------En tab three (New added)---------------------------------------->
-			</div>
+			</div><!--end container-->
 			<!--End tab-content-->
 			</div>
 		</section>
 
 		<!-- ---------------------------------------------------------Product Listing Section Ends ------------------------------------------------->
 
-		<!-- --------------------------------------------------------Categories Section Begins --------------------------------------------------------->
-		<section class="popular-categories section-padding mt-15 mb-25">
-			<div class="container wow fadeIn animated">
-				<h3 class="section-title mb-20"><span>Popular</span> Categories</h3>
-				<div class="carausel-6-columns-cover position-relative">
-					<div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-arrows">
-					</div>
-					<div class="carausel-6-columns" id="carausel-6-columns">
-						<% categories.forEach(category=>{ %>
-							<div class="card-1">
-								<figure class=" img-hover-scale overflow-hidden">
-									<!--<a href="/product"><img src="" alt="<%= category.name %>"></a>-->
-								</figure>
-								<h5><a href="/product">
-										<%= category.name %>
-									</a></h5>
-							</div>
-							<% }) %>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- -----------------------------------------Categories Section Ends --------------------------------------------------------->
-
-		<!-------------------------------------------------------New Arrivals Sections Begins----------------------------------------------------------->
-		<!--<section class="section-padding">
-		<div class="container wow fadeIn animated">
-			<h3 class="section-title mb-20"><span>New</span> Arrivals</h3>
-			<div class="carausel-6-columns-cover position-relative">
-				<div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-2-arrows">
-				</div>
-				<div class="carausel-6-columns carausel-arrow-center" id="carausel-6-columns-2">
-					<div class="product-cart-wrap small hover-up">
-						<div class="product-img-action-wrap">
-							<div class="product-img product-img-zoom">
-								<a href="shop-product-right.html">
-									<img class="default-img" src="assets/imgs/shop/product-2-1.jpg" alt="">
-									<img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt="">
-								</a>
-							</div>
-							<div class="product-action-1">
-								<a aria-label="Quick view" class="action-btn small hover-up" data-bs-toggle="modal"
-									data-bs-target="#quickViewModal">
-									<i class="fi-rs-eye"></i></a>
-								<a aria-label="Add To Wishlist" class="action-btn small hover-up"
-									href="shop-wishlist.html" tabindex="0"><i class="fi-rs-heart"></i></a>
-								<a aria-label="Compare" class="action-btn small hover-up" href="shop-compare.html"
-									tabindex="0"><i class="fi-rs-shuffle"></i></a>
-							</div>
-							<div class="product-badges product-badges-position product-badges-mrg">
-								<span class="hot">Hot</span>
-							</div>
-						</div>
-						<div class="product-content-wrap">
-							<h2><a href="shop-product-right.html">Lorem ipsum dolor</a></h2>
-							<div class="rating-result" title="90%">
-								<span>
-								</span>
-							</div>
-							<div class="product-price">
-								<span>$238.85 </span>
-								<span class="old-price">$245.8</span>
-							</div>
-						</div>
-					</div>
-					<!--End product-cart-wrap-2-->
-
-		<!--</div>
-			</div>
-		</div>
-	</section>-->
-
-		<!-------------------------------------------------------New Arrivals Sections Ends----------------------------------------------------------->
-
-
-		<!---------------------------------------------------Brands Section Begins--------------------------------------------------------->
-		<section class="section-padding">
-			<div class="container">
-				<h3 class="section-title mb-20 wow fadeIn animated"><span>Featured</span> Brands</h3>
-				<div class="carausel-6-columns-cover position-relative wow fadeIn animated">
-					<div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-3-arrows">
-					</div>
-					<div class="carausel-6-columns text-center" id="carausel-6-columns-3">
-						<% brands.forEach(brand=>{ %>
-							<div class="brand-logo"
-								style="width: 150px; height: 150px; display: inline-block; margin: 10px;">
-								<img class="img-grey-hover img-fluid"
-									style="width: 100%; height: 100%; object-fit: contain;"
-									src="/uploads/re-image/<%= brand.brandImage[0] %>" alt="<%= brand.brandName %>">
-
-							</div>
-							<% }) %>
-					</div>
-				</div>
-			</div>
-		</section>
-		<!---------------------------------------------------Brands Section Ends--------------------------------------------------------->
-
-
 
 	</main>
 
-	<!--<script>
-		function addToWishlist(event, productId) {
-			event.preventDefault();
-			fetch(`/addToWishlist/${productId}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						Swal.fire({
-							icon: 'success',
-							title: 'Added to Wishlist',
-							text: data.message,
-							confirmButtonText: 'OK'
-						});
-					} else {
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: data.message || 'Failed to add to wishlist',
-							confirmButtonText: 'OK'
-						});
-					}
-				})
-				.catch(error => {
-					console.error('Error:', error);
-					Swal.fire({
-						icon: 'error',
-						title: 'Oops...',
-						text: 'An error occurred while adding to wishlist',
-						confirmButtonText: 'OK'
-					});
-				});
-			return false;
-		}
-	</script>-->
+
 	<!----------------------------add to cart-------------------------->
 	<script>
 		// Wait for the DOM to be fully loaded
@@ -530,143 +268,118 @@
 			const forms = document.querySelectorAll('form[id^="addToCartForm"]');
 
 			forms.forEach(form => {
-				form.addEventListener('submit', function (event) {
+				form.addEventListener('submit', async function (event) {
 					event.preventDefault(); // Prevent form from submitting the traditional way
 
 					const productId = this.getAttribute('data-product-id');
-					const quantity = this.getAttribute('data-quantity');
+					const quantity = this.getAttribute('data-quantity') || 1;
+					try {
+						// Disable the submit button to prevent double submission
+						const submitButton = this.querySelector('button[type="submit"]');
+						if (submitButton) {
+							submitButton.disabled = true;
+						}
+						// Call the addToCart function to handle the logic
+						await addToCart(productId, quantity);
 
-					// Call the addToCart function to handle the logic
-					addToCart(productId, quantity);
+						// Re-enable the submit button
+						if (submitButton) {
+							submitButton.disabled = false;
+						}
+					} catch (error) {
+						console.error('Form submission error:', error);
+						// Re-enable the submit button on error
+						const submitButton = this.querySelector('button[type="submit"]');
+						if (submitButton) {
+							submitButton.disabled = false;
+						}
+					}
+
 				});
 			});
 		});
 
-		function addToCart(productId, quantity) {
-			fetch('/addToCart', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ productId, quantity })
-			})
-				.then(response => {
-					if (!response.ok) {
-						throw new Error('Network response was not ok');
-					}
-					return response.json();
+		async function addToCart(productId, quantity) {
+			try {
+				const response = await fetch('/addToCart', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ productId, quantity: parseInt(quantity) }),
+
+					redirect: 'follow'
 				})
-				.then(data => {
-					if (data.success) {
-						Swal.fire({
-							icon: 'success',
-							title: 'Product added to cart',
-							text: 'Item successfully added to your cart!',
-							confirmButtonText: 'OK'
-						});
-					} else {
-						throw new Error(data.error || 'Failed to add to cart');
-					}
-				})
-				.catch(error => {
-					console.error('Error:', error);
-					Swal.fire({
-						icon: 'error',
-						title: 'Oops...',
-						text: error.message || 'An error occurred while adding to cart',
-						confirmButtonText: 'OK'
+				// If we got redirected to login page
+				if (response.url.includes('/login')) {
+					// Redirect to login page
+					window.location.href = '/login';
+					return;
+				}
+
+				const data = await response.json()
+				if (data.redirect) {
+					// If server indicates redirect is needed, redirect to login
+					window.location.href = data.redirect;
+					return;
+				}
+				if (!response.ok) {
+					throw new Error(data.error || 'Failed to add to cart');
+				}
+
+				if (data.success) {
+					await Swal.fire({
+						icon: 'success',
+						title: 'Product added to cart',
+						text: 'Item successfully added to your cart!',
+						confirmButtonText: 'OK',
+						showCancelButton: true,
+						cancelButtonText: 'Continue Shopping',
+						confirmButtonText: 'View Cart'
 					});
-				});
+
+					// Update cart count and subtotal if available
+					//updateCartUI(data.cart);
+
+					// If user clicks "View Cart", redirect to cart page
+					if (result.isConfirmed) {
+						window.location.href = '/cart';
+					}
+				} else {
+					console.log('error while adding to cart', data.error)
+					throw new Error(data.error || 'Failed to add to cart');
+				}
+			} catch (error) {
+				console.error('Add to cart error:', error);
+				// If not logged in, redirect to login page
+				if (error.message && error.message.includes('<!DOCTYPE html>')) {
+					window.location.href = '/login';
+					return;
+				}
+				await Swal.fire({
+					icon: 'error',
+					title: 'Unable to add to cart',
+					text: 'Please log in to add items to your cart',
+					confirmButtonText: 'Go to Login',
+					showCancelButton: true,
+					cancelButtonText: 'Stay Here'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						window.location.href = '/login';
+					}
+				})
+			}
 		}
 
 
 	</script>
-	<!--<script>
-		function toggleWishlist(event, productId, isInWishlist) {
-			event.preventDefault();
 
-			if (isInWishlist) {
-				// If it's in wishlist, show confirmation before removing
-				Swal.fire({
-					title: 'Are you sure?',
-					text: 'Do you want to remove this product from your wishlist?',
-					icon: 'warning',
-					showCancelButton: true,
-					confirmButtonColor: '#3085d6',
-					cancelButtonColor: '#d33',
-					confirmButtonText: 'Yes, remove it!',
-					cancelButtonText: 'Cancel'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						handleWishlistAction(productId, false);
-					}
-				});
-			} else {
-				// If it's not in wishlist, add directly
-				handleWishlistAction(productId, true);
-			}
-			return false;
-		}
-
-		function handleWishlistAction(productId, isAdding) {
-			const url = isAdding ? `/addToWishlist/${productId}` : `/removeFromWishlist/${productId}`;
-			const button = document.querySelector(`button[onclick*="${productId}"]`);
-
-			fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						// Toggle the wishlist state visually
-						button.classList.toggle('in-wishlist');
-						button.classList.add('animate');
-
-						// Update the onclick handler with new state
-						const newState = !isAdding;
-						button.setAttribute('onclick', `toggleWishlist(event, '${productId}', ${newState})`);
-
-						// Remove animation class after animation completes
-						setTimeout(() => {
-							button.classList.remove('animate');
-						}, 300);
-
-						// Show success message
-						Swal.fire({
-							icon: 'success',
-							title: isAdding ? 'Added to Wishlist' : 'Removed from Wishlist',
-							text: data.message,
-							confirmButtonText: 'OK'
-						});
-					} else {
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: data.message || `Failed to ${isAdding ? 'add to' : 'remove from'} wishlist`,
-							confirmButtonText: 'OK'
-						});
-					}
-				})
-				.catch(error => {
-					console.error('Error:', error);
-					Swal.fire({
-						icon: 'error',
-						title: 'Oops...',
-						text: `An error occurred while ${isAdding ? 'adding to' : 'removing from'} wishlist`,
-						confirmButtonText: 'OK'
-					});
-				});
-		}
-	</script>-->
 	<script>
 		function toggleWishlist(event, productId) {
 			event.preventDefault();
-
 			const button = event.currentTarget;
-
+			const outlineIcon = button.querySelector('.wishlist-icon-outline');
+			const filledIcon = button.querySelector('.wishlist-icon-filled');
 			fetch(`/toggleWishlist/${productId}`, {
 				method: 'POST',
 				headers: {
@@ -675,8 +388,15 @@
 			})
 				.then(response => response.json())
 				.then(data => {
+					if (data.redirect) {
+						// If server indicates redirect is needed, redirect to login
+						window.location.href = data.redirect;
+						return;
+					}
 					if (data.success) {
-						// Toggle the wishlist state visually
+						// Toggle visibility of icons
+						outlineIcon.classList.toggle('d-none');
+						filledIcon.classList.toggle('d-none');
 						button.classList.toggle('in-wishlist');
 						button.classList.add('animate');
 
@@ -685,21 +405,13 @@
 							button.classList.remove('animate');
 						}, 300);
 
-						// Show success message
-						Swal.fire({
-							icon: 'success',
-							title: data.action === 'added' ? 'Added to Wishlist' : 'Removed from Wishlist',
-							text: data.message,
-							confirmButtonText: 'OK'
-						});
-					} else {
-						Swal.fire({
-							icon: 'error',
-							title: 'Error',
-							text: data.message || 'Failed to update wishlist',
-							confirmButtonText: 'OK'
-						});
+					
+						// Update the wishlist count in header
+						updateWishlistCount(data.wishlistCount);
+
+						
 					}
+					
 				})
 				.catch(error => {
 					console.error('Error:', error);
@@ -711,6 +423,20 @@
 					});
 				});
 			return false;
+		}
+
+		// function to update the wishlist count in header
+		function updateWishlistCount(count) {
+			const wishlistCountElement = document.getElementById('wishlist-count');
+			if (wishlistCountElement) {
+				wishlistCountElement.textContent = count;
+
+				// Add animation to highlight the count change
+				wishlistCountElement.classList.add('count-updated');
+				setTimeout(() => {
+					wishlistCountElement.classList.remove('count-updated');
+				}, 300);
+			}
 		}
 	</script>
 	<!----------------------------add to cart end-------------------------->

@@ -142,50 +142,75 @@ async function handleLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    const password = document.getElementById('password').value;
 
-            try {
-                const response = await fetch('/admin/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+    // Basic validation
+    if (!email || !password) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please fill in all fields',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
 
-                const data = await response.json();
+    try {
+        const response = await fetch('/admin/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password }),
+            // Include credentials to ensure session cookie is sent
+            credentials: 'same-origin'
+        });
 
-                if (data.success) {
-                    // Show success message
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                    // Redirect to dashboard
-                    window.location.href = data.redirectUrl;
-                } else {
-                    // Show error message
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message,
-                        confirmButtonText: 'Try Again'
-                    });
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong! Please try again later.',
-                    confirmButtonText: 'OK'
-                });
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Login failed');
+            }
+        } else {
+            // If response is a redirect
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            // If response is the login page with error
+            if (response.ok) {
+                const html = await response.text();
+                // Update the page content if needed
+                document.documentElement.innerHTML = html;
+                return;
             }
         }
+
+        // If we reach here, show success message and redirect
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Login successful',
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = '/admin/dashboard';
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: error.message || 'Invalid credentials. Please try again.',
+            confirmButtonText: 'OK'
+        });
+    }
+}
 
         function togglePassword() {
             const passwordInput = document.getElementById("password");

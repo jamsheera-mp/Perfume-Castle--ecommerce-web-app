@@ -172,7 +172,7 @@ const getProductList = async (req, res) => {
             
         };
 
-        res.render('user/productListing', responseData);
+        res.render('user/shop', responseData);
 
     } catch (error) {
         console.error('Error fetching products:', error);

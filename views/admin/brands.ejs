@@ -9,7 +9,7 @@
                     <h2 class="content-title card-title">Brand</h2>
                     <p>Add, edit or delete a brand</p>
                 </div>
-                
+
             </div>
             <div class="card">
                 <div class="card-body">
@@ -53,7 +53,7 @@
                                             <th>Image</th>
                                             <th>Status</th>
 
-                                            <th class="text-end">Action</th>
+                                            <th >Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -80,18 +80,18 @@
                                                     </td>
                                                     <td>
                                                         <% if(brand.isBlocked===true) { %>
-                                                            Blocked
+                                                            <span class="badge rounded-pill bg-danger">Blocked</span>
                                                             <% }else{ %>
-                                                                Active
+                                                                <span class="badge rounded-pill bg-success">Active</span>
                                                                 <% } %>
                                                     </td>
-                                                    <td class="text-end">
+                                                    <td >
                                                         <div class="dropdown">
                                                             <a href="#" data-bs-toggle="dropdown"
                                                                 class="btn btn-light rounded btn-sm font-sm"> <i
                                                                     class="material-icons md-more_horiz"></i> </a>
                                                             <div class="dropdown-menu">
-                                                                <a class="dropdown-item" href="#">View detail</a>
+                                                              
                                                                 <% if(brand.isBlocked===false){ %>
                                                                     <!-- Block button -->
                                                                     <button
@@ -155,213 +155,219 @@
 
 
         <script>
-           document.addEventListener('DOMContentLoaded', () => {
-    // Add brand
-    const addBrandForm = document.getElementById('addBrandForm');
+            document.addEventListener('DOMContentLoaded', () => {
+                // Add brand
+                const addBrandForm = document.getElementById('addBrandForm');
 
-    if (addBrandForm) {
-        addBrandForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+                if (addBrandForm) {
+                    addBrandForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
 
-            // Call validateForm before proceeding
-            if (!validateForm()) {
-                return; // If validation fails, stop form submission
-            }
+                        // Call validateForm before proceeding
+                        if (validateForm()) {
+                            const formData = new FormData(addBrandForm);
 
-            const formData = new FormData(addBrandForm);
+                            try {
+                                const response = await fetch('/admin/addBrand', {
+                                    method: 'POST',
+                                    body: formData
+                                });
 
-            try {
-                const response = await fetch('/admin/addBrand', {
-                    method: 'POST',
-                    body: formData
+                                const result = await response.json();
+                                if (result.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Brand Added!',
+                                        text: 'Brand added successfully.',
+                                        confirmButtonText: 'OK',
+                                    }).then(() => {
+                                        window.location.reload(); // Reload the page to reflect the changes
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: result.message,
+                                        confirmButtonText: 'OK',
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('Error adding brand:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error adding brand, please try again.',
+                                    confirmButtonText: 'OK',
+                                });
+                            }
+                        }else{
+                            Swal.fire({
+                                icon: 'error',
+                              
+                                text: 'Please fill in all required fields.',
+                            })
+                        }
+
+
+                    });
+                }
+
+                // Delete brand
+                document.querySelectorAll('.delete-brand').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const brandId = e.target.getAttribute('data-id');
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "Do you really want to delete this brand?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel',
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                try {
+                                    const response = await fetch(`/admin/deleteBrand/${brandId}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    });
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Deleted!',
+                                            text: 'Brand deleted successfully.',
+                                            confirmButtonText: 'OK',
+                                        }).then(() => {
+                                            window.location.reload(); // Reload the page to reflect the changes
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: result.message,
+                                            confirmButtonText: 'OK',
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error deleting brand:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Error deleting brand, please try again.',
+                                        confirmButtonText: 'OK',
+                                    });
+                                }
+                            }
+                        });
+                    });
                 });
 
-                const result = await response.json();
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Brand Added!',
-                        text: 'Brand added successfully.',
-                        confirmButtonText: 'OK',
-                    }).then(() => {
-                        window.location.reload(); // Reload the page to reflect the changes
+                // Block brand
+                document.querySelectorAll('.block-brand').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const brandId = e.target.getAttribute('data-id');
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "Do you really want to block this brand?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, block it!',
+                            cancelButtonText: 'Cancel',
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                try {
+                                    const response = await fetch(`/admin/blockBrand/${brandId}`, {
+                                        method: 'PATCH',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    });
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Blocked!',
+                                            text: 'Brand blocked successfully.',
+                                            confirmButtonText: 'OK',
+                                        }).then(() => {
+                                            window.location.reload(); // Reload the page to reflect the changes
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: result.message,
+                                            confirmButtonText: 'OK',
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error blocking brand:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Error blocking brand, please try again.',
+                                        confirmButtonText: 'OK',
+                                    });
+                                }
+                            }
+                        });
                     });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message,
-                        confirmButtonText: 'OK',
-                    });
-                }
-            } catch (error) {
-                console.error('Error adding brand:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error adding brand, please try again.',
-                    confirmButtonText: 'OK',
                 });
-            }
-        });
-    }
 
-    // Delete brand
-    document.querySelectorAll('.delete-brand').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const brandId = e.target.getAttribute('data-id');
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to delete this brand?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/deleteBrand/${brandId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
+                // Unblock brand
+                document.querySelectorAll('.unblock-brand').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const brandId = e.target.getAttribute('data-id');
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "Do you really want to unblock this brand?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, unblock it!',
+                            cancelButtonText: 'Cancel',
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                try {
+                                    const response = await fetch(`/admin/unBlockBrand/${brandId}`, {
+                                        method: 'PATCH',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    });
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Unblocked!',
+                                            text: 'Brand unblocked successfully.',
+                                            confirmButtonText: 'OK',
+                                        }).then(() => {
+                                            window.location.reload(); // Reload the page to reflect the changes
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: result.message,
+                                            confirmButtonText: 'OK',
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error('Error unblocking brand:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Error unblocking brand, please try again.',
+                                        confirmButtonText: 'OK',
+                                    });
+                                }
                             }
                         });
-                        const result = await response.json();
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Deleted!',
-                                text: 'Brand deleted successfully.',
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                window.location.reload(); // Reload the page to reflect the changes
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: result.message,
-                                confirmButtonText: 'OK',
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error deleting brand:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Error deleting brand, please try again.',
-                            confirmButtonText: 'OK',
-                        });
-                    }
-                }
+                    });
+                });
             });
-        });
-    });
-
-    // Block brand
-    document.querySelectorAll('.block-brand').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const brandId = e.target.getAttribute('data-id');
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to block this brand?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, block it!',
-                cancelButtonText: 'Cancel',
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/blockBrand/${brandId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Blocked!',
-                                text: 'Brand blocked successfully.',
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                window.location.reload(); // Reload the page to reflect the changes
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: result.message,
-                                confirmButtonText: 'OK',
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error blocking brand:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Error blocking brand, please try again.',
-                            confirmButtonText: 'OK',
-                        });
-                    }
-                }
-            });
-        });
-    });
-
-    // Unblock brand
-    document.querySelectorAll('.unblock-brand').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const brandId = e.target.getAttribute('data-id');
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to unblock this brand?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, unblock it!',
-                cancelButtonText: 'Cancel',
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/unBlockBrand/${brandId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Unblocked!',
-                                text: 'Brand unblocked successfully.',
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                window.location.reload(); // Reload the page to reflect the changes
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: result.message,
-                                confirmButtonText: 'OK',
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error unblocking brand:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Error unblocking brand, please try again.',
-                            confirmButtonText: 'OK',
-                        });
-                    }
-                }
-            });
-        });
-    });
-});
 
 
             // The validateForm function checks the form inputs before submission
@@ -371,7 +377,8 @@
                 // Validate Brand Name
                 const nameInput = document.getElementById('brandName');
                 const nameError = document.getElementById('name-error');
-                const nameRegex = /^[A-Za-z]{2,}$/;
+                const nameRegex = /^[A-Za-z]{2,}(\s[A-Za-z]+)*$/;
+
 
                 if (!nameInput.value.trim()) {
                     showError(nameError, 'Brand name is required');

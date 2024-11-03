@@ -6,31 +6,13 @@
         <section class="content-main">
             <div class="content-header">
                 <h2 class="content-title">Users list</h2>
-                <div>
-                    <a href="#" class="btn btn-primary"><i class="material-icons md-plus"></i> Create new</a>
-                </div>
+              
             </div>
             <div class="card mb-4">
                 <header class="card-header">
                     <div class="row gx-3">
-                        <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control">
-                        </div>
-                        <!-- <div class="col-lg-2 col-md-3 col-6">
-                            <select class="form-select">
-                                <option>Status</option>
-                                <option>Active</option>
-                                <option>Disabled</option>
-                                <option>Show all</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-md-3 col-6">
-                            <select class="form-select">
-                                <option>Show 20</option>
-                                <option>Show 30</option>
-                                <option>Show 40</option>
-                            </select>
-                        </div> -->
+                       
+                        
                     </div>
                 </header> <!-- card-header end// -->
                 <div class="card-body">
@@ -40,8 +22,9 @@
                                 <tr>
                                     <th scope="col"><h5>Name</h5></th>
                                     <th scope="col"><h5>Email</h5></th>
+                                    <th scope="col">Phone</th>
                                     <th scope="col"><h5>Status</h5></th>
-                                    <th scope="col"><h5>Action</h5> </th>
+                                    <th scope="col" ><h5>Action</h5> </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,6 +39,9 @@
                                                 <%= data[i].email %>
                                             </td>
                                             <td>
+                                                <%= data[i].phone %>
+                                            </td>
+                                            <td>
                                                 <% if(data[i].isBlocked === true){ %>
                                                     <span class="badge rounded-pill bg-danger">Blocked</span>
                                                     <% }else{ %>
@@ -63,26 +49,17 @@
                                                         <% } %>
                                                 </td>
 
-                                            <td class="text-end">
-                                                <div class="dropdown">
-                                                    <a href="#" data-bs-toggle="dropdown"
-                                                        class="btn btn-light rounded btn-sm font-sm"> <i
-                                                            class="material-icons md-more_horiz"></i> </a>
-                                                    <div class="dropdown-menu">
-                                                        <% if(data[i].isBlocked===false){ %>
-                                                            <a class="dropdown-item"
-                                                                href="/admin/blockUser?id=<%= data[i]._id %>">Block</a>
-                                                            <% }else{ %>
-                                                                <a class="dropdown-item"
-                                                                    href="/admin/unBlockUser?id=<%= data[i]._id %>">Unblock</a>
-                                                                <% } %>
-                                                                    <a class="dropdown-item" href="#">View detail</a>
-
-                                                                    <a class="dropdown-item text-danger"
-                                                                        href="#">Delete</a>
-                                                    </div>
-                                                </div> <!-- dropdown //end -->
-                                            </td>
+                                                <td >
+                                                    <% if(data[i].isBlocked===false){ %>
+                                                        <a href="/admin/blockUser?id=<%= data[i]._id %>" class="btn btn-sm btn-danger me-2 d-inline-flex align-items-center">
+                                                            <i class="material-icons md-block me-1"></i> Block
+                                                        </a>
+                                                    <% } else { %>
+                                                        <a href="/admin/unBlockUser?id=<%= data[i]._id %>" class="btn btn-sm btn-success me-2 d-inline-flex align-items-center">
+                                                            <i class="material-icons md-check_circle me-1"></i> Unblock
+                                                        </a>
+                                                    <% } %>
+                                                </td>
                                         </tr>
                                         <% } %>
                                             <% }else{ %>

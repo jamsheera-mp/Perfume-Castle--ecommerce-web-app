@@ -93,6 +93,7 @@ const salesReportController = {
             weekStart.setHours(0, 0, 0, 0);
 
             const weekEnd = new Date(weekStart);
+            
             weekEnd.setDate(weekStart.getDate() + 6);
             weekEnd.setHours(23, 59, 59, 999);
 

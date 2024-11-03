@@ -1,251 +1,358 @@
 <%- include('../partials/user/header.ejs') %>
 
   <style>
+    .form-control.error {
+      border: 2px solid #dc3545;
+      background-color: #fff;
+    }
+
+    .form-control.success {
+      border: 2px solid #198754;
+      background-color: #fff;
+    }
+
     .error-message {
-      color: red;
-      font-size: 0.75rem;
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
       display: none;
+      transition: all 0.3s ease;
+
     }
 
     .error-message.show {
       display: block;
     }
+
+    .form-control:focus {
+      box-shadow: none;
+      border-width: 2px;
+    }
+
+    .form-control.error:focus {
+      box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+
+    .form-control.success:focus {
+      box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25)
+    }
   </style>
   <!-- SIGN UP FORM SECTION -->
-  <div class="container my-5 py-5">
+  <div class="container my-5">
     <div class="row justify-content-center">
-      <div class="col-sm-12 col-md-6">
+      <div class="col-md-6 col-lg-5">
         <div class="card p-4">
           <h3 class="text-center mb-4">Sign Up</h3>
-          <form id="reg-form" action="/register" method="POST">
-            <div class="form-group mb-4">
+          <form id="reg-form">
+            <div class="mb-3">
               <input type="text" class="form-control" id="name" placeholder="Enter your name" name="name" />
-              <div id="error1" class="error-message "></div>
+              <div id="error1" class="error-message"></div>
             </div>
-            <div class="form-group mb-4">
+            <div class="mb-3">
               <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" />
-
               <div id="error2" class="error-message"></div>
             </div>
-            <div class="form-group mb-4 position-relative">
+            <div class="mb-3 position-relative">
               <input type="password" class="form-control" id="password" placeholder="Enter your password"
                 name="password" />
-                <span class="position-absolute top-50 end-0 translate-middle-y me-3"style="cursor:pointer;" onclick="togglePassword()">
-                  <i class="bi bi-eye-slash fs-5" id="toggleIcon"></i>
+              <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
+                onclick="togglePassword('password', 'toggleIcon')">
+                <i class="bi bi-eye-slash fs-5" id="toggleIcon"></i>
               </span>
-
               <div id="error3" class="error-message"></div>
             </div>
-            <div class="form-group mb-4 position-relative">
+            <div class="mb-3 position-relative">
               <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password"
                 name="confirmPassword" />
-                <span class="position-absolute top-50 end-0 translate-middle-y me-3"style="cursor:pointer;" onclick="togglePassword()">
-                  <i class="bi bi-eye-slash fs-5" id="toggleConfirmIcon"></i>
+              <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor:pointer;"
+                onclick="togglePassword('confirmPassword', 'toggleConfirmIcon')">
+                <i class="bi bi-eye-slash fs-5" id="toggleConfirmIcon"></i>
               </span>
-
               <div id="error4" class="error-message"></div>
             </div>
-            <input type="text" name="referredBy" placeholder="Referral Code (Optional)">
-            <% if(locals.message && message.length>0){  %> 
-              <div class="alert alert-secondary text-center">
-                  <%=message %>
-              </div>
-         <%}  %> 
-            <div class="text-center d-grid gap-2 mb-4">
-              <button type="submit" class="btn btn-secondary">Sign Up</button>
+            <div class="mb-3">
+              <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" name="phone" />
+              <div id="error5" class="error-message"></div>
             </div>
-          </form>
+            <div class="mb-3">
+              <input type="text" class="form-control" id="referredBy" placeholder="Referral Code (Optional)"
+                name="referredBy" />
+              <div id="error6" class="error-message"></div>
+            </div>
 
-          <!-- Social Sign Up Buttons -->
-          <div class="text-center">
+            <% if(locals.message && message.length> 0) { %>
+              <div class="alert alert-secondary text-center">
+                <%= message %>
+              </div>
+              <% } %>
+
+                <div class="text-center d-grid">
+                  <button type="submit" class="btn btn-secondary">Sign Up</button>
+                </div>
+          </form>
+           <!-- Social Sign Up Buttons -->
+           <div class="text-center">
             <p class="mb-3">or sign up with</p>
             <div class="d-grid gap-2">
-              <a href="/auth/google" class="btn btn-outline-danger btn-block mb-2">
+              <a href="/auth/google" class="btn btn-outline-danger  mb-2">
                 <i class="fa fa-google"></i> Sign Up with Google
               </a>
-              <a href="/auth/facebook" class="btn btn-outline-primary btn-block mb-2">
-                <i class="fa fa-facebook"></i> Sign Up with Facebook
-              </a>
+              
             </div>
           </div>
 
+
           <div class="text-center mt-4">
-            <p>
-              Already have an account?
-              <a href="/login" class="text-decoration-none">Log In</a>
-            </p>
+            <p>Already have an account? <a href="/login" class="text-decoration-none">Log In</a></p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+
+
   <script>
+
     const nameId = document.getElementById('name');
     const emailId = document.getElementById('email');
     const passwordId = document.getElementById('password');
     const confirmPasswordId = document.getElementById('confirmPassword');
+    const phoneId = document.getElementById('phone')
+    const referredById = document.getElementById('referredBy')
     const error1 = document.getElementById('error1');
     const error2 = document.getElementById('error2');
     const error3 = document.getElementById('error3');
     const error4 = document.getElementById('error4');
-    const registerForm = document.getElementById('reg-form')
+    const error5 = document.getElementById('error5');
+    const error6 = document.getElementById('error6');
 
 
-    function nameValidateChecking(e) {
-      const name = document.querySelector('[name="name"]').value;
+
+    function nameValidateChecking() {
+      const name = nameId.value;
       const namePattern = /^[A-Za-z\s]{2,20}$/;
+      nameId.classList.remove('error', 'success')
+
       if (name === "") {
-        
+        nameId.classList.add('error')
         error1.innerHTML = "Name is required"
         error1.classList.add('show');
-        
+        return false
       } else if (!namePattern.test(name)) {
-        
-       error1.innerHTML="Name must be between 2 and 20 characters and contain only letters"
-       error1.classList.add('show');
+        nameId.classList.add('error')
+        error1.innerHTML = "Name must be between 2 and 20 characters and contain only letters"
+        error1.classList.add('show');
+        return false
       } else {
+        nameId.classList.add('success')
         error1.classList.remove('show');
+        return true
 
-        error1.innerHTML = ""
       }
     }
 
-    function emailValidateChecking(e) {
+    function emailValidateChecking() {
       const emailVal = emailId.value
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      emailId.classList.remove('error', 'success')
       if (emailVal.trim() === "") {
+        emailId.classList.add('error')
         error2.innerHTML = "Email is required"
         error2.classList.add('show');
+        return false
       } else if (!emailPattern.test(emailVal)) {
-       
+        emailId.classList.add('error')
         error2.innerHTML = "Invalid email address"
         error2.classList.add('show');
+        return false
       } else {
+        emailId.classList.add('success')
         error2.classList.remove('show');
-
-        error2.innerHTML = ""
-
+        return true
       }
     }
-    function passwordValidateChecking(e) {
+
+    function passwordValidateChecking() {
       const passwordVal = passwordId.value.trim()
       const confirmPasswordVal = confirmPasswordId.value.trim();
       const passwordPattern = /^.{4,20}$/;
+      let isValid = true
+
+      passwordId.classList.remove('error', 'success')
+      confirmPasswordId.classList.remove('error', 'success')
+
       //const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (passwordVal === "") {
+        passwordId.classList.add('error')
         error3.innerHTML = "Password is required"
         error3.classList.add('show');
+        isValid = false
       } else if (!passwordPattern.test(passwordVal)) {
-        
+        passwordId.classList.add('error')
         error3.innerHTML = "Password  must be between 4 and 20 characters long"
         error3.classList.add('show');
+        isValid = false
         //error3.innerHTML = "Password should be at least 8 characters long and should contain at least  one uppercase letter, one lowercase letter, one number and one special character"
       } else {
+        passwordId.classList.add('success')
         error3.classList.remove('show');
-
-        error3.innerHTML = ""
-
+        isValid = true
       }
-      if (passwordVal !== confirmPasswordVal) {
-       
+
+      if (confirmPasswordVal === "") {
+        confirmPasswordId.classList.add('error')
+        error4.innerHTML = "Confirm Password is required"
+        error4.classList.add('show')
+        isValid = false
+      }
+      else if (passwordVal !== confirmPasswordVal) {
+        confirmPasswordId.classList.add('error')
         error4.innerHTML = "Passwords do not match"
         error4.classList.add('show');
-      } else {
+        isValid = false
+      } else if (passwordVal === confirmPasswordVal && passwordPattern.test(passwordVal)) {
+        confirmPasswordId.classList.add('success')
         error4.classList.remove('show');
+      }
+      return isValid
+    }
 
-        error4.innerHTML = ""
+    function phoneValidateChecking() {
+      const phoneVal = phoneId.value.trim()
+      const phonePattern = /^\d{10}$/;
+      phoneId.classList.remove('error', 'success')
+
+      if (phoneVal === '') {
+        phoneId.classList.add('error')
+        error5.innerHTML = "Phone number is required"
+        error5.classList.add('show')
+        return false
+      } else if (!phonePattern.test(phoneVal)) {
+        phoneId.classList.add('error')
+        error5.innerHTML = "Please enter a valid 10 digit phone number"
+        error5.classList.add('show')
+        return false
+      } else {
+        phoneId.classList.add('success')
+        error5.classList.remove('show')
+        return true
       }
     }
 
-
-
+    //Add event listeners for  form submission
 
     document.addEventListener("DOMContentLoaded", function () {
-      const registerForm = document.getElementById('reg-form');
+      //Input event listeners
+      nameId.addEventListener('input', nameValidateChecking)
+      emailId.addEventListener('input', emailValidateChecking)
+      passwordId.addEventListener('input', passwordValidateChecking)
+
+      confirmPasswordId.addEventListener('input', passwordValidateChecking)
+      phoneId.addEventListener('input', phoneValidateChecking)
+
+      //Blur event listeners for validation when leaving fields
+      nameId.addEventListener('blur', nameValidateChecking)
+      emailId.addEventListener('blur', emailValidateChecking)
+      passwordId.addEventListener('blur', passwordValidateChecking)
+      confirmPasswordId.addEventListener('blur', passwordValidateChecking)
+      phoneId.addEventListener('blur', phoneValidateChecking)
+
+      const registerForm =  document.getElementById('reg-form')
+
+
       registerForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        if (clientSideValidation()) {
+        const isNameValid = nameValidateChecking();
+        const isEmailValid = emailValidateChecking();
+        const isPasswordValid = passwordValidateChecking();
+        const isPhoneValid = phoneValidateChecking();
+
+        if (isNameValid && isEmailValid && isPasswordValid && isPhoneValid) {
           const formData = new FormData(registerForm);
+
+          // Log the data being sent
+          const data = Object.fromEntries(formData);
+          console.log('Sending data:', data);
+
           fetch('/register', {
             method: 'POST',
-            body: new URLSearchParams(formData).toString(),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams(formData).toString()
           })
-            .then(response => response.json())
+            .then(async response => {
+              const data = await response.json();
+              if (!response.ok) {
+                if (response.status === 400) {
+                  throw new Error(data.message || 'Invalid Referral Code');
+                } else {
+                  throw new Error('An error occurred during registration. Please try again.');
+                }
+              }
+              return data;
+            })
             .then(data => {
-              if (data.errors) {
-                displayErrors(data.errors);
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  text: 'Redirecting to OTP verification page...',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.href = data.redirectUrl;
+                });
               } else {
-                window.location.href = data.redirectUrl;
+                console.error('Registration error:', data.errors);
+                Swal.fire({
+                  icon: 'error',
+                  text: data.errors
+                });
               }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+              console.error('Registration error:', error);
+              Swal.fire({
+                icon: 'error',
+                text: error.message || 'An error occurred during registration. Please try again.'
+              });
+            });
         }
       });
-    });
 
-    function clientSideValidation() {
-      nameValidateChecking();
-      emailValidateChecking();
-      passwordValidateChecking();
-      return document.querySelectorAll('.error-message.show').length === 0;
+    })
+      //toggle password eye
+      function togglePassword() {
+        var passwordInput = document.getElementById("password");
+        var confirmPasswordInput = document.getElementById("confirmPassword");
+        var passwordEye = document.getElementById("toggleIcon");
+        var confirmPasswordEye = document.getElementById("toggleConfirmIcon");
 
-    }
+        // Toggle password input
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          passwordEye.classList.remove("bi-eye-slash");
+          passwordEye.classList.add("bi-eye");
+        } else {
+          passwordInput.type = "password";
+          passwordEye.classList.remove("bi-eye");
+          passwordEye.classList.add("bi-eye-slash");
+        }
 
-    function displayErrors(errors) {
-      errors.forEach(error => {
-        showError(`error${error.param}`, error.msg);
-      });
-    }
+        // Toggle confirm password input
+        if (confirmPasswordInput.type === "password") {
+          confirmPasswordInput.type = "text";
+          confirmPasswordEye.classList.remove("bi-eye-slash");
+          confirmPasswordEye.classList.add("bi-eye");
+        } else {
+          confirmPasswordInput.type = "password";
+          confirmPasswordEye.classList.remove("bi-eye");
+          confirmPasswordEye.classList.add("bi-eye-slash");
+        }
 
-    function showError(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.innerHTML = message;
-      errorElement.classList.add('show');
-    }
-
-    function hideError(elementId) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.innerHTML = "";
-      errorElement.classList.remove('show');
-    }
-
-
-
-//toggle password eye
-function togglePassword() {
-    var passwordInput = document.getElementById("password");
-    var confirmPasswordInput = document.getElementById("confirmPassword");
-    var passwordEye = document.getElementById("toggleIcon");
-    var confirmPasswordEye = document.getElementById("toggleConfirmIcon");
-
-    // Toggle password input
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        passwordEye.classList.remove("bi-eye-slash");
-        passwordEye.classList.add("bi-eye");
-    } else {
-        passwordInput.type = "password";
-        passwordEye.classList.remove("bi-eye");
-        passwordEye.classList.add("bi-eye-slash");
-    }
-
-    // Toggle confirm password input
-    if (confirmPasswordInput.type === "password") {
-        confirmPasswordInput.type = "text";
-        confirmPasswordEye.classList.remove("bi-eye-slash");
-        confirmPasswordEye.classList.add("bi-eye");
-    } else {
-        confirmPasswordInput.type = "password";
-        confirmPasswordEye.classList.remove("bi-eye");
-        confirmPasswordEye.classList.add("bi-eye-slash");
-    }
-}
-
+      }
   </script>
 
   <%- include('../partials/user/footer.ejs') %>

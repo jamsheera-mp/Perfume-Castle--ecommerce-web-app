@@ -7,7 +7,22 @@ const Cart = require('../../models/cartSchema');
 
 const addToCart = async (req, res) => {
   try {
+   
+    // If no user is logged in, redirect to login page
+    if (!req.session.user) {
+      return res.status(401).json({
+          success: false,
+          redirect: '/login'  
+      });
+  }
     const { productId, quantity } = req.body;
+    // Validate input
+    if (!productId || !quantity) {
+      return res.status(400).json({
+        success: false,
+        error: 'Product ID and quantity are required'
+      });
+    }
     const userId = req.session.user;
     const requestedQuantity = parseInt(quantity);
 

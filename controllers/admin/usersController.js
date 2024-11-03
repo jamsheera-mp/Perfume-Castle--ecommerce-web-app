@@ -3,44 +3,21 @@ const User = require('../../models/userSchema')
 
 const userInfo = async (req,res)=>{
     try {
-        let search = ""
-        if(req.query.search){
-            search = req.query.search
-        }
-        let page =1
-        if(req.query.page){
-            page = req.query.page  
-        }
+       let page = req.query.page || 1
         const limit = 10
-        const userData = await User.find({
-            isAdmin:false,
-            $or: [
-                
-                {name: { $regex: ".*"+search+".*", $options: 'i' } },
-                {email: { $regex: ".*"+search+".*", $options: 'i' } },
-                
-                ],   
-        })
-        .limit(limit*1)
+        const userData = await User.find({isAdmin:false })
+        .limit(limit)
         .skip((page-1)*limit)
-        .exec()
-
-        const count = await User.find({
-            isAdmin:false,
-            $or: [
-                
-                {name: { $regex: ".*"+search+".*", $options: 'i' } },
-                {email: { $regex: ".*"+search+".*", $options: 'i' } },
-                
-                ],   
-        }).countDocuments()
+        .sort({createdAt:1})
+       
+        console.log('userdata:',userData)
+        const count =await User.countDocuments({isAdmin:false})
         const totalPages = Math.ceil(count / limit)
         
        res.render('admin/userList',{
         data: userData,
         currentPage: page,
          totalPages: totalPages,
-         search: search
          })
     } catch (error) {
         console.log(error);
@@ -66,6 +43,7 @@ const unBlockUser = async(req,res)=>{
         res.redirect('/admin/pageError')
     }
 }
+
 module.exports = {
     userInfo,
     blockUser,

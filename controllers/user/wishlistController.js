@@ -5,6 +5,13 @@ const Wishlist = require('../../models/wishlistSchema')
 
 const toggleWishlist = async(req,res)=>{
     try {
+        if (!req.session.user) {
+            // If no user is logged in, redirect to login page
+            return res.status(200).json({
+                success: false,
+                redirect: '/login' 
+            });
+        }
         const userId = req.session.user
         const productId = req.params.productId;
     
@@ -30,7 +37,9 @@ const toggleWishlist = async(req,res)=>{
             return res.status(200).json({
                 success: true, 
                 message: 'Product removed from wishlist',
-                action: 'removed'
+                action: 'removed',
+                isInWishlist:false,
+                wishlistCount: wishlist.products.length
             });
         } else {
             // Product doesn't exist in wishlist - add it
@@ -39,7 +48,9 @@ const toggleWishlist = async(req,res)=>{
             return res.status(200).json({
                 success: true, 
                 message: 'Product added to wishlist',
-                action: 'added'
+                action: 'added',
+                isInWishlist:true,
+                wishlistCount: wishlist.products.length
             });
         }
     } catch (error) {
@@ -54,7 +65,9 @@ const toggleWishlist = async(req,res)=>{
 
 const getWishlist = async (req, res) => {
     try {
+
         const userId = req.session.user;
+       
         const page = parseInt(req.query.page) || 1;
         const itemsPerPage = 12;
 
@@ -116,7 +129,7 @@ const removeFromWishlist = async(req,res)=>{
       wishlist.products.splice(productIndex, 1);
       await wishlist.save();
   
-      res.status(200).json({success:true, message: 'Product removed from wishlist' });
+      res.status(200).json({success:true, message: 'Product removed from wishlist',wishlistCount:wishlist.products.length });
     } catch (error) {
       console.log('An error occured while removing item from wishlist',error)
       res.status(500).json({success:false, message: 'Error removing product from wishlist', error: error.message });

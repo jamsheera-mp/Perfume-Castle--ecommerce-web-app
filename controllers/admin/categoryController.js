@@ -9,9 +9,9 @@ const categoryInfo = async (req,res)=>{
         const skip =(page-1)*limit
 
         const categoryData = await Category.find({})
-        .sort({createdAt:-1})
+       
         .skip(skip)
-        .limit(limit)
+        .limit(limit) .sort({createdAt:1})
 
         const totalCategories = await  Category.find({}).countDocuments()
         const totalPages = Math.ceil(totalCategories/limit)

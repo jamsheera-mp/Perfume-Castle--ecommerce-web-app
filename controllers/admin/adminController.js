@@ -1,11 +1,7 @@
 const User = require('../../models/userSchema')
 const Order = require('../../models/orderSchema')
-//const Product = require('../../models/productSchema')
-//const Brand = require('../../models/brandSchema')
-//const {validationResult} = require('express-validator')
-
 const bcrypt = require('bcryptjs')
-
+//const {subDays, subWeeks,subMonths ,subYears} = require('date-fns')
 
 
 const pageError = async (req, res) => {
@@ -22,11 +18,11 @@ const loadLogin = async (req, res) => {
         if (req.session.admin) {
             return res.redirect('/admin/dashboard')
         }
-        res.render('admin/login', { message: null })
+         res.render('admin/login', { message: null })
 
     } catch (error) {
-        onsole.error('Error in loadLogin:', error.message);
-        return res.status(500).json({ success: false, message: 'An error occurred while loading the login page' })
+        console.error('Error in loadLogin:', error.message);
+       
     }
 
 }
@@ -120,6 +116,8 @@ const logout = async (req, res) => {
         });
     }
 };
+
+
 
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -284,7 +282,7 @@ const loadDashboard = async (req, res) => {
         if (!req.session.admin) {
             return res.redirect('/admin/login');
         }
-
+        const admin = await User.findById(req.session.userId)
         // Fetch initial data for the dashboard
         const period = 'monthly'; // Default period
         const salesData = await fetchSalesData(period);
@@ -293,6 +291,8 @@ const loadDashboard = async (req, res) => {
         const topBrands = await fetchTopBrands(period);
 
         return res.render('admin/dashboard', {
+            admin,
+            email: req.session.email,
             salesData: JSON.stringify(salesData),
             topProducts: topProducts,
             topCategories: topCategories,
@@ -357,26 +357,7 @@ const updateTopBrands = async (req, res) => {
 
 
 
-//------------------------------------Load dashboard----------------------------------------
-const loadDashboard2 = async (req, res) => {
-    try {
-        if (!req) {
-            throw new Error('Request object is undefined');
-        }
 
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-
-        return res.render('admin/dashboard');
-    } catch (error) {
-        console.error('Error in loadDashboard:', error.message);
-        return res.status(500).json({
-            success: false,
-            message: 'An error occurred while loading the dashboard'
-        });
-    }
-};
 
 
 

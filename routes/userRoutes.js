@@ -11,13 +11,20 @@ const paymentController = require('../controllers/user/paymentController')
 const walletController = require('../controllers/user/walletController')
 const invoiceControlller = require('../controllers/user/invoiceController')
 const { calculateProductPrices } = require('../middlewares/priceCalculator');
+const {validateRegistration, handleValidationErrors} = require('../middlewares/registerValidation')
 const {userAuth} =  require('../middlewares/auth')
 
 
- 
 const passport =  require('passport')
 
-//const registerValidation = require('.././middlewares/user/authValidation')
+
+//google auth
+router.get('/auth/google',
+    passport.authenticate('google',{scope:['profile','email']}))
+router.get('/google/callback',passport.authenticate('google',{failureRedirect:'/register'}),(req,res )=>{
+    res.redirect('/')
+    })
+    
 
 
 //login mgmt
@@ -29,19 +36,12 @@ router.get('/verify-otp', userController.loadVerifyOtp);
 router.get('/logout',userController.logout)
 
 
-//google auth
-router.get('/auth/google',
-    passport.authenticate('google',{scope:['profile','email']}))
-router.get('/google/callback',passport.authenticate('google',{failureRedirect:'/register'}),(req,res )=>{
-    res.redirect('/')
-    })
-    
-router.post('/register',userController.register)
+router.post('/register',validateRegistration, handleValidationErrors,userController.register)
 router.post('/login',userController.login)
 router.post('/verify-otp',userController.verifyOtp)
 router.post('/resend-otp',userController.resendOtp)
 
-//password
+//password reset
 router.get('/forgotPassword',profileController.getForgotPassword)
 router.post('/passwordReset',profileController.passwordReset)
 router.get('/verify-otp-forPwd',profileController.getOtpPage)
@@ -65,9 +65,9 @@ router.post('/changePassword',userAuth,profileController.cahngePassword)
 
 
 //product mgmt
-router.get('/product',userAuth,calculateProductPrices ,productController.getProductList)
-router.get('/product/:id',userAuth,calculateProductPrices ,productController.getProductDetails)
-router.get('/search', userAuth,calculateProductPrices ,productController.searchProducts); //search
+router.get('/product',calculateProductPrices ,productController.getProductList)
+router.get('/product/:id',calculateProductPrices ,productController.getProductDetails)
+router.get('/search',calculateProductPrices ,productController.searchProducts); //search
 
 
 

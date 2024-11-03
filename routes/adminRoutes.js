@@ -21,9 +21,10 @@ router.get('/pageError',adminController.pageError)
 
 //login mgmt
 router.get('/login',adminController.loadLogin)
+router.post('/login',adminController.login)
 router.get('/dashboard',adminAuth,adminController.loadDashboard)
 router.get('/logout',adminAuth,adminController.logout)
-router.post('/login',adminController.login)
+
 
 
 
@@ -44,6 +45,7 @@ router.get('/dashboard/update-top-brands', adminAuth, adminController.updateTopB
 router.get('/users',adminAuth,usersController.userInfo)
 router.get('/blockUser',adminAuth,usersController.blockUser)
 router.get('/unBlockUser',adminAuth,usersController.unBlockUser)
+
 
 //category management
 router.get('/category',adminAuth,categoryController.categoryInfo)
@@ -68,11 +70,9 @@ router.delete('/deleteBrand/:id', adminAuth, brandController.deleteBrand);
 router.get('/addProducts',adminAuth,productController.productInfo)
 router.post('/addProducts',adminAuth,uploads.array('images',3),productController.addProducts)
 router.get('/products',adminAuth,productController.getAllProducts)
-router.get('/productsGrid',adminAuth,productController.getAllProductsGrid)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,uploads.array('images',3),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
-
 router.post('/deleteProduct/:id',adminAuth,productController.deleteProduct)
 router.post('/softDeleteProduct/:id',adminAuth,productController.softDeleteProduct)
 
@@ -86,8 +86,8 @@ router.post('/order/cancel/:orderId', adminAuth, orderController.cancelOrderAndU
 
 //coupon mgmt
 router.get('/coupons',adminAuth,couponController.getCouponPage)
-router.post('/createCoupons', couponController.createCoupon);
-router.post('/deleteCoupons/:id', couponController.deleteCoupon);
+router.post('/createCoupons', adminAuth,couponController.createCoupon);
+router.post('/deleteCoupons/:id',adminAuth, couponController.deleteCoupon);
 
 
 //offer route
@@ -104,7 +104,7 @@ router.get('/getCategories',adminAuth,offerController.getCategories)
 
 
 //salesReport mgmt
-router.get('/sales-report', salesReportController.getSalesReport);
-router.get('/download-report', salesReportController.downloadReport);
+router.get('/sales-report', adminAuth,salesReportController.getSalesReport);
+router.get('/download-report', adminAuth,salesReportController.downloadReport);
 
 module.exports =  router;

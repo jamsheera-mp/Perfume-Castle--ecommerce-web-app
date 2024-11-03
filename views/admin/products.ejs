@@ -8,14 +8,15 @@
                     <h2 class="content-title card-title">Products </h2>
                     <p>View Products</p>
                 </div>
-                <!-- <div>
-                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
-                </div> -->
+                <div>
+                    <a href="/admin/addProducts" class="btn btn-primary fw-bold">+ Add New Product</a>
+                </div> 
             </div>
             <div class="card mb-4">
                 <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
+                           
                             <!--<input type="text" placeholder="Search..." class="form-control">-->
                         </div>
                     </div>
@@ -43,16 +44,11 @@
                                     <th scope="col">
                                         <h5>Quantity</h5>
                                     </th>
-                                    <th scope="col">
-                                        <h5>Regular Price</h5>
-                                    </th>
-                                    <th scope="col">
-                                        <h5>Offer</h5>
-                                    </th>
+                                   
                                     <th scope="col">
                                         <h5>Sale Price</h5>
                                     </th>
-                                    <th class="text-end">
+                                    <th >
                                         <h5>Action</h5>
                                     </th>
                                 </tr>
@@ -83,28 +79,19 @@
                                             <td>
                                                 <%= products[i].quantity %>
                                             </td>
-                                            <td>
-                                                <%= products[i].regularPrice %>
-                                            </td>
+                                            
 
-                                            <td>
-                                                <% if(products[i].productOffer){ %>
-                                                    <%= products[i].productOffer %>
-                                                        <% }else{ %>
-                                                            0%
-                                                            <% } %>
-
-                                            </td>
+                                            
                                             <td>
                                                 <%= products[i].salePrice %>
                                             </td>
-                                            <td class="text-end">
+                                            <td>
                                                 <div class="dropdown">
                                                     <a href="#" data-bs-toggle="dropdown"
                                                         class="btn btn-light rounded btn-sm font-sm"> <i
                                                             class="material-icons md-more_horiz"></i> </a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#">View detail</a>
+                                                       
                                                         <a class="dropdown-item"
                                                             href="/admin/editProduct?id=<%= products[i]._id %>">Edit
                                                             Product</a>

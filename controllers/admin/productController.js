@@ -29,12 +29,13 @@ const addProducts = async (req, res) => {
     try {
         const products = req.body;
         console.log("Received products data:", products);
+        console.log('Received files:',req.files)
 
         // Input validation
         const validationErrors = [];
         
         // Required fields check
-        const requiredFields = ['productName', 'description', 'regularPrice', 'salePrice', 'quantity', 'ml', 'category'];
+        const requiredFields = ['productName', 'description',  'salePrice', 'quantity', 'ml', 'category'];
         for (const field of requiredFields) {
             if (!products[field]) {
                 validationErrors.push(`${field} is required`);
@@ -43,6 +44,7 @@ const addProducts = async (req, res) => {
 
         // Return if there are validation errors
         if (validationErrors.length > 0) {
+            console.log('validation errors')
             return res.status(400).json({
                 status: 'error',
                 message: 'Validation failed',
@@ -64,18 +66,27 @@ const addProducts = async (req, res) => {
         // Process images
         const images = [];
         if (req.files && req.files.length > 0) {
+            console.log(`Processing ${req.files.length} images...`); 
             for (const file of req.files) {
                 try {
                     const originalImagePath = file.path;
                     const resizedImagePath = path.join('public', 'uploads', 'product-images', file.filename);
                     
+                    console.log(`Processing image: ${file.filename}`);
+                    console.log(`Original path: ${originalImagePath}`);
+                    console.log(`Target path: ${resizedImagePath}`);
+
+                     // Ensure the directory exists
+                     await fs.promises.mkdir(path.dirname(resizedImagePath), { recursive: true });
+
                     await sharp(originalImagePath)
                         .resize({ width: 440, fit: 'cover' })
                         .toFile(resizedImagePath);
                     
                     images.push(file.filename);
+                    console.log(`Successfully processed image: ${file.filename}`); 
                 } catch (imageError) {
-                    console.error("Error processing image:", imageError);
+                    console.error(`Error processing image ${file.filename}:`, imageError);
                     return res.status(400).json({
                         status: 'error',
                         message: 'Error processing product images'
@@ -109,20 +120,19 @@ const addProducts = async (req, res) => {
             description: products.description.trim(),
             brand: brandId ? brandId._id : null,
             category: categoryId._id,
-            regularPrice: parseFloat(products.regularPrice),
-            productOffer: parseFloat(products.productOffer || 0),
             salePrice: parseFloat(products.salePrice),
-            createdOn: new Date(),
             quantity: parseInt(products.quantity),
-            ml: products.ml,
+            ml: Array.isArray(products.ml) ? products.ml : [parseInt(products.ml)],
             productImage: images,
-            status: 'Available'
+            status: 'Available',
+            dateAdded: new Date()
         });
 
         await newProduct.save();
         console.log("New Product Saved", newProduct);
+        console.log("New Product Saved with images:", newProduct.productImage);
         
-        return res.status(200).json({status: 'success', message: 'Product added successfully'});
+        return res.status(200).json({status: 'success', message: 'Product added successfully',imageCount: images.length});
     } catch (error) {
         console.error("Error saving product", error);
         return res.status(500).json({status: 'error', message: 'Error saving product', error: error.message});
@@ -251,8 +261,6 @@ const editProduct = async (req,res)=>{
             description:data.description,
             brand:brandId ? brandId._id : null,
             category:categoryId._id,
-            offer:data.productOffer,
-            regularPrice:data.regularPrice,
             salePrice:data.salePrice,
             quantity:data.quantity,
             ml:data.ml,
@@ -287,62 +295,6 @@ const editProduct = async (req,res)=>{
 }
 
 
-const getAllProductsGrid = async (req, res) => {
-    try {
-        const search = req.query.search || "";
-        const page = req.query.page || 1;
-        const limit = 25;
-        const skip = (page - 1) * limit;
-
-
-         
-        const brandSearch = await Brand.find({
-            name: { $regex: new RegExp(".*" + search + ".*", 'i') },
-            isBlocked: false
-        }).select('_id')
-        const brandIds = brandSearch.map(brand => brand._id)
-
-        const productData = await Product.find({
-            $or: [
-                { productName: { $regex: new RegExp(".*" + search + ".*", 'i') } },
-                { brand: { $in:brandIds } }
-            ]
-        })
-        .limit(limit)
-        .skip(skip)
-        .populate('category')
-        .exec();
-
-
-    
-        const count = await Product.find({
-            $or: [
-                { productName: { $regex: new RegExp(".*" + search + ".*", 'i') } },
-                { brand: { $in:brandIds } }
-            ]
-        }).countDocuments();
-
-        const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isBlocked: false });
-
-        if (category && brand) {
-            res.render('admin/productGridView', {
-                products: productData,
-                currentPage: page,
-                totalPages: Math.ceil(count / limit),
-                cat: category,
-                brand: brand,
-                
-            });
-        } else {
-            console.log("Product page loading errors:", error);
-            res.render('admin/pageError');
-        }
-    } catch (error) {
-        console.log("Product page loading errors:", error);
-        res.redirect('/admin/pageError');
-    }
-}
 
 const deleteSingleImage = async (req, res) => {
     try {
@@ -416,7 +368,7 @@ module.exports = {
     productInfo,
     addProducts,
     getAllProducts,
-    getAllProductsGrid,
+   
     getEditProduct,
     editProduct,
     deleteSingleImage,

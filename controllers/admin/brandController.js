@@ -7,11 +7,11 @@ const brandInfo = async (req,res)=>{
     try {
         
         const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 10
+        const limit = parseInt(req.query.limit) || 4  
         const skip = (page-1)*limit
 
         const brandData = await Brand.find({})
-        .sort({createdAt:-1})
+        .sort({createdAt:1})
         .skip(skip)
         .limit(limit)
         .exec()
@@ -37,7 +37,8 @@ const brandInfo = async (req,res)=>{
 const addBrand = async(req,res)=>{
     try {
         
-        const brandName  = req.body.name
+        const brandName = req.body.brandName
+        
         
         if (!brandName || !req.file) {
             return res.status(400).json({

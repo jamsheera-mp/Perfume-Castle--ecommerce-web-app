@@ -162,21 +162,8 @@
                                         style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
 
                                 </div>
-                                <div class="mb-4">
-                                    <label for="regularPrice" class="form-label"> Regular Price</label>
-                                    <input type="number" step="1" class="form-control" name="regularPrice"
-                                        id="regularPrice" value="<%= product.regularPrice %>" >
-                                    <small id="regularPrice-error" class="error-message"
-                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="productOffer" class="form-label">Product Offer</label>
-                                    <input type="number" step="1" class="form-control" name="productOffer"
-                                        id="productOffer" value="<%= product.productOffer %>" >
-                                    <small id="productOffer-error" class="error-message"
-                                        style="color: #dc3545; display: none; font-size: 0.875rem; margin-top: 0.25rem;"></small>
-
-                                </div>
+                                
+                               
                                 <div class="mb-4">
                                     <label for="salePrice" class="form-label">Sale Price</label>
                                     <input type="number" step="1" class="form-control" name="salePrice"
@@ -218,9 +205,7 @@
                 }
 
                 const formData = new FormData(this);
-                
-
-                try {
+                 try {
                     const response = await fetch(`/admin/editProduct/<%=product._id%>`, {
                         method: 'POST',
                         body: formData
@@ -229,13 +214,27 @@
                     const result = await response.json();
 
                     if (result.status === 'success') {
-                        alert(result.message);
+                     Swal.fire({
+                            title: 'Success',
+                            text: result.message||'Product updated successfully',
+                            icon:'success',
+                            confirmButtonText:'Ok'
+                        })
                         window.location.href = '/admin/products'; // Redirect to products list
                     } else {
-                        alert(result.message);
+                        Swal.fire({
+                            icon:'error',
+                            text:  result.message||'Failed to update product',
+                            confirmButtonText:'Try again'
+
+                        })
                     }
                 } catch (error) {
-                    alert('An error occurred while updating the product');
+                   Swal.fire({
+                    icon:'error',
+                    text: 'Failed to update product',
+                    confirmButtonText:'Try again'
+                   })
                 }
             });
 
@@ -437,31 +436,8 @@
                             }
                         ]
                     },
-                    regularPrice: {
-                        element: document.getElementsByName('regularPrice')[0],
-                        rules: [
-                            {
-                                test: value => /^\d+(\.\d{1,2})?$/.test(value) && parseFloat(value) > 0,
-                                message: "Please enter a valid positive price"
-                            }
-                        ]
-                    },
-                    productOffer: {
-                        element: document.getElementsByName('productOffer')[0],
-                        rules: [
-
-                            {
-                                test: value => {
-                                    // Remove '%' symbol before validating
-                                    let numericValue = value.replace('%', '');
-
-                                    // Validate if the numeric value is a number between 0 and 100
-                                    return /^\d+(\.\d{1,2})?$/.test(numericValue) && parseFloat(numericValue) >= 0 && parseFloat(numericValue) <= 100;
-                                },
-                                message: "Please enter a valid offer percentage (0-100)"
-                            }
-                        ]
-                    },
+                   
+                   
                     salePrice: {
                         element: document.getElementsByName('salePrice')[0],
                         rules: [
@@ -492,14 +468,6 @@
                             break;
                         }
                     }
-                }
-
-                // Cross-field validations
-                const regularPrice = parseFloat(document.getElementsByName('regularPrice')[0].value);
-                const salePrice = parseFloat(document.getElementsByName('salePrice')[0].value);
-                if (regularPrice < salePrice) {
-                    displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price');
-                    isValid = false;
                 }
 
                 return isValid;
