@@ -48,7 +48,7 @@
                             <th scope="col">Offer Percentage</th>
                             <th scope="col">Validity</th>
                             <th scope="col">Offer Type</th>
-                            <th scope="col">Offer Type Name</th>
+                            <th scope="col">Offer Applied to</th>
                             <th scope="col">Status</th>
                             <th scope="col" class="tex-end">Action</th>
                         </tr>
@@ -72,10 +72,10 @@
                                 </td>
                                 <td><%= offer.type %></td>
                                 <td>
-                                    <% if(offer.type === 'Product'){ %>
-                                        <%= offer.offerTypeName %>
+                                    <% if(offer.type === 'Products'){ %>
+                                        <%= offer.productId ? offer.productId.productName : 'N/A' %>
                                         <%} else if(offer.type === 'Category'){ %>
-                                            <%= offer.offerTypeName %>
+                                            <%= offer.categoryId ? offer.categoryId.name : 'N/A' %>
                                             <% } else { %>
                                                  Referral Offer
                                                 <% } %>
@@ -87,7 +87,7 @@
                                             <span class="badge rounded-pill  bg-success">Active</span>
                                             <% } %>
                                     </td>
-                                    <td  class="text-end">
+                                    <td  >
 
                                         <% if(offer.status === false){ %>
                                             <button class ="btn btn-md rounded -pill btn-primary font-sm" onclick="changeOfferStatus('<%=offer._id%>')">Activate</button>

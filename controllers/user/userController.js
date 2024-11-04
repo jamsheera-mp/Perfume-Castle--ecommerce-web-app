@@ -13,6 +13,7 @@ const bcryptjs = require('bcryptjs')
 const Address = require('../../models/addressSchema')
 const Order = require('../../models/orderSchema')
 const Wallet = require('../../models/walletSchema')
+const Coupon = require('../../models/couponSchema')
 
 //Load home page
 const loadHome = async (req, res) => {
@@ -522,6 +523,10 @@ const loadProfile = async (req, res) => {
         // Find orders associated with the user's addresses
         const orders = await Order.find({ 'address.parentAddressId': { $in: addressIds } }).populate('orderedItems.product').sort({ createdAt: -1 });
 
+         // Find available coupons that are not expired
+         const currentDate = new Date();
+         const coupons = await Coupon.find({ isList: true, expireOn: { $gt: currentDate } });
+         console.log('coupons available:', coupons);
 
 
         console.log('Orders:', orders);
@@ -532,11 +537,12 @@ const loadProfile = async (req, res) => {
 
         res.render('user/profile', {
             user,
-            referralCode: user.referalCode,
+            referralCode: user.referralCode,
             walletBalance: wallet ? wallet.balance : 0,
             walletTransactions: wallet ? wallet.transactions.reverse() : [],
             addresses,
-            orders
+            orders,
+            coupons
         });
 
     } catch (error) {
@@ -544,6 +550,7 @@ const loadProfile = async (req, res) => {
         res.redirect('/pageNotFound')
     }
 }
+//---------------------------------------------------------------------------------------------------------------------
 //load address page
 const loadAddresses = async (req, res) => {
     try {

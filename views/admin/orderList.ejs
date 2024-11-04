@@ -44,7 +44,7 @@
                             <th scope="col">Contact</th>
                             <th scope="col">Amount</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Payment</th>
+                            <th scope="col">Payment Method</th>
                             <th scope="col">Date</th>
                             <th scope="col" class="text-end">Action</th>
                         </tr>
@@ -68,31 +68,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-pill <%= order.paymentStatus === 'Paid' ? 'badge-success' : 'badge-warning' %>">
-                                        <%= order.paymentMethod %> - <%= order.paymentStatus %>
-                                    </span>
+                                    <% if (order.paymentStatus === 'Paid') { %>
+                                        <span class="badge rounded-pill bg-success text-dark">
+                                            <%= order.paymentMethod %> - <%= order.paymentStatus %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge rounded-pill bg-warning text-dark">
+                                            <%= order.paymentMethod %> - <%= order.paymentStatus %>
+                                        </span>
+                                    <% } %>
+                                    
                                 </td>
                                 <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                                 <td class="text-end">
                                     <a href="/admin/order/<%= order._id %>" class="btn btn-sm btn-light">Detail</a>
-                                    <div class="dropdown d-inline-block">
-                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm">
-                                            <i class="material-icons md-more_horiz"></i>
-                                        </a>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="/admin/order/<%= order._id %>">View detail</a>
-                                            
-                                            <% if (order.status !== 'Delivered' && order.status !== 'Cancelled') { %>
-                                                <form action="/admin/order/update/<%= order._id %>" method="POST">
-                                                    <button class="dropdown-item" type="submit">Update Status</button>
-                                                </form>
-
-                                                <form action="/admin/order/cancel/<%= order._id %>" method="POST">
-                                                    <button class="dropdown-item text-danger" type="submit">Cancel</button>
-                                                </form>
-                                            <% } %>
-                                        </div>
-                                    </div>
+                                 
                                 </td>
                             </tr> 
                             <% }); %>

@@ -90,7 +90,6 @@ router.post('/verifyRazorpayPayment', paymentController.verifyRazorpayPayment);
 router.get('/checkout',userAuth,calculateProductPrices,orderController.getCheckout)
 router.post('/placeOrder',userAuth,calculateProductPrices,orderController.placeOrder)
 router.post('/updatePaymentStatus',calculateProductPrices,userAuth,orderController.updatePaymentStatus)
-router.get('/orderSuccess',userAuth,calculateProductPrices,orderController.getOrderSuccess)
 router.get('/orders', userAuth,calculateProductPrices,orderController.getOrderList);
 router.get('/track-order/:orderId', userAuth,calculateProductPrices,orderController.trackOrder);
 router.post('/cancelOrder/:orderId',userAuth,calculateProductPrices,orderController.cancelOrder)

@@ -11,6 +11,7 @@ const productInfo = async(req,res)=>{
 
     try {
         const category = await Category.find({isListed:true})
+        
         const brand = await Brand.find({isBlocked:false})
        
         res.render('admin/addProducts',{
@@ -157,17 +158,33 @@ const getAllProducts = async (req,res) => {
             .limit(limit)
             .sort({ createdAt: 1 }); // Sort by newest first
 
+         // Check for deleted/unlisted categories or brands
+         const productsWithValidation = products.map(product => {
+            if (!product.category || !product.category.isListed) {
+                product.categoryWarning = 'Category unavailable';
+            }
+            if (!product.brand || product.brand.isBlocked) {
+                product.brandWarning = 'Brand unavailable';
+            }
+            return product;
+        });
+
         res.render('admin/products', {
-            products,
+            products:productsWithValidation,
             currentPage: page,
             totalPages,
             totalProducts,
-            
+            error:req.query.error || null
         });
     } catch (error) {
         console.log("product page loading errors:",error);
-        
-        res.redirect('/admin/pageError')
+        return res.render('admin/products', {
+            products: [],
+            currentPage: 1,
+            totalPages: 0,
+            error: 'Failed to load products. Please try again.'
+        });
+        //res.redirect('/admin/pageError')
     }
    
     

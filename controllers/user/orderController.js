@@ -72,79 +72,6 @@ const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
-//---------------------------------------------------------
-// Verify Razorpay payment controller
-const verifyRazorpayPayment = async (req, res) => {
-    try {
-        const {
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature,
-            orderId
-        } = req.body;
-
-        // Find the order
-        const order = await Order.findById(orderId);
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: 'Order not found'
-            });
-        }
-
-        // Verify signature
-        const generatedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest('hex');
-
-        if (generatedSignature === razorpay_signature) {
-            // Payment is verified successfully
-            order.paymentStatus = 'Paid';
-            order.status = 'Placed';
-            order.razorpayPaymentId = razorpay_payment_id;
-            await order.save();
-
-            // Update inventory and clear cart only after successful payment
-            await Promise.all([
-                ...order.orderedItems.map(item =>
-                    Product.findByIdAndUpdate(
-                        item.product,
-                        { $inc: { quantity: -item.quantity } }
-                    )
-                ),
-                Cart.findOneAndUpdate(
-                    { userId: order.userId },
-                    { $set: { items: [] } }
-                )
-            ]);
-
-            return res.status(200).json({
-                success: true,
-                message: 'Payment verified successfully',
-                orderId: order._id
-            });
-        } else {
-            // Signature verification failed
-            order.paymentStatus = 'Failed';
-            order.status = 'Failed';
-            order.paymentError = 'Signature verification failed';
-            await order.save();
-
-            return res.status(400).json({
-                success: false,
-                message: 'Payment verification failed'
-            });
-        }
-
-    } catch (error) {
-        console.error('Error verifying payment:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error processing payment verification'
-        });
-    }
-};
 //-------------------------------------------------------------------------
 const placeOrder = async (req, res) => {
     try {
@@ -249,6 +176,8 @@ const placeOrder = async (req, res) => {
             userId: userObjectId,
             orderedItems: cart.items.map(item => ({
                 product: item.productId._id,
+                name:item.productId.productName,
+                image:item.productId.productImage[0],
                 quantity: item.quantity,
                 price: item.price
             })),
@@ -283,8 +212,8 @@ const placeOrder = async (req, res) => {
         // Clear session coupon after order is created
         delete req.session.appliedCoupon;
 
-         // For COD orders, update inventory and clear cart immediately
-         if (paymentMethod === 'CashOnDelivery'|| paymentStatus  === 'Paid') {
+         // For COD orders,and paid orders update inventory and clear cart immediately
+         if (paymentMethod === 'CashOnDelivery') {
 
             await Promise.all([
                 ...cart.items.map(item =>
@@ -301,6 +230,8 @@ const placeOrder = async (req, res) => {
                 orderId: newOrder._id
             });
         } else {
+            
+          
             // For online payment, return Razorpay order details
             return res.status(200).json({
                 success: true,
@@ -375,69 +306,7 @@ const updatePaymentStatus = async(req,res)=>{
 }
 
 //----------------------------------------------------------------------------------------
-const getOrderSuccess = async (req, res) => {
-    try {
-        const orderId = req.query.orderId
-        const order = await Order.findById(orderId)
-            .populate('orderedItems.product')
-            .populate('address.parentAddressId')
-            .populate('appliedCouponId');
 
-        if (!order) {
-            return res.redirect('/cart');
-        }
-        console.log('order details after placing an order:', order);
-
-        // Find the specific address from the array
-        const addressDocument = order.address.parentAddressId;
-        const specificAddress = addressDocument.address.find(addr =>
-            addr._id.toString() === order.address.addressId.toString()
-        );
-
-        if (!specificAddress) {
-            console.error('Selected address not found');
-            return res.redirect('/cart');
-        }
-
-        const orderedItems = order.orderedItems.map(item => ({
-            productName: item.product.productName,
-            productImage: item.product.productImage,
-            quantity: item.quantity,
-            price: item.price,
-
-        }));
-
-        // Calculate the subtotal (total before discount)
-        const totalPrice = order.totalPrice;
-
-        // Calculate the coupon discount
-        let couponDiscount = 0;
-        let couponCode = null;
-        if (order.appliedCouponId) {
-            couponDiscount = totalPrice - order.finalAmount;
-            couponCode = order.appliedCouponId.name;
-        }
-
-        // The final total after applying coupon 
-        const total = order.finalAmount;
-
-        res.render('user/orderSuccess', {
-            orderId: order.orderId,
-            orderDate: order.createdOn,
-            orderStatus: order.status,
-            orderedItems: orderedItems,
-            totalPrice: totalPrice,
-            couponDiscount: couponDiscount,
-            couponCode: couponCode,
-            total: total,
-            shippingAddress: specificAddress
-        });
-
-    } catch (error) {
-        console.error('Order success page loading error:', error);
-        return res.redirect('/cart');
-    }
-};
 const getOrderList = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -832,7 +701,8 @@ async function addToWallet(userId, amount, description) {
         getCheckout,
         placeOrder,
         updatePaymentStatus,
-        getOrderSuccess,
+       
+        
         getOrderList,
         returnOrder,
         cancelOrder,

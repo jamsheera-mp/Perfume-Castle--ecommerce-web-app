@@ -15,7 +15,7 @@ const pageError = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
-        if (req.session.admin) {
+        if (req.session.isAdmin) {
             return res.redirect('/admin/dashboard')
         }
          res.render('admin/login', { message: null })
@@ -57,7 +57,7 @@ const login = async (req, res) => {
         console.log('password:', isValidPassword);
 
         if (isValidPassword) {
-            req.session.admin = true
+            req.session.isAdmin = true
             req.session.adminId = admin._id
             return res.status(200).json({
                 success: true,
@@ -279,10 +279,10 @@ const loadDashboard = async (req, res) => {
             throw new Error('Request object is undefined');
         }
 
-        if (!req.session.admin) {
+        if (!req.session.isAdmin) {
             return res.redirect('/admin/login');
         }
-        const admin = await User.findById(req.session.userId)
+        const admin = await User.findById(req.session.adminId)
         // Fetch initial data for the dashboard
         const period = 'monthly'; // Default period
         const salesData = await fetchSalesData(period);

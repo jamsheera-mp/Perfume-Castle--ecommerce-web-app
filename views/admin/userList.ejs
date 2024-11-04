@@ -1,93 +1,120 @@
-<%- include('../partials/admin/sidebar.ejs') %>
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Add SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/admin/sidebar.ejs') %>
     <%- include('../partials/admin/header.ejs') %>
 
-
-
-        <section class="content-main">
-            <div class="content-header">
-                <h2 class="content-title">Users list</h2>
-              
-            </div>
-            <div class="card mb-4">
-                <header class="card-header">
-                    <div class="row gx-3">
-                       
-                        
-                    </div>
-                </header> <!-- card-header end// -->
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th scope="col"><h5>Name</h5></th>
-                                    <th scope="col"><h5>Email</h5></th>
-                                    <th scope="col">Phone</th>
-                                    <th scope="col"><h5>Status</h5></th>
-                                    <th scope="col" ><h5>Action</h5> </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if(data.length>0){ %>
-                                    <% for(let i=0;i<data.length;i++){ %>
-
-                                        <tr>
-                                            <td>
-                                                <%= data[i].name %>
-                                            </td>
-                                            <td>
-                                                <%= data[i].email %>
-                                            </td>
-                                            <td>
-                                                <%= data[i].phone %>
-                                            </td>
-                                            <td>
-                                                <% if(data[i].isBlocked === true){ %>
-                                                    <span class="badge rounded-pill bg-danger">Blocked</span>
-                                                    <% }else{ %>
-                                                        <span class="badge rounded-pill bg-success">Active</span>
-                                                        <% } %>
-                                                </td>
-
-                                                <td >
-                                                    <% if(data[i].isBlocked===false){ %>
-                                                        <a href="/admin/blockUser?id=<%= data[i]._id %>" class="btn btn-sm btn-danger me-2 d-inline-flex align-items-center">
-                                                            <i class="material-icons md-block me-1"></i> Block
-                                                        </a>
-                                                    <% } else { %>
-                                                        <a href="/admin/unBlockUser?id=<%= data[i]._id %>" class="btn btn-sm btn-success me-2 d-inline-flex align-items-center">
-                                                            <i class="material-icons md-check_circle me-1"></i> Unblock
-                                                        </a>
-                                                    <% } %>
-                                                </td>
-                                        </tr>
-                                        <% } %>
+    <section class="content-main">
+        <div class="content-header">
+            <h2 class="content-title">Users list</h2>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col"><h5>Name</h5></th>
+                                <th scope="col"><h5>Email</h5></th>
+                                <th scope="col">Phone</th>
+                                <th scope="col"><h5>Status</h5></th>
+                                <th scope="col"><h5>Action</h5></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(data.length>0){ %>
+                                <% for(let i=0;i<data.length;i++){ %>
+                                    <tr>
+                                        <td><%= data[i].name %></td>
+                                        <td><%= data[i].email %></td>
+                                        <td><%= data[i].phone %></td>
+                                        <td>
+                                            <% if(data[i].isBlocked === true){ %>
+                                                <span class="badge rounded-pill bg-danger">Blocked</span>
                                             <% }else{ %>
-                                                <tr>
-                                                    <td colspan="3"> No users found.</td>
-                                                </tr>
-                                                <% } %>
-                            </tbody>
-                        </table> <!-- table-responsive.// -->
-                    </div>
-                </div> <!-- card-body end// -->
-            </div> <!-- card end// -->
-            <div class="pagination-area mt-15 mb-50">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <% for(let i=1;i<=totalPages; i++){ %>
-                            <li class="page-item <%= (i===currentPage) ? 'active' : '' %>"></li>
-                            <a class="page-link" href="?page=<%= i %>">
-                                <%= i %>
-                            </a>
-                            </li>
-
+                                                <span class="badge rounded-pill bg-success">Active</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if(data[i].isBlocked===false){ %>
+                                                <button onclick="confirmBlock('<%= data[i]._id %>')" class="btn btn-sm btn-danger me-2 d-inline-flex align-items-center">
+                                                    <i class="material-icons md-block me-1"></i> Block
+                                                </button>
+                                            <% } else { %>
+                                                <button onclick="confirmUnblock('<%= data[i]._id %>')" class="btn btn-sm btn-success me-2 d-inline-flex align-items-center">
+                                                    <i class="material-icons md-check_circle me-1"></i> Unblock
+                                                </button>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            <% }else{ %>
+                                <tr>
+                                    <td colspan="5">No users found.</td>
+                                </tr>
                             <% } %>
-
-                    </ul>
-                </nav>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </section> <!-- content-main end// -->
+        </div>
 
+        <div class="pagination-area mt-15 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    <% for(let i=1;i<=totalPages; i++){ %>
+                        <li class="page-item <%= (i===currentPage) ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </section>
 
-        <%- include('../partials/admin/footer.ejs') %>
+    <%- include('../partials/admin/footer.ejs') %>
+
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        function confirmBlock(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This user will be blocked from accessing the system!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, block user',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/blockUser?id=${userId}`;
+                }
+            });
+        }
+
+        function confirmUnblock(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This user will be unblocked and granted access to the system!",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, unblock user',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/unBlockUser?id=${userId}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

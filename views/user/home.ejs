@@ -226,7 +226,7 @@
 																Go to Cart
 															</a>
 															<% } else { %>
-																<button type="submit"
+																<button id="addToCartBtn" type="submit"
 																	class="btn  font-sm rounded btn-brand addToCartBtn mt-2"
 																	<%=product.quantity===0 ? 'disabled' : '' %>>
 																	<i class="material-icons md-add_shopping_cart"></i>
@@ -264,116 +264,132 @@
 	<script>
 		// Wait for the DOM to be fully loaded
 		document.addEventListener('DOMContentLoaded', function () {
-			// Get all forms with the ID 'addToCartForm'
-			const forms = document.querySelectorAll('form[id^="addToCartForm"]');
+    const forms = document.querySelectorAll('form[id^="addToCartForm"]');
 
-			forms.forEach(form => {
-				form.addEventListener('submit', async function (event) {
-					event.preventDefault(); // Prevent form from submitting the traditional way
+    forms.forEach(form => {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
 
-					const productId = this.getAttribute('data-product-id');
-					const quantity = this.getAttribute('data-quantity') || 1;
-					try {
-						// Disable the submit button to prevent double submission
-						const submitButton = this.querySelector('button[type="submit"]');
-						if (submitButton) {
-							submitButton.disabled = true;
-						}
-						// Call the addToCart function to handle the logic
-						await addToCart(productId, quantity);
+            const productId = this.getAttribute('data-product-id');
+            const quantity = parseInt(this.getAttribute('data-quantity'));
 
-						// Re-enable the submit button
-						if (submitButton) {
-							submitButton.disabled = false;
-						}
-					} catch (error) {
-						console.error('Form submission error:', error);
-						// Re-enable the submit button on error
-						const submitButton = this.querySelector('button[type="submit"]');
-						if (submitButton) {
-							submitButton.disabled = false;
-						}
-					}
+            if (!productId) {
+                console.error('Product ID is missing');
+                return;
+            }
 
-				});
-			});
-		});
+            try {
+                const submitButton = this.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
 
-		async function addToCart(productId, quantity) {
-			try {
-				const response = await fetch('/addToCart', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ productId, quantity: parseInt(quantity) }),
+                const response = await fetch('/addToCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        productId, 
+                        quantity: quantity 
+                    }),
+                    redirect: 'follow'
+                });
 
-					redirect: 'follow'
-				})
-				// If we got redirected to login page
-				if (response.url.includes('/login')) {
-					// Redirect to login page
-					window.location.href = '/login';
-					return;
-				}
+                // Handle redirects
+                if (response.redirected || response.url.includes('/login')) {
+                    window.location.href = response.url || '/login';
+                    return;
+                }
 
-				const data = await response.json()
-				if (data.redirect) {
-					// If server indicates redirect is needed, redirect to login
-					window.location.href = data.redirect;
-					return;
-				}
-				if (!response.ok) {
-					throw new Error(data.error || 'Failed to add to cart');
-				}
+                const data = await response.json();
 
-				if (data.success) {
-					await Swal.fire({
-						icon: 'success',
-						title: 'Product added to cart',
-						text: 'Item successfully added to your cart!',
-						confirmButtonText: 'OK',
-						showCancelButton: true,
-						cancelButtonText: 'Continue Shopping',
-						confirmButtonText: 'View Cart'
-					});
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
 
-					// Update cart count and subtotal if available
-					//updateCartUI(data.cart);
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to add to cart');
+                }
 
-					// If user clicks "View Cart", redirect to cart page
-					if (result.isConfirmed) {
-						window.location.href = '/cart';
-					}
-				} else {
-					console.log('error while adding to cart', data.error)
-					throw new Error(data.error || 'Failed to add to cart');
-				}
-			} catch (error) {
-				console.error('Add to cart error:', error);
-				// If not logged in, redirect to login page
-				if (error.message && error.message.includes('<!DOCTYPE html>')) {
-					window.location.href = '/login';
-					return;
-				}
-				await Swal.fire({
-					icon: 'error',
-					title: 'Unable to add to cart',
-					text: 'Please log in to add items to your cart',
-					confirmButtonText: 'Go to Login',
-					showCancelButton: true,
-					cancelButtonText: 'Stay Here'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						window.location.href = '/login';
-					}
-				})
-			}
-		}
+                if (data.success) {
+                    // Update cart icon
+                    if (data.cart && typeof data.cart.cartItemCount !== 'undefined') {
+                        updateCartIcon(data.cart.cartItemCount);
+                    }
 
+                    // Replace "Add to Cart" button with "Go to Cart" link
+                    if (data.isInCart) {
+                        const buttonContainer = this.querySelector('button');
+                        if (buttonContainer) {
+                            const goToCartLink = document.createElement('a');
+                            goToCartLink.href = '/cart';
+                            goToCartLink.className = 'btn btn-md font-md rounded btn-brand';
+                            goToCartLink.innerHTML = '<i class="material-icons md-shopping_cart"></i> Go to Cart';
+                            buttonContainer.replaceWith(goToCartLink);
+                        }
+                    }
 
+                    // Show success message
+                    const result = await Swal.fire({
+                        icon: 'success',
+                        title: 'Product added to cart',
+                        text: 'Item successfully added to your cart!',
+                        showCancelButton: true,
+                        cancelButtonText: 'Continue Shopping',
+                        confirmButtonText: 'View Cart'
+                    });
+
+                    if (result.isConfirmed) {
+                        window.location.href = '/cart';
+                    }
+                }
+            } catch (error) {
+                console.error('Add to cart error:', error);
+                
+                if (error.message && error.message.includes('<!DOCTYPE html>')) {
+                    const result = await Swal.fire({
+                        icon: 'error',
+                        title: 'Please Log In',
+                        text: 'You need to be logged in to add items to your cart',
+                        showCancelButton: true,
+                        cancelButtonText: 'Stay Here',
+                        confirmButtonText: 'Go to Login'
+                    });
+
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
+                } else {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Failed to add item to cart'
+                    });
+                }
+            } finally {
+                const submitButton = this.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
+        });
+    });
+});
+
+function updateCartIcon(count) {
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+        cartCountElement.classList.add('cart-update-animation');
+        setTimeout(() => {
+            cartCountElement.classList.remove('cart-update-animation');
+        }, 300);
+    }
+}
 	</script>
-
+<!-----------------------------------add to wishlist------------------------------------->
 	<script>
 		function toggleWishlist(event, productId) {
 			event.preventDefault();

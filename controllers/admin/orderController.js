@@ -153,10 +153,13 @@ const getOrderDetails = async (req, res) => {
             formattedDateTime,
             orderedItems: order.orderedItems.map(item => ({
                 ...item,
+                productImage: item.image ? [item.image] : [],  // Wrap single image in array
+                productName: item.name,
+                price: item.price,
+                quantity: item.quantity,
                 product: {
                     ...item.product,
-                    productImage: item.product?.productImage || [],
-                    productName: item.product?.productName || 'Product Name Unavailable'
+                    category: item.product?.category || 'Unknown Category'
                 }
             }))
         };

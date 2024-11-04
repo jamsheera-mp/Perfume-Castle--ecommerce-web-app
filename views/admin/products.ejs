@@ -1,7 +1,7 @@
 <%- include('../partials/admin/sidebar.ejs') %>
     <%- include('../partials/admin/header.ejs') %>
-
-
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+  
         <section class="content-main">
             <div class="content-header">
                 <div>
@@ -95,22 +95,18 @@
                                                         <a class="dropdown-item"
                                                             href="/admin/editProduct?id=<%= products[i]._id %>">Edit
                                                             Product</a>
-                                                        <form action="/admin/deleteProduct/<%= products[i]._id %>"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this product?');">
-                                                            <button type="submit"
-                                                                class="dropdown-item text-danger">Delete
-                                                                Product</button>
-                                                        </form>
-
-                                                        <form action="/admin/softDeleteProduct/<%= products[i]._id %>"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to soft delete this product?');">
-                                                            <button type="submit" class="dropdown-item text-danger">Soft
-                                                                Delete</button>
-                                                        </form>
-                                                        <!-- <a class="dropdown-item text-danger" href="/admin//deleteProduct/">Soft Delete</a>
-                                                    <a class="dropdown-item text-danger" href="/admin/softDeleteProduct/">Delete</a> -->
+                                                            <form action="/admin/deleteProduct/<%= products[i]._id %>"
+                                                                method="POST"
+                                                                onsubmit="confirmDelete(this, true); return false;">
+                                                              <button type="submit" class="dropdown-item text-danger">Delete Product</button>
+                                                          </form>
+                                                          
+                                                          <form action="/admin/softDeleteProduct/<%= products[i]._id %>"
+                                                                method="POST"
+                                                                onsubmit="confirmDelete(this, false); return false;">
+                                                              <button type="submit" class="dropdown-item text-danger">Soft Delete</button>
+                                                          </form>
+                                                        
                                                         
                                                     
                                                     <!--offer section-->
@@ -158,9 +154,31 @@
 
 
         </section> <!-- content-main end// -->
-
+     
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
         
-
+<script>
+    function confirmDelete(formElement, isRealDelete) {
+    event.preventDefault();
+    
+    const actionType = isRealDelete ? 'permanently delete' : 'soft delete';
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to ${actionType} this product?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            formElement.submit();
+        }
+    });
+}
+</script>
 
 
         <%- include('../partials/admin/footer.ejs') %>

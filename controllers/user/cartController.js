@@ -53,7 +53,7 @@ const addToCart = async (req, res) => {
     const maxQuantityPerUser = 5;
 
 
-    // Store product in request for middleware
+    // Store product in request for price calculator middleware
     req.products = product;
         
     // Calculate price with offers
@@ -98,18 +98,14 @@ const addToCart = async (req, res) => {
       //update existing item
       cart.items[existingItemIndex] = {
         ...existingItem,
+        productId: product._id,
         quantity: newQuantity,
         price:  finalPrice,
         totalPrice:  newQuantity * finalPrice,
         
       }
       
-      //update existing item's quantity and price
-      //existingItem.quantity = newQuantity;
-      //existingItem.price =  finalPrice;
-      //existingItem.totalPrice = newQuantity *  finalPrice;
       
-
 
     } else {
       // product is not in cart,add new item
@@ -140,6 +136,7 @@ const addToCart = async (req, res) => {
 
     return res.json({
       success: true,
+      isInCart:true,
       cart: {
         items: cart.items.map(item=>({
           productId:item.productId,
@@ -174,9 +171,6 @@ const updateCart = async (req, res) => {
         error: 'Product ID and quantity are required'
       });
     }
-
-
-
 
     // Find the product and check stock
     const product = await Product.findById(productId);

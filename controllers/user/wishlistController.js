@@ -82,13 +82,26 @@ const getWishlist = async (req, res) => {
             });
         }
 
-        const formattedWishlist = wishlist.products.map(item => ({
-            productId: item.productId._id,
-            productName: item.productId.productName || 'Product Name Not Available',
-            productImage: item.productId.productImage || [],
-            salePrice: item.productId.salePrice || 'Price Not Available',
-            addedOn: item.addedOn
+        // Filter out products that have been deleted from the database
+        const availableProducts = await Promise.all(wishlist.products.filter(async (item) => {
+            const product = await Product.findById(item.productId);
+            return product !== null;
         }));
+
+        // Update the wishlist with only the available products
+        await Wishlist.findOneAndUpdate(
+            { userId },
+            { $set: { products: availableProducts } },
+            { new: true }
+        );
+
+        const formattedWishlist = wishlist.products.map(item => ({
+            productId: item.productId?._id ,
+            productName: item.productId?.productName ,
+            productImage: item.productId?.productImage ,
+            salePrice: item.productId?.salePrice ,
+            addedOn: item.addedOn
+        })).filter(item => item.productId !== undefined)
 
         const totalItems = formattedWishlist.length;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -104,7 +117,7 @@ const getWishlist = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching wishlist:', error);
-        res.status(500).render('error', { message: 'Error fetching wishlist' });
+        res.status(500).render('user/404', { message: 'Error fetching wishlist' });
     }
 };
 const removeFromWishlist = async(req,res)=>{
