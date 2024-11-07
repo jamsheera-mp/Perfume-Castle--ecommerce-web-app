@@ -84,6 +84,7 @@ router.post('/clearCart', userAuth,calculateProductPrices,cartController.clearCa
 
 router.post('/createRazorpayOrder', paymentController.createRazorpayOrder);
 router.post('/verifyRazorpayPayment', paymentController.verifyRazorpayPayment);
+router.post('/createRetryPayment',paymentController.createRetryPayment);
 
 
 //order mgmt

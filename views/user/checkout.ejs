@@ -53,14 +53,14 @@
                                                                                     item.quantity %>
                                                                             </span>
                                                                         </td>
-                                                                        <td>$<%= (item.price * item.quantity).toFixed(2)
+                                                                        <td>₹<%= (item.price * item.quantity).toFixed(2)
                                                                                 %>
                                                                         </td>
                                                                     </tr>
                                                                     <% }); %>
                                                                         <tr>
                                                                             <th>SubTotal</th>
-                                                                            <td colspan="2">$<%= subtotal.toFixed(2) %>
+                                                                            <td colspan="2">₹<%= subtotal.toFixed(2) %>
                                                                             </td>
                                                                         </tr>
                                                                         <tr>
@@ -78,14 +78,14 @@
                                                                             </tr>
                                                                             <tr>
                                                                                 <th>Discount</th>
-                                                                                <td colspan="2">-$<%=
+                                                                                <td colspan="2">-₹<%=
                                                                                         couponDiscount.toFixed(2) %>
                                                                                 </td>
                                                                             </tr>
                                                                             <% }else{ %>
                                                                                 <tr>
                                                                                     <th>Discount</th>
-                                                                                    <td colspan="2">$0.00</td>
+                                                                                    <td colspan="2">₹0.00</td>
                                                                                 </tr>
                                                                                 <% } %>
                                                                                     <tr>
@@ -93,7 +93,7 @@
                                                                                         <td colspan="2"
                                                                                             class="product-subtotal">
                                                                                             <span
-                                                                                                class="font-xl text-brand fw-900">$
+                                                                                                class="font-xl text-brand fw-900">₹
                                                                                                 <%= total.toFixed(2) %>
                                                                                             </span>
                                                                                         </td>
@@ -147,7 +147,7 @@
                                     <div id="couponInfo" style="display:none;">
                                         <p>Coupon applied: <span id="appliedCouponCode"></span>
                                         </p>
-                                        <p>Discount: $<span id="couponDiscount"></span></p>
+                                        <p>Discount: ₹<span id="couponDiscount"></span></p>
                                         <button id="removeCoupon">Remove Coupon</button>
                                     </div>
                                 </div>

@@ -230,7 +230,14 @@ const placeOrder = async (req, res) => {
                 orderId: newOrder._id
             });
         } else {
-            
+            await Promise.all([
+                ...cart.items.map(item =>
+                    Product.findByIdAndUpdate(item.productId._id, {
+                        $inc: { quantity: -item.quantity }
+                    })
+                ),
+                Cart.findOneAndUpdate({ userId: userObjectId }, { $set: { items: [] } })
+            ])
           
             // For online payment, return Razorpay order details
             return res.status(200).json({
@@ -635,6 +642,7 @@ async function addToWallet(userId, amount, description) {
             }
 
             if (newStatus === 'Returned') {
+                console.log('new status:',newStatus)
                 try {
                     if (order.paymentMethod === 'Online') {
                         // Initiate Razorpay refund
@@ -651,6 +659,7 @@ async function addToWallet(userId, amount, description) {
 
                     // Add refund amount to user's wallet (for both Online and COD)
                     let wallet = await Wallet.findOne({ userId: addressDoc.userId });
+                    console.log('waleet:',wallet)
                     if (!wallet) {
                         wallet = new Wallet({ userId: addressDoc.userId });
                     }

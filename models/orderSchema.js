@@ -106,7 +106,7 @@ const orderSchema = new Schema({
         type: String,
         default: ''
     },
-    
+    paymentRetryCount: { type: Number, default: 0 }
     
 },{
     timestamps : true

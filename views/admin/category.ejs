@@ -81,8 +81,8 @@
                                                             <a class="dropdown-item"
                                                                 href="/admin/editCategory?id=<%= category._id %>">Edit
                                                                 info</a>
-                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmSoftDelete('<%= category._id %>')">Soft Delete</a>
-                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('<%= category._id %>')">Delete</a>
+                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmSoftDelete('<%= category._id %>')">Delete</a>
+                                                                <!--<a class="dropdown-item text-danger" href="#" onclick="confirmDelete('<%= category._id %>')">Delete</a>-->
                                                               </div>
 
                                                         </div>
@@ -160,20 +160,7 @@
                     .then(data => {
                         location.reload()
                         console.log('Form submitted:', { name, description });
-                        //insert the new category into the table dynamically
-                        // const tableBody = document.querySelector('tbody')
-                        // const newRow = document.createElement('tr')
-                        // newRow.innerHTML =
-                        //     `<td>${data.category.name}</td>
-                        //     <td>${data.category.description}</td> `
-                        // tableBody.prepend(newRow)
-
-
-                        // Optionally, clear the form after submission
-                        // document.getElementById('name').value = '';
-                        // document.getElementById('descriptionId').value = '';
-
-                        //location.reload()
+                        
                     })
                     .catch(error => {
                         console.log('error:',error);
@@ -246,8 +233,10 @@
       }
     });
   }
-
-  function confirmDelete(categoryId) {
+</script>
+<!---
+<script>
+ function confirmDelete(categoryId) {
     Swal.fire({
       title: 'Delete Category',
       text: 'Are you sure you want to permanently delete this category?',
@@ -262,7 +251,8 @@
       }
     });
   }
-</script>
+
+</script>-->
+ 
         <%- include('../partials/admin/footer.ejs') %>
 
-            <!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-categories.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->
