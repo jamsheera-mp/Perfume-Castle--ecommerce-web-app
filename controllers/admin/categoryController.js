@@ -116,7 +116,7 @@ const softDeleteCategory = async(req,res)=>{
         if(!id){
             return res.status(400).redirect('/admin/pageError')
         }
-        await  Category.updateOne({_id:id},{$set:{isDeleted:true}})
+        await Category.findByIdAndUpdate(id, { $set: { isDeleted: true } });
         res.redirect('/admin/category')
 
     } catch (error) {

@@ -659,6 +659,9 @@
                     return
                 }
                 if (result.success) {
+                    if (result.cart && typeof result.cart.cartItemCount !== 'undefined') {
+                        updateCartIcon(result.cart.cartItemCount);
+                    }
                     // Show success message
                     Swal.fire({
                         icon: 'success',
@@ -666,10 +669,7 @@
                         text: 'Item added to cart successfully'
                     });
 
-                    // Update cart count if available
-                    if (result.cart && result.cart.cartItemCount) {
-                        updateCartCount(result.cart.cartItemCount);
-                    }
+                    
 
                     // Update button to "Go to Cart"
                     const button = document.querySelector(`button[onclick="window.addToCart('${productId}', 1)"]`);
@@ -699,11 +699,14 @@
             }
         };
 
-        // Helper function to update cart count if you have one in your UI
-        function updateCartCount(count) {
-            const cartCountElement = document.querySelector('.cart-count'); // Add appropriate selector
+        function updateCartIcon(count) {
+            const cartCountElement = document.getElementById('cart-count');
             if (cartCountElement) {
                 cartCountElement.textContent = count;
+                cartCountElement.classList.add('cart-update-animation');
+                setTimeout(() => {
+                    cartCountElement.classList.remove('cart-update-animation');
+                }, 300);
             }
         }
 
@@ -737,12 +740,12 @@
                         setTimeout(() => {
                             button.classList.remove('animate');
                         }, 300);
-                        
-						// Update the wishlist count in header
-						updateWishlistCount(data.wishlistCount);
-                       
-                    } 
-                    
+
+                        // Update the wishlist count in header
+                        updateWishlistCount(data.wishlistCount);
+
+                    }
+
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -756,18 +759,18 @@
             return false;
         }
         // function to update the wishlist count in header
-		function updateWishlistCount(count) {
-			const wishlistCountElement = document.getElementById('wishlist-count');
-			if (wishlistCountElement) {
-				wishlistCountElement.textContent = count;
+        function updateWishlistCount(count) {
+            const wishlistCountElement = document.getElementById('wishlist-count');
+            if (wishlistCountElement) {
+                wishlistCountElement.textContent = count;
 
-				// Add animation to highlight the count change
-				wishlistCountElement.classList.add('count-updated');
-				setTimeout(() => {
-					wishlistCountElement.classList.remove('count-updated');
-				}, 300);
-			}
-		}
+                // Add animation to highlight the count change
+                wishlistCountElement.classList.add('count-updated');
+                setTimeout(() => {
+                    wishlistCountElement.classList.remove('count-updated');
+                }, 300);
+            }
+        }
     </script>
     <script>
         function resetFilters() {

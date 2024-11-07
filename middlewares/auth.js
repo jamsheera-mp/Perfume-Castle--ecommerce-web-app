@@ -12,6 +12,8 @@ const isUserAuthenticated = (req,res,next) =>{
 }
 
 
+
+
 //Authorization : Check if the user is valid and not blocked
 const userAuth = (req,res,next)=>{
     if(req.session && req.session.user){
@@ -39,7 +41,7 @@ const userAuth = (req,res,next)=>{
 const adminAuth = (req,res,next)=>{
    
         if(req.session.isAdmin){
-            console.log('admin found')
+           
             next()
         }else{
             res.redirect('/admin/login')

@@ -63,9 +63,9 @@
                                                     <%= category.description %>
                                                 </td>
                                                 <td>
-                                                    <% if(category.isListed === true){ %>
+                                                    <% if(!category.isDeleted === true){ %>
                                                         <span class="badge bg-success">Listed</span>
-                                                        <% }else if(isDeleted === true){ %>
+                                                        <% }else { %>
                                                             <span class="badge bg-danger">Deleted</span>
                                                            
                                                         <% } %>
@@ -81,8 +81,9 @@
                                                             <a class="dropdown-item"
                                                                 href="/admin/editCategory?id=<%= category._id %>">Edit
                                                                 info</a>
-                                                            <a class="dropdown-item text-danger" href="/admin/softDeleteCategory/<%= category._id %>">Soft Delete</a>
-                                                            <a class="dropdown-item text-danger" href="/admin/deleteCategory/<%= category._id %>">Delete</a>
+                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmSoftDelete('<%= category._id %>')">Soft Delete</a>
+                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('<%= category._id %>')">Delete</a>
+                                                              </div>
 
                                                         </div>
                                                     </div>
@@ -229,7 +230,39 @@
             }
         </script>
 
+<script>
+     function confirmSoftDelete(categoryId) {
+    Swal.fire({
+      title: 'Soft Delete Category',
+      text: 'Are you sure you want to soft delete this category?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, soft delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/admin/softDeleteCategory/${categoryId}`;
+      }
+    });
+  }
 
+  function confirmDelete(categoryId) {
+    Swal.fire({
+      title: 'Delete Category',
+      text: 'Are you sure you want to permanently delete this category?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/admin/deleteCategory/${categoryId}`;
+      }
+    });
+  }
+</script>
         <%- include('../partials/admin/footer.ejs') %>
 
             <!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-categories.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->

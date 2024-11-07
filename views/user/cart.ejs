@@ -372,6 +372,7 @@
 
                 // Update cart subtotal
                 updateCartTotals(result.cartSubTotal);
+                //updateCartIcon(result.cart.cartItemCount)
 
                 // Update stock info and button states
                 const stockInfoElement = row.querySelector('.stock-quantity');
@@ -410,15 +411,14 @@
 
             const result = await response.json();
             if (result.success) {
+                
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
                     text: 'Item added to cart successfully'
                 });
-                // Update cart count if you have a cart counter in your UI
-                if (result.cart && result.cart.cartItemCount) {
-                    updateCartCount(result.cart.cartItemCount);
-                }
+                // Update the cart counter in  UI
+               
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -464,12 +464,15 @@
             });
 
             const data = await response.json();
-            if (data.success === 'true') { // Backend sends string 'true'
+            if (data.success === 'true') { 
+           
                 row.style.transition = 'opacity 0.3s';
                 row.style.opacity = '0';
                 setTimeout(() => {
                     row.remove();
+                    
                     updateCartTotals(data.cartSubTotal || 0);
+                    
                     if (document.querySelectorAll('tr[data-productid]').length === 0) {
                         location.reload();
                     }
@@ -535,13 +538,18 @@
         if (totalElement) totalElement.innerText = `$${formattedTotal}`;
     }
 
-    // Optional: Update cart count in UI
-    function updateCartCount(count) {
-        const cartCountElement = document.querySelector('.cart-count'); // Add this class to your cart count element
-        if (cartCountElement) {
-            cartCountElement.textContent = count;
+    //update cart icon
+    function updateCartIcon(count) {
+            const cartCountElement = document.getElementById('cart-count');
+            if (cartCountElement) {
+                cartCountElement.textContent = count;
+                cartCountElement.classList.add('cart-update-animation');
+                setTimeout(() => {
+                    cartCountElement.classList.remove('cart-update-animation');
+                }, 300);
+            }
         }
-    }
+   
 
     // Set up event listeners
     document.querySelector('table').addEventListener('click', handleRemoveItem);
@@ -568,7 +576,6 @@
 });
     </script>
 
-    
-
+   
 
     <%- include('../partials/user/footer.ejs') %>

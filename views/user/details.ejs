@@ -129,13 +129,7 @@
                                             <div class="product-price primary-color float-left">
                                                 <ins><span class="text-brand">$<%= product.salePrice ?
                                                             product.salePrice.toFixed(2) : 'N/A' %></span></ins>
-                                                <% if(product.regularPrice){ %>
-                                                    <ins><span class="old-price font-md ml-15">$<%=
-                                                                product.regularPrice.toFixed(2) %></span></ins>
-                                                    <span class="save-price  font-md color3 ml-15">
-                                                        <%= product.productOffer %> % Off
-                                                    </span>
-                                                    <% } %>
+                                               
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
