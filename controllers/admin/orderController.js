@@ -171,9 +171,11 @@ const getOrderDetails = async (req, res) => {
     }
 };
 
+
 module.exports = {
     listOrders,
     updateOrderStatus,
     cancelOrderAndUpdateStock,
-    getOrderDetails
+    getOrderDetails,
+    
 };

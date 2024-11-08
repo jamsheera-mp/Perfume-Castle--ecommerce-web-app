@@ -156,11 +156,11 @@ const placeOrder = async (req, res) => {
         }
 
         //Order above Rs 1000 should not be allowed for COD
-        if(finalAmount > 1000 && paymentMethod === 'CashOnDelivery'){
-            return res.status(400).json({success:false,message:'Order above Rs 1000 should not be allowed for COD'})
+        if (finalAmount > 1000 && paymentMethod === 'CashOnDelivery') {
+            return res.status(400).json({ success: false, message: 'Order above Rs 1000 should not be allowed for COD' })
         }
 
-        
+
         let initialStatus, initialPaymentStatus;
         if (paymentMethod === 'CashOnDelivery') {
             initialStatus = 'Placed';
@@ -176,8 +176,8 @@ const placeOrder = async (req, res) => {
             userId: userObjectId,
             orderedItems: cart.items.map(item => ({
                 product: item.productId._id,
-                name:item.productId.productName,
-                image:item.productId.productImage[0],
+                name: item.productId.productName,
+                image: item.productId.productImage[0],
                 quantity: item.quantity,
                 price: item.price
             })),
@@ -212,8 +212,8 @@ const placeOrder = async (req, res) => {
         // Clear session coupon after order is created
         delete req.session.appliedCoupon;
 
-         // For COD orders,and paid orders update inventory and clear cart immediately
-         if (paymentMethod === 'CashOnDelivery') {
+        // For COD orders,and paid orders update inventory and clear cart immediately
+        if (paymentMethod === 'CashOnDelivery') {
 
             await Promise.all([
                 ...cart.items.map(item =>
@@ -238,7 +238,7 @@ const placeOrder = async (req, res) => {
                 ),
                 Cart.findOneAndUpdate({ userId: userObjectId }, { $set: { items: [] } })
             ])
-          
+
             // For online payment, return Razorpay order details
             return res.status(200).json({
                 success: true,
@@ -257,52 +257,52 @@ const placeOrder = async (req, res) => {
 };
 
 //------------------------------------------------------------------------------------------------
-const updatePaymentStatus = async(req,res)=>{
+const updatePaymentStatus = async (req, res) => {
     try {
-        const { orderId, razorpayOrderId, status ,error} = req.body;
-        
+        const { orderId, razorpayOrderId, status, error } = req.body;
+
         const order = await Order.findById(orderId);
         if (!order) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Order not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
             });
         }
 
         // Update order with payment failure details
         order.paymentStatus = status;
         order.status = status === 'Failed' ? 'Failed' : order.status;
-        
+
 
         if (error) {
             order.paymentError = error;
         }
         // If there's an error message, store it
-       // if (error) {
-            //updates.paymentFailureReason = error;
-       // }
-        await  order.save();
+        // if (error) {
+        //updates.paymentFailureReason = error;
+        // }
+        await order.save();
 
         //////////////////////////////////////////
         //const updatedOrder = await Order.findOneAndUpdate(
-            //{ _id: orderId },
-            //{ $set: updates },
-            //{ new: true }
+        //{ _id: orderId },
+        //{ $set: updates },
+        //{ new: true }
         //);
-        
+
 
         // If payment failed, restore product quantities
         //if (paymentStatus === 'Failed') {
-           // await Promise.all(order.orderedItems.map(async (item) => {
-               // await Product.findByIdAndUpdate(
-                    //item.product,
-                    //{ $inc: { quantity: item.quantity } }
-               // );
-           // }));
+        // await Promise.all(order.orderedItems.map(async (item) => {
+        // await Product.findByIdAndUpdate(
+        //item.product,
+        //{ $inc: { quantity: item.quantity } }
+        // );
+        // }));
         //}
         /////////////////////////////////////////
-        res. status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             message: 'Payment status updated successfully',
             //order: updatedOrder
         });
@@ -492,7 +492,7 @@ const cancelOrder = async (req, res) => {
         }
 
         // Add refund amount to user's wallet
-        
+
         // Handle refund for online payments
         if (order.paymentMethod !== 'CashOnDelivery' && order.razorpayOrderId) {
             try {
@@ -535,10 +535,10 @@ const cancelOrder = async (req, res) => {
 
         console.log('Product quantities restored');
 
-        res.status(200).json({ success:true,message: 'Order cancelled successfully' });
+        res.status(200).json({ success: true, message: 'Order cancelled successfully' });
     } catch (error) {
         console.error('Error cancelling order:', error);
-        res.status(500).json({ success:false,message: 'An error occurred while cancelling the order' });
+        res.status(500).json({ success: false, message: 'An error occurred while cancelling the order' });
     }
 };
 
@@ -557,164 +557,98 @@ async function addToWallet(userId, amount, description) {
     await wallet.save();
     console.log('Refund added to wallet:', { userId, amount });
 }
-    async function initiateRazorpayRefund(razorpayOrderId, amount) {
-        try {
-            const payments = await razorpay.orders.fetchPayments(razorpayOrderId);
-            // const payment = payments.items[0];
+async function initiateRazorpayRefund(razorpayOrderId, amount) {
+    try {
+        const payments = await razorpay.orders.fetchPayments(razorpayOrderId);
+        // const payment = payments.items[0];
 
-            const refund = await razorpay.payments.refund(payments.id, {
-                amount: amount * 100, // Razorpay expects amount in paise
-            });
+        const refund = await razorpay.payments.refund(payments.id, {
+            amount: amount * 100, // Razorpay expects amount in paise
+        });
 
-            console.log('Refund initiated:', refund);
-            return {
-                success: true,
-                refundId: refund.id,
-                amount: refund.amount / 100, // Convert back to rupees
-                status: refund.status
-            };
-        } catch (error) {
-            console.error('Razorpay refund error:', error);
-            return {
-                success: false,
-                error: error.message
-            };
-        }
+        console.log('Refund initiated:', refund);
+        return {
+            success: true,
+            refundId: refund.id,
+            amount: refund.amount / 100, // Convert back to rupees
+            status: refund.status
+        };
+    } catch (error) {
+        console.error('Razorpay refund error:', error);
+        return {
+            success: false,
+            error: error.message
+        };
     }
+}
 
-    const returnOrder = async (req, res) => {
-        try {
-            if (!req.session.user) {
-                return res.status(401).json({ error: 'User not authenticated' });
-            }
+//-------------------------------------------------------------------------------------------------
 
-            const { orderId } = req.params;
-            const { reason, action } = req.body;
-            const userId = req.session.user;
 
-            console.log('Attempting to process return for order:', { orderId, userId, reason, action });
 
-            const order = await Order.findOne({ orderId }).populate('address.parentAddressId');
+//------------------------------------------------------------------------------------------------------------
 
-            if (!order) {
-                console.log('Order not found with orderId:', orderId);
-                return res.status(404).json({ error: 'Order not found' });
-            }
-
-            console.log('Order found:', order);
-
-            // Fetch the address document
-            const addressDoc = await Address.findById(order.address.parentAddressId);
-
-            if (!addressDoc) {
-                console.log('Address not found for order:', orderId);
-                return res.status(404).json({ error: 'Address not found for this order' });
-            }
-
-            // Check if the session user is the owner of the order
-            if (!addressDoc.userId.equals(userId) && !req.session.isAdmin) {
-                console.log('Order does not belong to the user:', { orderId, userId });
-                return res.status(403).json({ error: 'Not authorized to process return for this order' });
-            }
-
-            let newStatus;
-            switch (action) {
-                case 'request':
-                    if (order.status !== 'Delivered') {
-                        return res.status(400).json({ error: 'Order cannot be returned' });
-                    }
-                    newStatus = 'Return Request';
-                    break;
-                case 'approve':
-                    if (order.status !== 'Return Request' || !req.session.isAdmin) {
-                        return res.status(400).json({ error: 'Cannot approve return' });
-                    }
-                    newStatus = 'Returned';
-                    break;
-                case 'reject':
-                    if (order.status !== 'Return Request' || !req.session.isAdmin) {
-                        return res.status(400).json({ error: 'Cannot reject return' });
-                    }
-                    newStatus = 'Delivered';
-                    break;
-                default:
-                    return res.status(400).json({ error: 'Invalid action' });
-            }
-
-            if (newStatus === 'Returned') {
-                console.log('new status:',newStatus)
-                try {
-                    if (order.paymentMethod === 'Online') {
-                        // Initiate Razorpay refund
-                        const refundResult = await initiateRazorpayRefund(order.razorpayOrderId, order.finalAmount);
-                        if (refundResult.success) {
-                            order.paymentStatus = 'Refund Pending';
-                            order.refundId = refundResult.refundId;
-                            console.log('Razorpay refund initiated:', { orderId, refundId: refundResult.refundId });
-                        } else {
-                            console.error('Failed to initiate Razorpay refund:', refundResult.error);
-                            return res.status(500).json({ error: 'Failed to initiate refund' });
-                        }
-                    }
-
-                    // Add refund amount to user's wallet (for both Online and COD)
-                    let wallet = await Wallet.findOne({ userId: addressDoc.userId });
-                    console.log('waleet:',wallet)
-                    if (!wallet) {
-                        wallet = new Wallet({ userId: addressDoc.userId });
-                    }
-                    wallet.balance += order.finalAmount;
-                    wallet.transactions.push({
-                        type: 'credit',
-                        amount: order.finalAmount,
-                        description: `Refund for returned order ${orderId}`
-                    });
-                    await wallet.save();
-
-                    if (order.paymentMethod === 'CashOnDelivery') {
-                        order.paymentStatus = 'Refunded';
-                    }
-
-                    console.log('Refund added to wallet:', { userId: addressDoc.userId, amount: order.finalAmount });
-
-                    // Restore product quantities
-                    await Promise.all(order.orderedItems.map(async (item) => {
-                        await Product.findByIdAndUpdate(
-                            item.product,
-                            { $inc: { quantity: item.quantity } }
-                        );
-                    }));
-                    console.log('Product quantities restored');
-                } catch (refundError) {
-                    console.error('Error processing refund:', refundError);
-                    return res.status(500).json({ error: 'Failed to process refund' });
-                }
-            }
-
-            // Update order status
-            order.status = newStatus;
-            if (action === 'request') {
-                order.returnReason = reason;
-            }
-            await order.save();
-
-            console.log('Order status updated to', newStatus);
-
-            res.status(200).json({ message: `Return ${action === 'request' ? 'requested' : action + 'ed'} successfully` })
-        } catch (error) {
-            console.error('Error processing return:', error);
-            res.status(500).json({ error: 'An error occurred while processing the return' });
+//----------------------------------------------------------------------------------
+const returnOrder = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'User not authenticated' });
         }
-    };
-    module.exports = {
-        getCheckout,
-        placeOrder,
-        updatePaymentStatus,
-       
-        
-        getOrderList,
-        returnOrder,
-        cancelOrder,
-        trackOrder
 
-    };
+        const { orderId } = req.params;
+        const { reason, action } = req.body;
+        const userId = req.session.user;
+        console.log('Attempting to process return for order:', { orderId, userId, reason, action });
+
+        const order = await Order.findOne({ orderId }).populate('address.parentAddressId');
+
+        if (!order) {
+            console.log('Order not found with orderId:', orderId);
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        console.log('Order found:', order);
+
+        // Fetch the address document
+        const addressDoc = await Address.findById(order.address.parentAddressId);
+
+        if (!addressDoc) {
+            console.log('Address not found for order:', orderId);
+            return res.status(404).json({ error: 'Address not found for this order' });
+        }
+
+        // Check if the session user is the owner of the order
+        if (!addressDoc.userId.equals(userId) && !req.session.isAdmin) {
+            console.log('Order does not belong to the user:', { orderId, userId });
+            return res.status(403).json({ error: 'Not authorized to process return for this order' });
+        }
+        // Update the order status to 'Return Request'
+        order.status = 'Return Request';
+        order.returnReason = reason;
+        await order.save();
+
+
+  // Credit the user's wallet with the order amount
+  await addToWallet(addressDoc.userId, order.finalAmount, `Refund for returned order ${orderId}`);
+
+
+
+        res.status(200).json({ success: true, message: 'Return request submitted successfully' });
+    } catch (error) {
+        console.error('Error processing return:', error);
+        res.status(500).json({ error: 'An error occurred while processing the return request' });
+    }
+};
+//-------------------------------------------------------------------------------------------
+
+
+
+module.exports = {
+    getCheckout,
+    placeOrder,
+    updatePaymentStatus,
+    getOrderList,
+    returnOrder,
+    cancelOrder,
+    trackOrder
+};

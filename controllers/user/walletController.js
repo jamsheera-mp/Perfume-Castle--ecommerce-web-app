@@ -76,5 +76,6 @@ const handleWalletTransaction = async (userId, amount, type, description) => {
 
 
 module.exports = {
-    getWallet
+    getWallet,
+    handleWalletTransaction
 };

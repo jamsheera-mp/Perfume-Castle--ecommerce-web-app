@@ -105,7 +105,7 @@
                                     </li>
                                     <% }) %>
                             </ul>
-                            <% if(orderStatus !=='Cancelled' && orderStatus !=='Return' &&  orderStatus !=='Delivered' && order.status !== 'Shipped' && order.status != 'Return Request') { %>
+                            <% if(orderStatus !=='Cancelled' && orderStatus !=='Returned' &&  orderStatus !=='Delivered' && order.status !== 'Shipped' && order.status !== 'Return Request') { %>
 
                                 <button type="button" class="btn  w-100 mt-3" style="background-color: red;"  data-bs-toggle="modal"
                                     data-bs-target="#cancelOrderModal">
@@ -133,7 +133,7 @@
                                     </tr>
                                     <tr>
                                         <th>Total Amount:</th>
-                                        <td>$<%= total.toFixed(2) %>
+                                        <td>₹<%= total.toFixed(2) %>
                                         </td>
                                     </tr>
                                     <tr>
@@ -146,9 +146,9 @@
                                         <th>Payment Status:</th>
                                         <td>
                                             <%= order.paymentStatus %>
-                                            <% if(order.paymentStatus === 'Failed'){ %>
+                                            <!--<% if(order.paymentStatus === 'Failed'){ %>
                                                 <a href="/checkout" class="btn btn-sm ms-5" style="background-color: red;">Retry Payment</a>
-                                                <% } %>
+                                                <% } %>-->
 
                                         </td>
                                     </tr>
@@ -387,11 +387,11 @@
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({ reason: finalReason, action: 'request' }),
-                            credentials: 'same-origin'
+                            //credentials: 'same-origin'
                         })
                             .then(response => response.json())
                             .then(data => {
-                                if (data.message) {
+                                if (data.success) {
                                     Swal.fire('Return Requested!', data.message, 'success');
                                     updateOrderStatus('Return Request');
                                     bootstrap.Modal.getInstance(document.getElementById('returnOrderModal')).hide();
