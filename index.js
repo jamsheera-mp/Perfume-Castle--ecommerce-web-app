@@ -17,7 +17,7 @@ const path = require('path')
 const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
 
-const PORT = process.env.PORT || 3001 //port
+const PORT = process.env.PORT || 3000 //port
 connectDB() //db
 
 // Middleware to parse form data
