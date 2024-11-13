@@ -14,11 +14,18 @@ const Address = require('../../models/addressSchema')
 const Order = require('../../models/orderSchema')
 const Wallet = require('../../models/walletSchema')
 const Coupon = require('../../models/couponSchema')
+const Banner = require('../../models/bannerSchema')
 
 //Load home page
 const loadHome = async (req, res) => {
     try {
+        const today = new Date().toISOString()
+        const banner = await Banner.find({
+            startDate:{$lt:new Date(today)},
+            endDate:{$gt:new Date(today)}
+        })
         const user = req.session.user;
+       
         const categories = await Category.find({ isListed: true }).lean();
         // Fetch basic data
         const [brands, products, userData] = await Promise.all([
@@ -51,7 +58,8 @@ const loadHome = async (req, res) => {
             user: userData,
             products: processedProducts, // Use processed products with offers
             categories: categories,
-            brands: brands
+            brands: brands,
+            banner:banner||''
         });
 
     } catch (error) {

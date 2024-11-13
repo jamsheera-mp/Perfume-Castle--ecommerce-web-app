@@ -944,7 +944,7 @@
                         console.log('Selected payment method:', selectedPaymentRadio.value);
 
                         if (!selectedAddressRadio) {
-                            //alert('Please select a delivery address');
+                       
                             Swal.fire({
                                 icon: 'error',
                                
@@ -956,7 +956,7 @@
                         }
 
                         if (!selectedPaymentRadio) {
-                            //alert('Please select a payment method');
+                            
                             Swal.fire({
                                 icon: 'error',
                           
@@ -984,12 +984,20 @@
                         .then(data => {
                             if (data.success) {
                                 if (paymentMethod === 'CashOnDelivery') {
-                                    window.location.href = '/orderSuccess?orderId=' + data.orderId;
+                                    Swal.fire({
+                                        text:'Order placed successfully'
+                                    })
+                                    window.location.href = '/orders'
                                 } else if (paymentMethod === 'Online') {
                                     initiateRazorpayPayment(data);
-                                }
+                                }else if(paymentMethod === 'wallet'){
+                                    Swal.fire({
+                                        text:'Order placed successfully'
+                                    })
+                                    window.location.href = '/orders'
+                                } 
                             } else {
-                                //alert(data.message || 'Error occurred while placing order');
+                              
                                 Swal.fire({
                                     
                                     text: data.message || 'Error occurred while placing order.',
@@ -1000,7 +1008,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            //alert('An error occurred while placing the order');
+                           
                             Swal.fire({
                                
                                 text: 'An error occurred while placing the order.',

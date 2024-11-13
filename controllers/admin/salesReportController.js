@@ -7,7 +7,11 @@ const salesReportController = {
   getSalesReport: async (req, res) => {
     try {
       const { startDate, endDate, reportType } = req.query;
-      let query = {};
+      let query = {
+        status:{
+          $nin:['Returned','Cancelled','Return Request','Returned','Failed','Pending']
+        }
+      };
 
       if (startDate && endDate) {
         query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
@@ -15,19 +19,25 @@ const salesReportController = {
         const currentDate = new Date();
         switch (reportType) {
           case 'daily':
-            query.createdAt = { $gte: new Date(currentDate.setHours(0, 0, 0, 0)) };
+            query.createdAt = { $gte: new Date(currentDate.setHours(0, 0, 0, 0)), $lte: new Date(currentDate.setHours(23, 59, 59, 999)) };
             break;
           case 'weekly':
             const weekStart = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
-            query.createdAt = { $gte: weekStart };
+            weekStart.setHours(0, 0, 0, 0);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+            query.createdAt = { $gte: weekStart, $lte: weekEnd };
             break;
           case 'monthly':
             const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            query.createdAt = { $gte: monthStart };
+            const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            query.createdAt = { $gte: monthStart, $lte: monthEnd };
             break;
           case 'yearly':
             const yearStart = new Date(currentDate.getFullYear(), 0, 1);
-            query.createdAt = { $gte: yearStart };
+            const yearEnd = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59, 999);
+            query.createdAt = { $gte: yearStart, $lte: yearEnd };
             break;
         }
       }
@@ -63,7 +73,12 @@ const salesReportController = {
       // Log received parameters
       console.log('Request query parameters:', req.query);
       const { format, startDate, endDate, reportType } = req.query;
-      let query = {};
+      let query = {
+        status:{
+          $nin:['Returned','Cancelled','Return Request','Returned','Failed','Pending']
+        }
+      };
+
       console.log('Parsed parameters:', {
         format,
         startDate,

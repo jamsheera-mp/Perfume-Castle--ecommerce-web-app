@@ -151,7 +151,7 @@ const fetchSalesData = async (period) => {
     const { startDate, endDate } = getDateRange(period);
 
     const salesData = await Order.aggregate([
-        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $ne: 'Cancelled' } } },
+        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $nin: ['Returned','Cancelled','Return Request','Returned','Failed','Pending']} } },
         { $group: {
             _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdOn" } },
             totalSales: { $sum: "$finalAmount" },
@@ -168,7 +168,7 @@ const fetchTopProducts = async (period) => {
     const { startDate, endDate } = getDateRange(period);
 
     const topProducts = await Order.aggregate([
-        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $ne: 'Cancelled' } } },
+        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $nin: ['Returned','Cancelled','Return Request','Returned','Failed','Pending']} } },
         { $unwind: "$orderedItems" },
         { $group: {
             _id: "$orderedItems.product",
@@ -200,7 +200,7 @@ const fetchTopCategories = async (period) => {
     const { startDate, endDate } = getDateRange(period);
 
     const topCategories = await Order.aggregate([
-        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $ne: 'Cancelled' } } },
+        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $nin: ['Returned','Cancelled','Return Request','Returned','Failed','Pending']}} },
         { $unwind: "$orderedItems" },
         { $lookup: {
             from: 'products',
@@ -239,7 +239,7 @@ const fetchTopBrands = async (period) => {
     const { startDate, endDate } = getDateRange(period);
 
     const topBrands = await Order.aggregate([
-        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $ne: 'Cancelled' } } },
+        { $match: { createdOn: { $gte: startDate, $lte: endDate }, status: { $nin: ['Returned','Cancelled','Return Request','Returned','Failed','Pending']} } },
         { $unwind: "$orderedItems" },
         { $lookup: {
             from: 'products',

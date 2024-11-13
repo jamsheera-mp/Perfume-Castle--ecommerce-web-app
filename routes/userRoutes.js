@@ -90,6 +90,7 @@ router.post('/createRetryPayment',paymentController.createRetryPayment);
 //order mgmt
 router.get('/checkout',userAuth,calculateProductPrices,orderController.getCheckout)
 router.post('/placeOrder',userAuth,calculateProductPrices,orderController.placeOrder)
+//router.post('/placeOrderWithWallet',userAuth,calculateProductPrices,orderController.placeOrderWithWallet);
 router.post('/updatePaymentStatus',calculateProductPrices,userAuth,orderController.updatePaymentStatus)
 router.get('/orders', userAuth,calculateProductPrices,orderController.getOrderList);
 router.get('/track-order/:orderId', userAuth,calculateProductPrices,orderController.trackOrder);

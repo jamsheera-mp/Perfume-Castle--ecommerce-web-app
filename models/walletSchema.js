@@ -30,6 +30,23 @@ const walletSchema = new mongoose.Schema({
     }]
 }, { timestamps: true });
 
+
+
+// Add middleware to recalculate balance before saving
+walletSchema.pre('save', function(next) {
+    // Recalculate balance based on all transactions
+    this.balance = this.transactions.reduce((acc, transaction) => {
+        return transaction.type === 'credit' 
+            ? acc + transaction.amount 
+            : acc - transaction.amount;
+    }, 0);
+    next();
+});
+
+
+
+
+
 const Wallet = mongoose.model('Wallet', walletSchema);
 
 module.exports = Wallet;

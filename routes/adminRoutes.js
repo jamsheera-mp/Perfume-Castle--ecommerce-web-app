@@ -16,6 +16,7 @@ const multer =  require('multer')
 const storage = require('../helpers/multer')
 const uploads = multer({storage:storage})
 
+
 //error mgmt
 router.get('/pageError',adminController.pageError)
 
@@ -74,7 +75,7 @@ router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,uploads.array('images',3),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 router.post('/deleteProduct/:id',adminAuth,productController.deleteProduct)
-router.post('/softDeleteProduct/:id',adminAuth,productController.softDeleteProduct)
+
 
 
 //order mgmt
@@ -98,7 +99,6 @@ router.patch('/offerStatus/:offerId/:newStatus',adminAuth,offerController.change
 router.delete('/offer',adminAuth,  offerController.deleteOffer);
 router.get('/getProducts',adminAuth,offerController.getProducts)
 router.get('/getCategories',adminAuth,offerController.getCategories)
-
 
 
 

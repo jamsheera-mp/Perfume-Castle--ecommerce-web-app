@@ -73,6 +73,7 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 //-------------------------------------------------------------------------
+
 const placeOrder = async (req, res) => {
     try {
         console.log('Received order request:', req.body);
@@ -165,7 +166,7 @@ const placeOrder = async (req, res) => {
         if (paymentMethod === 'CashOnDelivery') {
             initialStatus = 'Placed';
             initialPaymentStatus = 'Pending';
-        } else if (paymentMethod === 'Online') {
+        } else if (paymentMethod === 'Online' || paymentMethod === 'wallet') {
             initialStatus = 'Pending';
             initialPaymentStatus = 'Pending';
         } else {
@@ -204,6 +205,36 @@ const placeOrder = async (req, res) => {
             });
             newOrder.razorpayOrderId = razorpayOrder.id;
         }
+        if (paymentMethod === 'wallet') {
+            // Check if the user has a wallet and sufficient balance
+            const wallet = await Wallet.findOne({ userId });
+            if (!wallet || wallet.balance < finalAmount) {
+                return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
+            }
+
+            // Deduct the order amount from the wallet balance
+            const newBalance = wallet.balance - finalAmount;
+           
+            
+
+            // Add a new transaction to the wallet
+            await Wallet.findByIdAndUpdate(wallet._id, {
+                $set: { balance: newBalance },
+                $push: {
+                    transactions: {
+                        type: 'debit',
+                        amount: finalAmount,
+                        description: `Order #${newOrder.orderId}`,
+                        date: new Date()
+                    }
+                }
+            },{new:true})
+            
+            console.log('Amount deducted from wallet:', { userId, newBalance: wallet.balance });
+        newOrder.status = 'Placed'
+        newOrder.paymentStatus = 'Paid'
+
+        }
 
         console.log('Before saving new order:', newOrder);
         await newOrder.save();
@@ -229,7 +260,7 @@ const placeOrder = async (req, res) => {
                 message: 'Order placed successfully',
                 orderId: newOrder._id
             });
-        } else {
+        } else if(paymentMethod === 'Online') {
             await Promise.all([
                 ...cart.items.map(item =>
                     Product.findByIdAndUpdate(item.productId._id, {
@@ -248,6 +279,24 @@ const placeOrder = async (req, res) => {
                 amount: finalAmount * 100,
                 currency: 'INR'
             });
+        }else if(paymentMethod === 'wallet'){
+
+            await Promise.all([
+                ...cart.items.map(item =>
+                    Product.findByIdAndUpdate(item.productId._id, {
+                        $inc: { quantity: -item.quantity }
+                    })
+                ),
+                Cart.findOneAndUpdate({ userId: userObjectId }, { $set: { items: [] } })
+            ])
+            return res.status(200).json({
+                success: true,
+                message: 'Order placed successfully',
+                orderId: newOrder._id,
+                paymentStatus: 'Paid',
+                paymentMethod:'wallet'
+            });
+
         }
 
     } catch (error) {
@@ -255,6 +304,9 @@ const placeOrder = async (req, res) => {
         res.status(400).json({ success: false, message: 'Error placing order' });
     }
 };
+//---------------------------------------------------------------------------------------
+
+
 
 //------------------------------------------------------------------------------------------------
 const updatePaymentStatus = async (req, res) => {
@@ -272,36 +324,12 @@ const updatePaymentStatus = async (req, res) => {
         // Update order with payment failure details
         order.paymentStatus = status;
         order.status = status === 'Failed' ? 'Failed' : order.status;
-
-
         if (error) {
             order.paymentError = error;
         }
-        // If there's an error message, store it
-        // if (error) {
-        //updates.paymentFailureReason = error;
-        // }
         await order.save();
 
-        //////////////////////////////////////////
-        //const updatedOrder = await Order.findOneAndUpdate(
-        //{ _id: orderId },
-        //{ $set: updates },
-        //{ new: true }
-        //);
-
-
-        // If payment failed, restore product quantities
-        //if (paymentStatus === 'Failed') {
-        // await Promise.all(order.orderedItems.map(async (item) => {
-        // await Product.findByIdAndUpdate(
-        //item.product,
-        //{ $inc: { quantity: item.quantity } }
-        // );
-        // }));
-        //}
-        /////////////////////////////////////////
-        res.status(200).json({
+               res.status(200).json({
             success: true,
             message: 'Payment status updated successfully',
             //order: updatedOrder
@@ -357,7 +385,7 @@ const getOrderList = async (req, res) => {
     }
 };
 
-
+//----------------------------------------------------------------------------------------------------------
 const trackOrder = async (req, res) => {
     try {
         const userId = req.session.user
@@ -451,6 +479,8 @@ const trackOrder = async (req, res) => {
         res.redirect('/orders');
     }
 };
+
+//----------------------------------------------------------------------------------------------------
 const cancelOrder = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -544,18 +574,26 @@ const cancelOrder = async (req, res) => {
 
 // Helper function to add amount to wallet
 async function addToWallet(userId, amount, description) {
-    let wallet = await Wallet.findOne({ userId });
+    try{
+        let wallet = await Wallet.findOne({ userId });
     if (!wallet) {
         wallet = new Wallet({ userId });
     }
-    wallet.balance += amount;
+    //wallet.balance += amount;
     wallet.transactions.push({
         type: 'credit',
         amount,
-        description
+        description,
+        date:new Date()
     });
     await wallet.save();
     console.log('Refund added to wallet:', { userId, amount });
+    return wallet
+    }catch(error){
+        console.error('Error in addToWallet:', error);
+        throw error;
+    }
+    
 }
 async function initiateRazorpayRefund(razorpayOrderId, amount) {
     try {
@@ -628,8 +666,8 @@ const returnOrder = async (req, res) => {
         await order.save();
 
 
-  // Credit the user's wallet with the order amount
-  await addToWallet(addressDoc.userId, order.finalAmount, `Refund for returned order ${orderId}`);
+        // Credit the user's wallet with the order amount
+        await addToWallet(addressDoc.userId, order.finalAmount, `Refund for returned order ${orderId}`);
 
 
 
@@ -646,6 +684,7 @@ const returnOrder = async (req, res) => {
 module.exports = {
     getCheckout,
     placeOrder,
+    
     updatePaymentStatus,
     getOrderList,
     returnOrder,

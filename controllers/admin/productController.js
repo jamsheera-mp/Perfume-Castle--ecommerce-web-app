@@ -265,13 +265,7 @@ const editProduct = async (req,res)=>{
         }
 
         
-        //Process new Images if uploaded
-        //const images =[]
-        //if(req.files && req.files.length > 0){
-            //for(let i=0;i<req.files.length;i++){
-                //images.push(req.files[i].filename)
-            //}
-        //}
+       
         //Prepare updated fields
         const updatedFields = {
             productName:data.productName,
@@ -348,24 +342,24 @@ const deleteSingleImage = async (req, res) => {
     }
 };
 
-const deleteProduct = async(req,res)=>{
-    try {
-        const id = req.params.id
-        const product = await Product.findByIdAndDelete(id)
-        console.log('deleted product',product);
+//const deleteProduct = async(req,res)=>{
+    //try {
+      //  const id = req.params.id
+        //const product = await Product.findByIdAndDelete(id)
+        //console.log('deleted product',product);
         
-        if(product){
-            res.redirect('/admin/products')
-        }
+        //if(product){
+          //  res.redirect('/admin/products')
+        //}
 
         
-    } catch (error) {
+    //} catch (error) {
         
-        console.log('error deleting product',error);
+      //  console.log('error deleting product',error);
         
-    }
-}
-const softDeleteProduct = async(req,res)=>{
+    //}
+//}
+const deleteProduct = async(req,res)=>{
     try {
         const id = req.params.id
         if(!id){
@@ -391,5 +385,5 @@ module.exports = {
     deleteSingleImage,
     
     deleteProduct,
-    softDeleteProduct
+    
 }
