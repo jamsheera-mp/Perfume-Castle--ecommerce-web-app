@@ -12,9 +12,9 @@ const couponController = require('../controllers/admin/couponController')
 const offerController = require('../controllers/admin/offerController')
 const salesReportController = require('../controllers/admin/salesReportController')
 
-const multer =  require('multer')
-const storage = require('../helpers/multer')
-const uploads = multer({storage:storage})
+//const multer =  require('multer')
+//const storage = require('../helpers/multer')
+const {upload} = require('../helpers/uploadToS3')
 
 
 //error mgmt
@@ -37,11 +37,6 @@ router.get('/dashboard/update-top-brands', adminAuth, adminController.updateTopB
 
 
 
-
-
-
-
-
 //user management
 router.get('/users',adminAuth,usersController.userInfo)
 router.get('/blockUser',adminAuth,usersController.blockUser)
@@ -59,20 +54,18 @@ router.get('/softDeleteCategory/:id',adminAuth,categoryController.softDeleteCate
 
 // brand management routes
 router.get('/brands', adminAuth, brandController.brandInfo);
-router.post('/addBrand', adminAuth, uploads.single('image'), brandController.addBrand);
+router.post('/addBrand', adminAuth, upload.single('image'), brandController.addBrand);
 router.patch('/blockBrand/:id', adminAuth, brandController.blockBrand);
 router.patch('/unBlockBrand/:id', adminAuth, brandController.unBlockBrand);
 router.delete('/deleteBrand/:id', adminAuth, brandController.deleteBrand);
 
 
-
-
 //product management
 router.get('/addProducts',adminAuth,productController.productInfo)
-router.post('/addProducts',adminAuth,uploads.array('images',3),productController.addProducts)
+router.post('/addProducts',adminAuth,upload.array('images',3),productController.addProducts)
 router.get('/products',adminAuth,productController.getAllProducts)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
-router.post('/editProduct/:id',adminAuth,uploads.array('images',3),productController.editProduct)
+router.post('/editProduct/:id',adminAuth,upload.array('images',3),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 router.post('/deleteProduct/:id',adminAuth,productController.deleteProduct)
 
@@ -95,7 +88,7 @@ router.post('/deleteCoupons/:id',adminAuth, couponController.deleteCoupon);
 router.get('/offers',adminAuth,offerController.offerPageLoad);
 router.get('/add-offer',adminAuth,offerController.addOfferPage);
 router.post('/addOffer',adminAuth,offerController.addOffer);
-router.patch('/offerStatus/:offerId/:newStatus',adminAuth,offerController.changeOfferStatus);
+router.patch('/offerStatus/:offerId/:status',adminAuth,offerController.changeOfferStatus);
 router.delete('/offer',adminAuth,  offerController.deleteOffer);
 router.get('/getProducts',adminAuth,offerController.getProducts)
 router.get('/getCategories',adminAuth,offerController.getCategories)

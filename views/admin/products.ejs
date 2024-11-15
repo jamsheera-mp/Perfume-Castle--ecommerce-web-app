@@ -61,10 +61,13 @@
                                                 <%= products[i].productName %>
                                             </td>
                                             <td>
-                                                <img src="/uploads/re-image/<%= products[i].productImage[0]%>"
+                                                <% if(products[i].productImage && products[i].productImage.length > 0 ){ %>
+                                                <img src= "<%= products[i].productImage[0]%>"
                                                     alt="<%= products[i].productName %>"
-                                                    style="width: 100px; height: auto;">
-
+                                                    style="width: 100px; height: auto;" onloading="lazy" onerror="this.onerror=null;">
+                                                    <% } else{ %>
+                                                        No image available
+                                                        <% } %>
                                             </td>
                                             <td>
                                                 <% if (products[i].brand) { %>

@@ -183,29 +183,42 @@ const changeOfferStatus = async (req, res) => {
         
         const offer = await Offer.findById(offerId);
         if (!offer) {
-            return res.status(404).json({ error: "Offer not found" });
+            return res.status(404).json({ success: false, error: "Offer not found" });
         }
 
         if (offer.validity < new Date()) {
-            return res.status(400).json({ error: "Cannot modify expired offer" });
+            return res.status(400).json({ success: false, error: "Cannot modify expired offer" });
         }
 
-        offer.status = status === 'activate';
-        await offer.save();
+        // Set the new status based on the action
+        const newStatus = status === 'activate';
+       
+        //Update the offer status
+        const updatedOffer = await Offer.findByIdAndUpdate(
+            offerId,
+            {status: newStatus},
+            {new: true}
+        )
+        if (!updatedOffer) {
+            return res.status(404).json({ 
+                success: false, 
+                error: "Failed to update offer status" 
+            });
+        }
 
         res.json({ 
             success: true, 
-            message: `Offer ${status === 'activate' ? 'activated' : 'deactivated'} successfully` 
+            message: `Offer ${status}d successfully` 
         });
 
     } catch (error) {
+        console.error('Error changing offer status:', error);
         res.status(500).json({ 
             success: false, 
             error: "Error changing offer status" 
         });
     }
 };
-
 // Delete offer
 const deleteOffer = async (req, res) => {
     try {

@@ -9,33 +9,13 @@
             <p>Offers</p>
         </div>
         <div>
-            <!--<input type="text" placeholder="Search order ID" class="form-control bg-white">-->
+          
            <a href="/admin/add-offer" class="btn btn-md">+ Add New Offer</a>
 
         </div>
     </div>
     <div class="card mb-4">
-        <!--<header class="card-header">
-            <div class="row gx-3">
-                <div class="col-lg-4 col-md-6 me-auto">
-                    <input type="text" placeholder="Search..." class="form-control">
-                </div>
-                <div class="col-lg-2 col-6 col-md-3">
-                    <select class="form-select">
-                        <option>Status</option>
-                        <option>Active</option>
-                        <option>Disabled</option>
-                        <option>Show all</option>
-                    </select>
-                </div>
-                <div class="col-lg-2 col-6 col-md-3">
-                    <select class="form-select">
-                        <option>Show 20</option>
-                        <option>Show 30</option>
-                        <option>Show 40</option>
-                    </select>
-                </div>
-            </div>-->
+        
         </header>
         <div class="card-body">
             <div class="table-responsive">
@@ -88,13 +68,12 @@
                                             <% } %>
                                     </td>
                                     <td  >
-
-                                        <% if(offer.status === false){ %>
-                                            <button class ="btn btn-md rounded -pill btn-primary font-sm" onclick="changeOfferStatus('<%=offer._id%>')">Activate</button>
-                                            <% }else{ %>
-                                                <button class ="btn btn-md rounded -pill btn-warning font-sm" onclick="changeOfferStatus('<%= offer._id %>')"  >Deactivate</button>
-                                                <% } %>
-                                                <button  type="submit"  class="btn btn-md bg-danger rounded font-sm" onclick="deleteOffer('<%= offer._id%>')">Delete Offer</button>
+                                          <% if(offer.status === false){ %>
+                                                <button class="btn btn-md rounded-pill btn-primary font-sm" onclick="changeOfferStatus('<%=offer._id%>')">Activate</button>
+                                            <% } else { %>
+                                                <button class="btn btn-md rounded-pill btn-warning font-sm" onclick="changeOfferStatus('<%= offer._id %>')">Deactivate</button>
+                                            <% } %>
+                                            <button type="submit" class="btn btn-md bg-danger rounded font-sm" onclick="deleteOffer('<%= offer._id%>')">Delete Offer</button>
 
                                     </td>
                                 
@@ -129,52 +108,57 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-   function changeOfferStatus(offerId) {
-    const currentStatus = event.target.innerText.toLowerCase();
-    const newStatus = currentStatus === 'activate' ? 'activate' : 'deactivate';
+  function changeOfferStatus(offerId) {
+
+     // Get the current button text
+     const button = event.target;
+    const isCurrentlyDeactivated = button.innerText.toLowerCase() === 'activate';
+    
+    // Determine the action based on current state
+    const action = isCurrentlyDeactivated ? 'activate' : 'deactivate';
     
     Swal.fire({
         title: `Are you sure?`,
-        text:`Do you want to ${currentStatus} this offer?`,
+        text: `Do you want to ${action} this offer?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: `Yes, ${currentStatus} it`
-    }).then( (result) => {
+        confirmButtonText: `Yes, ${action} it`
+    }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/admin/offerStatus/${offerId}/${newStatus}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: data.message
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.error || 'Error updating offer status'
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to update offer status'
-                        });
+            fetch(`/admin/offerStatus/${offerId}/${action}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message|| ` Offer ${action}d successfully`
+                    }).then(() => {
+                        window.location.reload();
                     });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || 'Error updating offer status'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to update offer status'
+                });
+            });
         }
     });
 }
