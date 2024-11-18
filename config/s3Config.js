@@ -1,6 +1,8 @@
 
 const { S3Client } = require('@aws-sdk/client-s3');
 
+const { NodeHttpHandler } = require('@smithy/node-http-handler');
+
 require('dotenv').config();
 
 // Create S3 client
