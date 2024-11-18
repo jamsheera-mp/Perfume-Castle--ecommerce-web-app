@@ -28,6 +28,11 @@ const upload = multer({
 // Function to process and upload image to S3
 async function uploadResizedImageToS3(fileBuffer, originalname) {
     try {
+
+         // Increase timeout for individual uploads
+         const controller = new AbortController();
+         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+ 
          // Process image with sharp
          const processedImage = await sharp(fileBuffer)
          .resize(440, 440, {
@@ -38,7 +43,7 @@ async function uploadResizedImageToS3(fileBuffer, originalname) {
             
          // Get the processed buffer and metadata
         const resizedBuffer = await processedImage.toBuffer();
-        const metadata = await processedImage.metadata();
+       
 
         // Generate unique filename
         const filename = `products/${Date.now()}-${originalname}`;
@@ -49,22 +54,19 @@ async function uploadResizedImageToS3(fileBuffer, originalname) {
             Key: filename,
             Body: resizedBuffer,
             ContentType: 'image/jpeg',
-            ContentLength: metadata.size,
-            CacheControl:'max-age=31536000',//cache for 1 year
-            Metadata:{
-                'original-filename':originalname,
-                'width': metadata.width.toString(),
-                'height': metadata.height.toString(),
-            }
+            
+            
         };
 
         const upload = new Upload({
             client: s3Client,
-            params: uploadParams
+            params: uploadParams,
+            abortController: controller
         });
 
         // Execute upload
         const result = await upload.done();
+        clearTimeout(timeoutId)
         return result;
     } catch (error) {
         console.error('Error in uploadResizedImageToS3:', error);
