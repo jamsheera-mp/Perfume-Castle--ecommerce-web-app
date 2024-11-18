@@ -23,13 +23,11 @@
                                         style="display:none;"></small>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="form-label">Brand Image</label>
-                                    <div class="input-upload">
-                                        <img src="" alt="" />
-                                        <input class="form-control border" id="brandImage" name="image" type="file">
-                                    </div>
+                                    <label class="form-label">Description</label>
+                                    <textarea placeholder="Type here" class="form-control" id="description"
+                                    name="description"></textarea>
 
-                                    <small id="image-error" class="error-message text-danger"
+                                    <small id="description-error" class="error-message text-danger"
                                         style="display:none;"></small>
                                 </div>
                                 <div class="d-grid">
@@ -43,14 +41,10 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <!-- <th class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" />
-                                                </div>
-                                            </th> -->
+                                           
 
                                             <th>Name</th>
-                                            <th>Image</th>
+                                            <th>Description</th>
                                             <th>Status</th>
 
                                             <th >Action</th>
@@ -64,18 +58,7 @@
                                                         <%= brand.brandName %>
                                                     </td>
                                                     <td>
-                                                        <div class="d-flex align-items-center justify-content-center"
-                                                            style="width:40px;
-                                                    height:40px;
-                                                    border-radius: 50%;
-                                                    overflow: hidden;">
-
-                                                            <img src="/uploads/re-image/<%= brand.brandImage[0] %>"
-                                                                alt="<%= brand.brandName %>"
-                                                                class="img-fluid rounded-circle"
-                                                                style="width:100%;height:auto;">
-
-                                                        </div>
+                                                       <%= brand.description %>
 
                                                     </td>
                                                     <td>
@@ -390,24 +373,20 @@
                     hideError(nameError);
                 }
 
-                // Validate Image
-                const imageInput = document.querySelector('input[name="image"]');
-                const imageError = document.getElementById('image-error');
-
-                if (!imageInput.files || imageInput.files.length === 0) {
-                    showError(imageError, 'Please select an image');
+               //validate description
+               const descriptionInput = document.getElementById('description');
+               const descriptionError = document.getElementById('description-error');
+               const descriptionRegex = /^[A-Za-z]{8,}(\s[A-Za-z]+)*$/;
+                
+               if (!descriptionInput.value.trim()) {
+                    showError(nameError, 'Description is required');
+                    isValid = false;
+                } else if (!descriptionRegex .test(nameInput.value.trim())) {
+                    showError(nameError, 'Description should contain only alphabets and be at least 8 characters long');
                     isValid = false;
                 } else {
-                    const file = imageInput.files[0];
-                    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                    if (!validTypes.includes(file.type)) {
-                        showError(imageError, 'Please select a valid image file (JPEG, PNG, or GIF)');
-                        isValid = false;
-                    } else {
-                        hideError(imageError);
-                    }
+                    hideError(nameError);
                 }
-
                 return isValid;
             }
 

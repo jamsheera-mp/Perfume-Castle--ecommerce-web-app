@@ -55,7 +55,7 @@ const addBrand = async(req,res)=>{
         }
             const newBrand = new Brand({
                 brandName : brandName,
-                brandImage : req.file.filename
+                description : description
             })
             await newBrand.save()
             res.status(200).json({

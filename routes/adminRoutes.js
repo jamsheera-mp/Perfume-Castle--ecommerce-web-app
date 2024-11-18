@@ -53,11 +53,11 @@ router.get('/softDeleteCategory/:id',adminAuth,categoryController.softDeleteCate
 
 
 // brand management routes
-router.get('/brands', adminAuth, brandController.brandInfo);
-router.post('/addBrand', adminAuth, upload.single('image'), brandController.addBrand);
-router.patch('/blockBrand/:id', adminAuth, brandController.blockBrand);
-router.patch('/unBlockBrand/:id', adminAuth, brandController.unBlockBrand);
-router.delete('/deleteBrand/:id', adminAuth, brandController.deleteBrand);
+router.get('/brands',adminAuth,brandController.brandInfo);
+router.post('/addBrand',adminAuth,brandController.addBrand);
+router.patch('/blockBrand/:id',adminAuth,brandController.blockBrand);
+router.patch('/unBlockBrand/:id',adminAuth,brandController.unBlockBrand);
+router.delete('/deleteBrand/:id',adminAuth,brandController.deleteBrand);
 
 
 //product management
