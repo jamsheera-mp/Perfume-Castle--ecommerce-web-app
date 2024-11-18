@@ -37,13 +37,13 @@ const brandInfo = async (req,res)=>{
 const addBrand = async(req,res)=>{
     try {
         
-        const brandName = req.body.brandName
+        const { brandName, description } = req.body
         
         
-        if (!brandName || !req.file) {
+        if (!brandName || !description) {
             return res.status(400).json({
                 success:false,
-                message: 'Brand name and image are required'
+                message: 'Brand name and description are required'
             });
         }
         const existingBrand = await Brand.findOne({brandName:brandName})

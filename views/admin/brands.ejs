@@ -153,7 +153,10 @@
                             try {
                                 const response = await fetch('/admin/addBrand', {
                                     method: 'POST',
-                                    body: formData
+                                    headers:{
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(Object.fromEntries(formData)),
                                 });
 
                                 const result = await response.json();
@@ -184,6 +187,7 @@
                                 });
                             }
                         }else{
+                            console.log('brand error',error)
                             Swal.fire({
                                 icon: 'error',
                               
@@ -376,13 +380,14 @@
                //validate description
                const descriptionInput = document.getElementById('description');
                const descriptionError = document.getElementById('description-error');
-               const descriptionRegex = /^[A-Za-z]{8,}(\s[A-Za-z]+)*$/;
+               const descriptionRegex =/^[A-Za-z\s]{4,}$/
+
                 
                if (!descriptionInput.value.trim()) {
-                    showError(nameError, 'Description is required');
+                    showError(descriptionError, 'Description is required');
                     isValid = false;
-                } else if (!descriptionRegex .test(nameInput.value.trim())) {
-                    showError(nameError, 'Description should contain only alphabets and be at least 8 characters long');
+                } else if (!descriptionRegex .test(descriptionInput.value.trim())) {
+                    showError(descriptionError, 'Description should contain only alphabets and be at least 4 characters long');
                     isValid = false;
                 } else {
                     hideError(nameError);
