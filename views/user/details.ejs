@@ -83,7 +83,7 @@
                                         <div class="product-image-slider product-image-slider-custom">
                                             <figure class="border-radius-10">
                                                 <img id="main-product-image" class="main-image"
-                                                    src="/uploads/re-image/<%= product.productImage[0] %>"
+                                                src= "<%= products[i].productImage[0]%>" 
                                                     alt="<%= product.productName %>">
                                             </figure>
 
@@ -92,7 +92,7 @@
                                         <div class="slider-nav-thumbnails pl-15 pr-15">
                                             <% product.productImage.forEach((image,index )=> { %>
 
-                                                <div><img src="/uploads/re-image/<%= image %>"
+                                                <div><img src="<%= image %>"
                                                         alt="<%= product.productName %>- Image <%= index + 1 %>"
                                                         onclick="changeMainImage(this.src)"></div>
                                                 <% }) %>
@@ -312,8 +312,8 @@
                                                 <div class="product-img-action-wrap">
                                                     <div class="product-img product-img-zoom">
                                                         <a href="/product/<%= relatedProduct._id %>" tabindex="0">
-                                                            <img class="default-img"
-                                                                src="/uploads/re-image/<%= relatedProduct.productImage[0] %>"
+                                                            <img class="default-img" src= "<%= relatedProduct[i].productImage[0]%>"
+                                                                
                                                                 alt="<%= relatedProduct.productName %>">
                                                             <!-- <img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt=""> -->
                                                         </a>

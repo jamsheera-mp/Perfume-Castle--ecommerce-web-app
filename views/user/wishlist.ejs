@@ -74,7 +74,7 @@
                 <div class="col">
                     <div class="card h-100 wishlist-item">
                         <% if (item.productImage && item.productImage.length > 0) { %>
-                            <img src="/uploads/re-image/<%= item.productImage[0] %>" class="card-img-top" alt="<%= item.productName %>">
+                            <img src= "<%= products[i].productImage[0]%>" class="card-img-top" alt="<%= item.productName %>">
                         <% } else { %>
                             <img src="/path/to/default-image.jpg" class="card-img-top" alt="<%= item.productName %>">
                         <% } %>
