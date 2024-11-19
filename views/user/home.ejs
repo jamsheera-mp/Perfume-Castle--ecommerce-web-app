@@ -393,11 +393,11 @@
 											<div class="product-img-action-wrap">
 												<div class="product-img product-img-zoom" style="position: relative;">
 													<a href="/product/<%= product._id %>">
-														<img src="/uploads/re-image/<%= product.productImage[0] %>"
+														<img src="<%= product.productImage[0] %>"
 															alt="<%= product.productName %>"
 															style="width: 100%; height: auto;">
 														<img class="hover-img"
-														src= "<%= products[i].productImage[0]%>"
+														src= "<%= products.productImage[0]%>"
 															alt="<%= product.productName %>"
 															style="width: 100%; height: auto;">
 													</a>
