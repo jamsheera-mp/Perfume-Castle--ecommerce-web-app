@@ -13,8 +13,8 @@ const s3Client = new S3Client({
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     },
     requestHandler: new NodeHttpHandler({
-        connectionTimeout: 10000,
-        socketTimeout:10000,
+        connectionTimeout: 60000, //Increased to 60 seconds
+        socketTimeout:60000,
 
     }),
     maxAttempts: 5

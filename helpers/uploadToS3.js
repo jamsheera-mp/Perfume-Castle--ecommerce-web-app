@@ -14,7 +14,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
+        fileSize: 25 * 1024 * 1024, // 25MB limit
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
@@ -24,6 +24,49 @@ const upload = multer({
         }
     }
 });
+async function compressImage(fileBuffer,quality=60) {
+    try {
+        // Get image metadata
+        const metadata = await sharp(fileBuffer).metadata();
+        
+        // Calculate new dimensions while maintaining aspect ratio
+        const MAX_DIMENSION = 1500;
+        let width = metadata.width;
+        let height = metadata.height;
+        
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+            if (width > height) {
+                height = Math.round((height * MAX_DIMENSION) / width);
+                width = MAX_DIMENSION;
+            } else {
+                width = Math.round((width * MAX_DIMENSION) / height);
+                height = MAX_DIMENSION;
+            }
+        }
+
+        const compressedImage = await sharp(fileBuffer)
+            .resize(width, height, {
+                fit: 'inside',
+                withoutEnlargement: true
+            })
+            .jpeg({ 
+                quality: quality,
+                mozjpeg: true,
+                chromaSubsampling: '4:4:4'
+            })
+            .toBuffer();
+
+        // If the compressed image is still too large, recursively compress with lower quality
+        if (compressedImage.length > 5 * 1024 * 1024 && quality > 20) {
+            return await compressImage(fileBuffer, quality - 10);
+        }
+
+        return compressedImage;
+    } catch (error) {
+        console.error('Image compression error:', error);
+        throw error;
+    }
+}
 
 // Function to process and upload image to S3
 async function uploadResizedImageToS3(fileBuffer, originalname) {
@@ -31,28 +74,20 @@ async function uploadResizedImageToS3(fileBuffer, originalname) {
 
          // Increase timeout for individual uploads
          const controller = new AbortController();
-         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds
  
-         // Process image with sharp
-         const processedImage = await sharp(fileBuffer)
-         .resize(440, 440, {
-             fit: 'cover',
-             withoutEnlargement: true
-         })
-         .jpeg({ quality: 80 });
-            
-         // Get the processed buffer and metadata
-        const resizedBuffer = await processedImage.toBuffer();
+           // Compress image before upload
+        const compressedBuffer = await compressImage(fileBuffer);
        
 
-        // Generate unique filename
-        const filename = `products/${Date.now()}-${originalname}`;
+       // Generate unique filename
+       const filename = `products/${Date.now()}-${originalname.replace(/\s+/g, '-')}`;
 
         // Create upload object with metadata
         const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME,
             Key: filename,
-            Body: resizedBuffer,
+            Body: compressedBuffer,
             ContentType: 'image/jpeg',
             
             
@@ -61,7 +96,10 @@ async function uploadResizedImageToS3(fileBuffer, originalname) {
         const upload = new Upload({
             client: s3Client,
             params: uploadParams,
-            abortController: controller
+            abortController: controller,
+            queueSize: 4,
+            partSize: 5 * 1024 * 1024, // 5MB,
+            leavePartsOnError: false
         });
 
         // Execute upload
