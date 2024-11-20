@@ -280,64 +280,52 @@ const searchProducts = async (req, res) => {
 
 
 
-// Product detail
 const getProductDetails = async (req, res) => {
     try {
-
-        const products = await Product.findById(req.params.id)
+        const product = await Product.findById(req.params.id)
             .populate('brand', 'brandName')
             .populate('category', 'name')
             .lean()
 
-        if (!products) {
+        if (!product) {
             return res.status(404).render('user/404', { message: 'Product not found' });
         }
 
-        if (!products.category) {
+        if (!product.category) {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
-       // Before processing products, generate signed URLs
-       const productsWithSignedUrls = await Promise.all(
-        products.map(async (product) => {
-            // Ensure product.productImage exists and is an array
-            const productImages = product.productImage || [];
-            
-            const signedImageUrls = await Promise.all(
-                productImages.map(async (imageUrl) => {
-                    try {
-                        const imageKey = imageUrl.split('/').slice(-2).join('/');
-                        return await getSignedImageUrl(imageKey);
-                    } catch (error) {
-                        console.error(`Error signing image URL: ${imageUrl}`, error);
-                        return imageUrl;
-                    }
-                })
-            );
-    
-            return {
-                ...product,
-                productImage: signedImageUrls
-            };
-        })
-    );
-    // Process products through middleware for price calculations
-    req.products = productsWithSignedUrls;
-    await new Promise((resolve) => {
-        calculateProductPrices(req, res, resolve);
-    });
+
+        // Generate signed URLs for product images
+        const productImages = product.productImage || [];
+        const signedImageUrls = await Promise.all(
+            productImages.map(async (imageUrl) => {
+                try {
+                    const imageKey = imageUrl.split('/').slice(-2).join('/');
+                    return await getSignedImageUrl(imageKey);
+                } catch (error) {
+                    console.error(`Error signing image URL: ${imageUrl}`, error);
+                    return imageUrl;
+                }
+            })
+        );
+
+        product.productImage = signedImageUrls;
+
+        // Process product through price calculation middleware
+        req.products = [product];
+        await new Promise((resolve) => {
+            calculateProductPrices(req, res, resolve);
+        });
+
         const reviews = await Review.find({ productId: product._id })
         const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0
 
         const relatedProducts = await Product.find({
-            category: products.category,
-
-            _id: { $ne: products._id },
-
+            category: product.category,
+            _id: { $ne: product._id },
         }).populate('brand', 'brandName')
-            .limit(4) || []
-                .lean();
-
-      
+            .limit(4)
+            .lean();
 
         // Generate signed URLs for related products
         const relatedProductsWithSignedUrls = await Promise.all(
@@ -359,21 +347,22 @@ const getProductDetails = async (req, res) => {
                 return relatedProduct;
             })
         );
-          // Calculate prices for related products
-          req.products = relatedProductsWithSignedUrls;
-          await new Promise((resolve) => {
+
+        // Calculate prices for related products
+        req.products = relatedProductsWithSignedUrls;
+        await new Promise((resolve) => {
             calculateProductPrices(req, res, resolve);
         });
 
         res.render('user/details', {
-            product: processedProduct,
+            product: req.products[0], // Use the processed product from middleware
             reviews,
             averageRating,
-            relatedProducts: req.products
+            relatedProducts: req.products.slice(1) // Related products start from index 1
         });
     } catch (error) {
         console.error('Error fetching product details:', error);
-        res.status(500).render('user/404', { message: 'Error fetching product details:${error.message}' });
+        res.status(500).render('user/404', { message: `Error fetching product details: ${error.message}` });
     }
 }
 
