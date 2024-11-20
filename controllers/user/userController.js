@@ -39,6 +39,41 @@ const loadHome = async (req, res) => {
             user ? User.findById(user).lean() : null
         ]);
 
+        // Generate signed URLs for product images
+        const productsWithSignedUrls = await Promise.all(
+            products.map(async (product) => {
+                // Generate signed URLs for each image
+                const signedImageUrls = await Promise.all(
+                    product.productImage.map(async (imageUrl) => {
+                        // Extract the key from the full S3 URL
+                        const imageKey = imageUrl.split('/').slice(-2).join('/');
+                        return await getSignedImageUrl(imageKey);
+                    })
+                );
+                 // Add warning flags if category or brand is unavailable
+                 const categoryWarning = !product.category || !product.category.isListed 
+                 ? 'Category unavailable' 
+                 : null;
+                 
+             const brandWarning = !product.brand || product.brand.isBlocked 
+                 ? 'Brand unavailable' 
+                 : null;
+
+             return {
+                 ...product,
+                 productImage: signedImageUrls,
+                 categoryWarning,
+                 brandWarning
+             };
+         })
+     );
+
+     // Process products through middleware for price calculations
+     req.products = productsWithSignedUrls;
+     await new Promise((resolve) => {
+         calculateProductPrices(req, res, resolve);
+     });
+
         // Store products in request for middleware
         req.products = products;
 
