@@ -296,29 +296,35 @@ const getProductDetails = async (req, res) => {
         if (!product.category) {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
-        // Generate signed URLs for the product
-        if (product.productImage && product.productImage.length > 0) {
+       // Before processing products, generate signed URLs
+       const productsWithSignedUrls = await Promise.all(
+        products.map(async (product) => {
+            // Ensure product.productImage exists and is an array
+            const productImages = product.productImage || [];
+            
             const signedImageUrls = await Promise.all(
-                product.productImage.map(async (imageUrl) => {
+                productImages.map(async (imageUrl) => {
                     try {
                         const imageKey = imageUrl.split('/').slice(-2).join('/');
                         return await getSignedImageUrl(imageKey);
                     } catch (error) {
-                        console.error(`Error generating signed URL for image: ${imageUrl}`, error);
+                        console.error(`Error signing image URL: ${imageUrl}`, error);
                         return imageUrl;
                     }
                 })
             );
-            product.productImage = signedImageUrls;
-        }
-
-        // Store product in request for middleware
-        req.products = product;
-
-        // Calculate price with offers
-        await calculateProductPrices(req, res, () => { });
-        const processedProduct = req.products;
-
+    
+            return {
+                ...product,
+                productImage: signedImageUrls
+            };
+        })
+    );
+    // Process products through middleware for price calculations
+    req.products = productsWithSignedUrls;
+    await new Promise((resolve) => {
+        calculateProductPrices(req, res, resolve);
+    });
         const reviews = await Review.find({ productId: product._id })
         const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0
 
@@ -355,14 +361,15 @@ const getProductDetails = async (req, res) => {
         );
           // Calculate prices for related products
           req.products = relatedProductsWithSignedUrls;
-          await calculateProductPrices(req, res, () => { });
-          const processedRelatedProducts = req.products;
+          await new Promise((resolve) => {
+            calculateProductPrices(req, res, resolve);
+        });
 
         res.render('user/details', {
             product: processedProduct,
             reviews,
             averageRating,
-            relatedProducts: processedRelatedProducts
+            relatedProducts: req.products
         });
     } catch (error) {
         console.error('Error fetching product details:', error);
