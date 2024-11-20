@@ -284,16 +284,16 @@ const searchProducts = async (req, res) => {
 const getProductDetails = async (req, res) => {
     try {
 
-        const product = await Product.findById(req.params.id)
+        const products = await Product.findById(req.params.id)
             .populate('brand', 'brandName')
             .populate('category', 'name')
             .lean()
 
-        if (!product) {
+        if (!products) {
             return res.status(404).render('user/404', { message: 'Product not found' });
         }
 
-        if (!product.category) {
+        if (!products.category) {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
        // Before processing products, generate signed URLs
@@ -329,9 +329,9 @@ const getProductDetails = async (req, res) => {
         const averageRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0
 
         const relatedProducts = await Product.find({
-            category: product.category,
+            category: products.category,
 
-            _id: { $ne: product._id },
+            _id: { $ne: products._id },
 
         }).populate('brand', 'brandName')
             .limit(4) || []
