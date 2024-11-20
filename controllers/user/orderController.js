@@ -505,7 +505,7 @@ const trackOrder = async (req, res) => {
 
         const subtotal = order.totalPrice;
         const total = order.finalAmount;
-        const orderedItems = order.orderedItemsWithSignedUrls.map(item => ({
+        const orderedItems = orderedItemsWithSignedUrls.map(item => ({
             productName: item.product.productName,
             productImage: item.product.productImage,
             quantity: item.quantity,
