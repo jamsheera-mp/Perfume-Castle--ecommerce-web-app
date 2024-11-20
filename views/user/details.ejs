@@ -83,7 +83,7 @@
                                         <div class="product-image-slider product-image-slider-custom">
                                             <figure class="border-radius-10">
                                                 <img id="main-product-image" class="main-image"
-                                                src= "<%= products[i].productImage[0]%>" 
+                                                src= "<%= products.productImage[0]%>" 
                                                     alt="<%= product.productName %>">
                                             </figure>
 
@@ -312,7 +312,7 @@
                                                 <div class="product-img-action-wrap">
                                                     <div class="product-img product-img-zoom">
                                                         <a href="/product/<%= relatedProduct._id %>" tabindex="0">
-                                                            <img class="default-img" src= "<%= relatedProduct[i].productImage[0]%>"
+                                                            <img class="default-img" src= "<%= relatedProduct.productImage[0]%>"
                                                                 
                                                                 alt="<%= relatedProduct.productName %>">
                                                             <!-- <img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt=""> -->
