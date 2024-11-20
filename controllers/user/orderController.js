@@ -462,6 +462,29 @@ const trackOrder = async (req, res) => {
             return res.redirect('/cart');
         }
 
+        // Generate signed URLs for ordered items' product images
+        const orderedItemsWithSignedUrls = await Promise.all(
+            order.orderedItems.map(async (item) => {
+                const signedImageUrls = await Promise.all(
+                    item.product.productImage.map(async (imageUrl) => {
+                        // Extract the key from the full S3 URL if needed
+                        const imageKey = imageUrl.split('/').slice(-2).join('/');
+                        return await getSignedImageUrl(imageKey);
+                    })
+                );
+
+                return {
+                    ...item.toObject(),
+                    product: {
+                        ...item.product.toObject(),
+                        productImage: signedImageUrls
+                    }
+                };
+            })
+        );
+
+
+
         // Prepare order status history
         const statusHistory = [
             { status: 'Pending', date: formatDate(order.createdAt) },
@@ -482,7 +505,7 @@ const trackOrder = async (req, res) => {
 
         const subtotal = order.totalPrice;
         const total = order.finalAmount;
-        const orderedItems = order.orderedItems.map(item => ({
+        const orderedItems = order.orderedItemsWithSignedUrls.map(item => ({
             productName: item.product.productName,
             productImage: item.product.productImage,
             quantity: item.quantity,
