@@ -41,22 +41,6 @@ const addToCart = async (req, res) => {
     if (product.quantity < requestedQuantity) {
       return res.status(400).json({ success: false, error: `Only ${product.quantity} items available in stock` });
     }
-    // Generate signed URLs for product images
-    const productImages = product.productImage || [];
-    const signedImageUrls = await Promise.all(
-        productImages.map(async (imageUrl) => {
-            try {
-                const imageKey = imageUrl.split('/').slice(-2).join('/');
-                return await getSignedImageUrl(imageKey);
-            } catch (error) {
-                console.error(`Error signing image URL: ${imageUrl}`, error);
-                return imageUrl;
-            }
-        })
-    );
-
-    product.productImage = signedImageUrls;
-
 
     // Get or create cart
     let cart = await Cart.findOne({ userId });
@@ -68,23 +52,19 @@ const addToCart = async (req, res) => {
 
 
     // Store product in request for price calculator middleware
-   //// req.products = product;    
+    req.products = product;
+        
     // Calculate price with offers
-    //await calculateProductPrices(req, res, () => {});
-    //const processedProduct = req.products;
+    await calculateProductPrices(req, res, () => {});
+    const processedProduct = req.products;
 
-    // Process products through middleware for price calculations
-    req.products = productsWithSignedUrls;
-    await new Promise((resolve) => {
-        calculateProductPrices(req, res, resolve);
-    });
    
     console.log('requested product:',req.products)
-    if (!req.products ) {
+    if (!processedProduct) {
       return res.status(500).json({ success: false, error: 'Error processing product prices' });
     }
 
-    const finalPrice = req.products.finalPrice;
+    const finalPrice = processedProduct.finalPrice;
     console.log('final price:',finalPrice)
 
     // Update cart items
@@ -362,9 +342,28 @@ const listCartItems = async (req, res) => {
     // Filter out any items where product no longer exists
     cart.items = cart.items.filter(item => item.productId);
 
-    // Process each item through price calculator
-    for (const item of cart.items) {
+  
+
+    // Process images and prices for each item
+    const processedItems = await Promise.all(cart.items.map(async (item) => {
       if (item.productId) {
+        // Generate signed URLs for product images
+        const productImages = item.productId.productImage || [];
+        const signedImageUrls = await Promise.all(
+          productImages.map(async (imageUrl) => {
+            try {
+              const imageKey = imageUrl.split('/').slice(-2).join('/');
+              return await getSignedImageUrl(imageKey);
+            } catch (error) {
+              console.error(`Error signing image URL: ${imageUrl}`, error);
+              return imageUrl;
+            }
+          })
+        );
+
+        // Update product images with signed URLs
+        item.productId.productImage = signedImageUrls;
+
         // Set product for price calculation
         req.products = item.productId;
         
@@ -380,25 +379,27 @@ const listCartItems = async (req, res) => {
           item.totalPrice = item.quantity * processedProduct.finalPrice;
         }
       }
-    }
+      return item;
+    }));
     // Check if any item in cart is out of stock
-    const hasOutOfStockItem = cart.items.some(item =>
+    const hasOutOfStockItem = processedItems.some(item =>
       !item.productId || 
       item.productId.quantity === 0||// Check if product exists
       item.productId.stockQuantity < item.quantity  // Check if enough stock
 
 
     );
-
-         
-  
+ 
  // Recalculate cart subtotal with new prices
     cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    
+    // Update cart with processed items and subtotal
+    cart.items = processedItems;
+    cart.cartSubTotal = cartSubTotal;
     await cart.save();
-
+    
     res.render('user/cart', {
-      cartItems: cart.items,
-      
+      cartItems: processedItems,
       cartTotalPrice: cart.cartSubTotal,
       hasOutOfStockItem,
 
