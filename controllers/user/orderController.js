@@ -8,7 +8,7 @@ const Wallet = require('../../models/walletSchema')
 let Coupon = require('../../models/couponSchema')
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-
+const { getSignedImageUrl } = require('../../helpers/uploadToS3');
 
 
 
@@ -34,9 +34,46 @@ const getCheckout = async (req, res) => {
                 couponDiscount: 0
             });
         }
+          // Process items with signed image URLs
+          const processedItems = await Promise.all(cart.items.map(async (item) => {
+            if (item.productId) {
+                // Generate signed URLs for product images
+                const productImages = item.productId.productImage || [];
+                const signedImageUrls = await Promise.all(
+                    productImages.map(async (imageUrl) => {
+                        try {
+                            const imageKey = imageUrl.split('/').slice(-2).join('/');
+                            return await getSignedImageUrl(imageKey);
+                        } catch (error) {
+                            console.error(`Error signing image URL: ${imageUrl}`, error);
+                            return imageUrl;
+                        }
+                    })
+                );
+
+                // Update product images with signed URLs
+                item.productId.productImage = signedImageUrls;
+
+                // Set product for price calculation
+                req.products = item.productId;
+                
+                // Calculate price with offers
+                await calculateProductPrices(req, res, () => {});
+                
+                // Get processed product with final price
+                const processedProduct = req.products;
+                
+                if (processedProduct) {
+                    // Update item prices with calculated values
+                    item.price = processedProduct.finalPrice;
+                    item.totalPrice = item.quantity * processedProduct.finalPrice;
+                }
+            }
+            return item;
+        }));
 
         // Calculate subtotal
-        const subtotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
+        const subtotal = processedItems.reduce((total, item) => total + item.totalPrice, 0);
 
         // Get coupon information from session
         const appliedCoupon = req.session.appliedCoupon || null;
@@ -51,10 +88,13 @@ const getCheckout = async (req, res) => {
             total = subtotal - couponDiscount;
         }
 
+        //update cart items with processd items
+        cart.items = processedItems;
+
         res.render('user/checkout', {
             cart,
             addresses,
-            cartItems: cart.items,
+            cartItems: processedItems,
             subtotal,
             total,
             appliedCoupon: appliedCoupon ? true : false,
