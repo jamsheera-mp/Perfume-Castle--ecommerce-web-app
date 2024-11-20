@@ -121,7 +121,7 @@ const getProductList = async (req, res) => {
 
         // Add cart status to products
         const cartProductIds = cart ? cart.items.map(item => item.productId.toString()) : [];
-        const productsWithCartStatus = productsWithSignedUrls.map(product => ({
+        const productsWithCartStatus = req.products.map(product => ({
             ...product,
             isInCart: cartProductIds.includes(product._id.toString())
         }));
