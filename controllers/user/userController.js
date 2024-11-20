@@ -30,7 +30,8 @@ const loadHome = async (req, res) => {
             Product.find({
                 isBlocked: false,
                 category: { $in: categories.map(category => category._id) },
-                quantity: { $gt: 0 }
+                quantity: { $gt: 0 },
+                productImage:{$exists:true,$ne:[]}
             })
                 .sort({ createdOn: -1 })
                 .limit(50)
@@ -47,8 +48,6 @@ const loadHome = async (req, res) => {
             calculateProductPrices(req, res, resolve);
         });
         const processedProducts = req.products;
-
-
 
         res.render('user/home', {
             user: userData,
