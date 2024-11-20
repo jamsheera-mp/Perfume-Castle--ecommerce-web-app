@@ -14,7 +14,7 @@ const Address = require('../../models/addressSchema')
 const Order = require('../../models/orderSchema')
 const Wallet = require('../../models/walletSchema')
 const Coupon = require('../../models/couponSchema')
-
+const {getSignedImageUrl } = require('../../helpers/uploadToS3')
 
 //Load home page
 const loadHome = async (req, res) => {
@@ -94,7 +94,7 @@ const loadHome = async (req, res) => {
 
     } catch (error) {
         console.log("home page not found", error.message);
-        res.status(500).send('server error');
+        res.status(500).send('Failed to load home page.');
     }
 };
 //Load page not found
