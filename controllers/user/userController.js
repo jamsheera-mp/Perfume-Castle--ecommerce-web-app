@@ -34,7 +34,7 @@ const loadHome = async (req, res) => {
                 productImage:{$exists:true,$ne:[]}
             })
                 .sort({ createdOn: -1 })
-                .limit(50)
+                .limit(25)
                 .lean(),
             user ? User.findById(user).lean() : null
         ]);
@@ -50,20 +50,13 @@ const loadHome = async (req, res) => {
                         return await getSignedImageUrl(imageKey);
                     })
                 );
-                 // Add warning flags if category or brand is unavailable
-                 const categoryWarning = !product.category || !product.category.isListed 
-                 ? 'Category unavailable' 
-                 : null;
-                 
-             const brandWarning = !product.brand || product.brand.isBlocked 
-                 ? 'Brand unavailable' 
-                 : null;
+                
 
              return {
                  ...product,
                  productImage: signedImageUrls,
-                 categoryWarning,
-                 brandWarning
+                 categoryWarning: !product.category || !product.category.isListed ? 'Category unavailable' : null,
+                 brandWarning: !product.brand || product.brand.isBlocked ? 'Brand unavailable' : null
              };
          })
      );
@@ -75,18 +68,18 @@ const loadHome = async (req, res) => {
      });
 
         // Store products in request for middleware
-        req.products = products;
+        //req.products = products;
 
 
         // Use Promise to properly handle the middleware
-        await new Promise((resolve) => {
-            calculateProductPrices(req, res, resolve);
-        });
-        const processedProducts = req.products;
+        //await new Promise((resolve) => {
+            //calculateProductPrices(req, res, resolve);
+        ////});
+        //const processedProducts = req.products;
 
         res.render('user/home', {
             user: userData,
-            products: processedProducts, // Use processed products with offers
+            products: req.products, // Use processed products with offers
             categories: categories,
             brands: brands,
             
