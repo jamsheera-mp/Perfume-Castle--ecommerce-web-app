@@ -1,9 +1,7 @@
 const { calculateProductPrices } = require('../../middlewares/priceCalculator')
-
-
 const Product = require('../../models/productSchema')
 const Cart = require('../../models/cartSchema');
-
+const { getSignedImageUrl } = require('../../helpers/uploadToS3');
 
 const addToCart = async (req, res) => {
   try {
@@ -43,6 +41,22 @@ const addToCart = async (req, res) => {
     if (product.quantity < requestedQuantity) {
       return res.status(400).json({ success: false, error: `Only ${product.quantity} items available in stock` });
     }
+    // Generate signed URLs for product images
+    const productImages = product.productImage || [];
+    const signedImageUrls = await Promise.all(
+        productImages.map(async (imageUrl) => {
+            try {
+                const imageKey = imageUrl.split('/').slice(-2).join('/');
+                return await getSignedImageUrl(imageKey);
+            } catch (error) {
+                console.error(`Error signing image URL: ${imageUrl}`, error);
+                return imageUrl;
+            }
+        })
+    );
+
+    product.productImage = signedImageUrls;
+
 
     // Get or create cart
     let cart = await Cart.findOne({ userId });
@@ -54,19 +68,23 @@ const addToCart = async (req, res) => {
 
 
     // Store product in request for price calculator middleware
-    req.products = product;
-        
+   //// req.products = product;    
     // Calculate price with offers
-    await calculateProductPrices(req, res, () => {});
-    const processedProduct = req.products;
+    //await calculateProductPrices(req, res, () => {});
+    //const processedProduct = req.products;
 
+    // Process products through middleware for price calculations
+    req.products = productsWithSignedUrls;
+    await new Promise((resolve) => {
+        calculateProductPrices(req, res, resolve);
+    });
    
     console.log('requested product:',req.products)
-    if (!processedProduct) {
+    if (!req.products ) {
       return res.status(500).json({ success: false, error: 'Error processing product prices' });
     }
 
-    const finalPrice = processedProduct.finalPrice;
+    const finalPrice = req.products.finalPrice;
     console.log('final price:',finalPrice)
 
     // Update cart items
