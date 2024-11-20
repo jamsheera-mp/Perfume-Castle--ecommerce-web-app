@@ -391,13 +391,13 @@ const listCartItems = async (req, res) => {
     );
  
  // Recalculate cart subtotal with new prices
-    cart.cartSubTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const cartSubTotal = processedItems.reduce((sum, item) => sum + item.totalPrice, 0);
     
     // Update cart with processed items and subtotal
     cart.items = processedItems;
     cart.cartSubTotal = cartSubTotal;
     await cart.save();
-    
+
     res.render('user/cart', {
       cartItems: processedItems,
       cartTotalPrice: cart.cartSubTotal,
