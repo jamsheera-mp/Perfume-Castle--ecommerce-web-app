@@ -9,7 +9,7 @@ const salesReportController = {
       const { startDate, endDate, reportType } = req.query;
       let query = {
         status:{
-          $nin:['Returned','Cancelled','Return Request','Returned','Failed','Pending']
+          $nin:['Cancelled','Return Request','Returned','Pending','Failed']
         }
       };
 
@@ -75,7 +75,7 @@ const salesReportController = {
       const { format, startDate, endDate, reportType } = req.query;
       let query = {
         status:{
-          $nin:['Returned','Cancelled','Return Request','Returned','Failed','Pending']
+          $nin:['Cancelled','Return Request','Returned','Pending','Failed']
         }
       };
 
