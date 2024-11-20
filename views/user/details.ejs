@@ -83,7 +83,7 @@
                                         <div class="product-image-slider product-image-slider-custom">
                                             <figure class="border-radius-10">
                                                 <img id="main-product-image" class="main-image"
-                                                src= "<%= product.productImage[0]%>" 
+                                                    src="<%= product.productImage[0]%>"
                                                     alt="<%= product.productName %>">
                                             </figure>
 
@@ -107,15 +107,15 @@
                                         </h2>
                                         <div class="product-detail-rating">
                                             <div class="pro-details-brand">
-                                                <span> Brand: 
+                                                <span> Brand:
                                                     <% if (product.brand && product.brand.brandName) { %>
                                                         <%= product.brand.brandName %>
-                                                    <% } else { %>
-                                                        Not Specified
-                                                    <% } %>
+                                                            <% } else { %>
+                                                                Not Specified
+                                                                <% } %>
                                                 </span>
                                             </div>
-                                            <div class="product-rate-cover text-end">
+                                            <!--<div class="product-rate-cover text-end">
                                                 <div class="product-rate d-inline-block">
                                                     <div class="product-rating"
                                                         style="width:<%= averageRating * 20 %>%;">
@@ -123,13 +123,13 @@
                                                 </div>
                                                 <span class="font-small ml-5 text-muted"> (<%= reviews.length %>
                                                         reviews)</span>
-                                            </div>
+                                            </div>-->
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
                                                 <ins><span class="text-brand">$<%= product.salePrice ?
                                                             product.salePrice.toFixed(2) : 'N/A' %></span></ins>
-                                               
+
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -176,12 +176,12 @@
                                                         <div class="product-extra-link2">
                                                             <button type="submit" class="button button-add-to-cart">Add
                                                                 to cart</button>
-                                                                <div id="cartMessage-<%= product._id %>" class="cart-message"
-                                                                    style="display: none;"></div>
+                                                            <div id="cartMessage-<%= product._id %>"
+                                                                class="cart-message" style="display: none;"></div>
                                                             <!--<a aria-label="Add To Wishlist" class="action-btn hover-up"
                                                                 href="shop-wishlist.html"><i
                                                                     class="fi-rs-heart"></i></a>-->
-                                                           <!-- <a aria-label="Compare" class="action-btn hover-up"
+                                                            <!-- <a aria-label="Compare" class="action-btn hover-up"
                                                                 href="shop-compare.html"><i
                                                                     class="fi-rs-shuffle"></i></a>-->
                                                         </div>
@@ -196,7 +196,7 @@
                                                                 </span></li>
                                                         </ul>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
 
@@ -299,61 +299,66 @@
                                 </div>
                             </div>
                         </div>-->
-                        <div class="row mt-60">
-                            <div class="col-12">
-                                <h3 class="section-title style-1 mb-30">Related products</h3>
-                            </div>
-                            <div class="col-12">
-                                <div class="row related-products">
-                                    <% if (relatedProducts && relatedProducts.length > 0) { %>
-                                    <% relatedProducts.forEach(relatedProduct=> { %>
-                                        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                            <div class="product-cart-wrap small hover-up">
-                                                <div class="product-img-action-wrap">
-                                                    <div class="product-img product-img-zoom">
-                                                        <a href="/product/<%= relatedProduct._id %>" tabindex="0">
-                                                            <img class="default-img" src= "<%= relatedProduct.productImage[0]%>"
-                                                                
-                                                                alt="<%= relatedProduct.productName %>">
-                                                            <!-- <img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt=""> -->
-                                                        </a>
-                                                    </div>
+                                <div class="row mt-60">
+                                    <div class="col-12">
+                                        <h3 class="section-title style-1 mb-30">Related products</h3>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="row related-products">
+                                            <% if (relatedProducts && relatedProducts.length> 0) { %>
+                                                <% relatedProducts.forEach(relatedProduct=> { %>
+                                                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                                        <div class="product-cart-wrap small hover-up">
+                                                            <div class="product-img-action-wrap">
+                                                                <div class="product-img product-img-zoom">
+                                                                    <a href="/product/<%= relatedProduct._id %>"
+                                                                        tabindex="0">
+                                                                        <img class="default-img"
+                                                                            src="<%= relatedProduct.productImage[0]%>"
+                                                                            alt="<%= relatedProduct.productName %>">
+                                                                        <!-- <img class="hover-img" src="assets/imgs/shop/product-2-2.jpg" alt=""> -->
+                                                                    </a>
+                                                                </div>
 
-                                                </div>
-                                                <div class="product-content-wrap">
-                                                    <h2><a href="/product/<%= relatedProduct._id %>" tabindex="0">
-                                                            <%= relatedProduct.productName %>
-                                                        </a></h2>
-                                                    <div class="rating-result" title="90%">
-                                                        <span>
-                                                        </span>
+                                                            </div>
+                                                            <div class="product-content-wrap">
+                                                                <h2><a href="/product/<%= relatedProduct._id %>"
+                                                                        tabindex="0">
+                                                                        <%= relatedProduct.productName %>
+                                                                    </a></h2>
+                                                                <div class="rating-result" title="90%">
+                                                                    <span>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="product-price">
+                                                                    <span>$ <%= relatedProduct.salePrice.toFixed(2) %>
+                                                                    </span>
+                                                                    <% if (relatedProduct.regularPrice) { %>
+                                                                        <span class="old-price">$<%=
+                                                                                relatedProduct.regularPrice.toFixed(2)
+                                                                                %></span>
+                                                                        <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="product-price">
-                                                        <span>$ <%= relatedProduct.salePrice.toFixed(2) %> </span>
-                                                        <% if (relatedProduct.regularPrice) { %>
-                                                            <span class="old-price">$<%= relatedProduct.regularPrice.toFixed(2) %></span>
-                                                        <% } %>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <div class="col-12">
+                                                                <p class="text-center">No related products found</p>
+                                                            </div>
+
+                                                            <% } %>
+
+
                                         </div>
-                                        <% }) %>
-                                        <% } else { %>
-                                            <div class="col-12">
-                                                <p class="text-center">No related products found</p>
-                                            </div>
-
-                                            <% } %>
-
-
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
-
                     </div>
                 </div>
-            </div>
-            </div>
         </section>
     </main>
 
@@ -374,56 +379,112 @@
             $('.main-image').zoom(); // Reinitialize zoom
         }
     </script>
- <script>
-    document.querySelectorAll('.button-add-to-cart').forEach(button => {
-   button.addEventListener('click', async function (event) {
-       event.preventDefault();  // Prevent page refresh or redirect
-       const form = event.target.closest('form'); // Get the related form
-       const formData = new FormData(form); // Extract form data
-       const productId = formData.get('productId');
-       const cartMessage = document.getElementById(`cartMessage-${productId}`); // Message container for feedback
+    <script>
+        document.querySelectorAll('.button-add-to-cart').forEach(button => {
+            button.addEventListener('click', async function (event) {
+                event.preventDefault();  // Prevent page refresh or redirect
+                const form = event.target.closest('form'); // Get the related form
+                const formData = new FormData(form); // Extract form data
+                const productId = formData.get('productId');
+                const cartMessage = document.getElementById(`cartMessage-${productId}`); // Message container for feedback
 
-       try {
-           const response = await fetch('/addToCart', {
-               method: 'POST',
-               headers: {
-                   'Content-Type': 'application/json'
-               },
-               body: JSON.stringify({
-                   productId: formData.get('productId'),
-                   quantity: formData.get('quantity')
-               })
-           });
+                try {
+                    const response = await fetch('/addToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            productId: formData.get('productId'),
+                            quantity: formData.get('quantity')
+                        }),
+                        redirect: 'follow'
+                    });
+                    // Handle redirects
+                    if (response.redirected || response.url.includes('/login')) {
+                        window.location.href = response.url || '/login';
+                        return;
+                    }
 
-           const result = await response.json();
+                    const result = await response.json();
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                        return;
+                    }
 
-           if (result.success) {
-               // Show success message on the same page
-               cartMessage.textContent = 'Item added to cart!';
-               cartMessage.classList.remove('alert-danger');
-               cartMessage.classList.add('alert', 'alert-success');
-               cartMessage.style.display = 'block';
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to add to cart');
+                    }
 
-               // Optionally update the button to "Go to Cart" or disable it
-               event.target.innerHTML = '<i class="material-icons md-shopping_cart"></i> Go to Cart';
-               event.target.disabled = true; // Disable button after adding
-           } else {
-               // Show error message on the same page (like stock issue)
-               cartMessage.textContent = result.error || 'Failed to add item to cart.';
-               cartMessage.classList.remove('alert-success');
-               cartMessage.classList.add('alert', 'alert-danger');
-               cartMessage.style.display = 'block';
-           }
-       } catch (error) {
-           // Handle network or unexpected errors
-           cartMessage.textContent = 'An error occurred. Please try again.';
-           cartMessage.classList.add('alert', 'alert-danger');
-           cartMessage.style.display = 'block';
-       }
-   });
-});
+                    if (result.success) {
+                        // Update cart icon
+                        if (result.cart && typeof result.cart.cartItemCount !== 'undefined') {
+                            updateCartIcon(result.cart.cartItemCount);
+                        }
 
 
-   </script>
+                        // Optionally update the button to "Go to Cart" or disable it
+                        event.target.innerHTML = '<i class="material-icons md-shopping_cart"></i> Go to Cart';
+                        event.target.disabled = true; // Disable button after adding
+
+                        // Show success message
+                        const data = await Swal.fire({
+                            icon: 'success',
+                            title: 'Product added to cart',
+                            text: 'Item successfully added to your cart!',
+                            showCancelButton: true,
+                            cancelButtonText: 'Continue Shopping',
+                            confirmButtonText: 'View Cart'
+                        });
+
+                        if (data.isConfirmed) {
+                            window.location.href = '/cart';
+                        }
+                    } else {
+                        // Show error message on the same page (like stock issue)
+                        swal.fire({
+                            icon: 'error',
+                            text: 'An error occured while adding product to cart',
+                            confirmButtonText: 'Try again'
+                        })
+                    }
+                } catch (error) {
+                    console.error('Add to cart error:', error);
+
+                    if (error.message && error.message.includes('<!DOCTYPE html>')) {
+                        const result = await Swal.fire({
+                            icon: 'error',
+                            title: 'Please Log In',
+                            text: 'You need to be logged in to add items to your cart',
+                            showCancelButton: true,
+                            cancelButtonText: 'Stay Here',
+                            confirmButtonText: 'Go to Login'
+                        });
+
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
+                        }
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'Failed to add item to cart'
+                        });
+                    }
+                }
+            })
+        })
+        function updateCartIcon(count) {
+                const cartCountElement = document.getElementById('cart-count');
+                if (cartCountElement) {
+                    cartCountElement.textContent = count;
+                    cartCountElement.classList.add('cart-update-animation');
+                    setTimeout(() => {
+                        cartCountElement.classList.remove('cart-update-animation');
+                    }, 300);
+                }
+            }
+            
+    </script>
 
     <%- include('../partials/user/footer.ejs') %>
