@@ -67,15 +67,7 @@ const loadHome = async (req, res) => {
          calculateProductPrices(req, res, resolve);
      });
 
-        // Store products in request for middleware
-        //req.products = products;
-
-
-        // Use Promise to properly handle the middleware
-        //await new Promise((resolve) => {
-            //calculateProductPrices(req, res, resolve);
-        ////});
-        //const processedProducts = req.products;
+        
 
         res.render('user/home', {
             user: userData,

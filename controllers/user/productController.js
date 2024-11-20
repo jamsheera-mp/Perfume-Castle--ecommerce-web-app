@@ -91,19 +91,21 @@ const getProductList = async (req, res) => {
         // Before processing products, generate signed URLs
         const productsWithSignedUrls = await Promise.all(
             products.map(async (product) => {
-                // Generate signed URLs for product images
+                // Ensure product.productImage exists and is an array
+                const productImages = product.productImage || [];
+                
                 const signedImageUrls = await Promise.all(
-                    (product.productImage || []).map(async (imageUrl) => {
+                    productImages.map(async (imageUrl) => {
                         try {
                             const imageKey = imageUrl.split('/').slice(-2).join('/');
                             return await getSignedImageUrl(imageKey);
                         } catch (error) {
-                            console.error(`Error generating signed URL for image: ${imageUrl}`, error);
-                            return imageUrl; // Fallback to original URL if signing fails
+                            console.error(`Error signing image URL: ${imageUrl}`, error);
+                            return imageUrl;
                         }
                     })
                 );
-
+        
                 return {
                     ...product,
                     productImage: signedImageUrls

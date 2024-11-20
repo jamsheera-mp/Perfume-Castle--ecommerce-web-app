@@ -518,12 +518,12 @@
                                                     <div class="price-row">
                                                         <% if (product.hasOffer) { %>
                                                             <span class="original-price">₹<%=
-                                                                    product.basePrice %></span>
-                                                            <span class="final-price">₹<%= product.finalPrice
+                                                                    product.basePrice.toFixed(2) %></span>
+                                                            <span class="final-price">₹<%= product.finalPrice.toFixed(2)
                                                                     %></span>
                                                             <% } else { %>
                                                                 <span class="final-price">₹<%=
-                                                                        product.basePrice %></span>
+                                                                        product.basePrice.toFixed(2) %></span>
                                                                 <% } %>
                                                     </div>
 
