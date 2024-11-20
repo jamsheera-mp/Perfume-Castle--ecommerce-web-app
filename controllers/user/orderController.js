@@ -9,6 +9,7 @@ let Coupon = require('../../models/couponSchema')
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { getSignedImageUrl } = require('../../helpers/uploadToS3');
+const { calculateProductPrices } = require('../../middlewares/priceCalculator')
 
 
 
