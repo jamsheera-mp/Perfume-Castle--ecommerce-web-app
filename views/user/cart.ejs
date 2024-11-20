@@ -120,7 +120,7 @@
                                             <% if(item.productId) { %>
                                                 <tr data-productid="<%= item.productId._id %>">
                                                     <td class="image product-thumbnail"><img
-                                                        src= "<%= products[i].productImage[0]%>"
+                                                        src= "<%= item.productId.productImage[0]%>"
                                                             alt="<%= item.productId.productName%>"></td>
                                                     <td class="product-des product-name">
                                                         <h5 class="product-name"><a href="">
