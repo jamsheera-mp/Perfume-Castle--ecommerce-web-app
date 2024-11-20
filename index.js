@@ -44,6 +44,7 @@ app.use((req, res, next) => {
       'Content-Security-Policy',
       "default-src 'self'; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "style-src-elem 'self' 'unsafe-inline' https: https://fonts.googleapis.com;" +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: https:; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval';"
