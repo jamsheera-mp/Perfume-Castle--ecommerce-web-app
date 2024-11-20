@@ -7,7 +7,7 @@ const Category = require('../../models/categorySchema')
 const Brand = require('../../models/brandSchema')
 const User = require('../../models/userSchema')
 const Cart = require('../../models/cartSchema')
-
+const { getSignedImageUrl } = require('../../helpers/uploadToS3');
 
 
 
@@ -69,11 +69,11 @@ const getProductList = async (req, res) => {
 
         const sort = sortMapping[sortBy] || sortMapping.dateAdded;
 
-       
+
 
 
         // Run queries in parallel
-        const [categories, brands, products, totalProducts,cart] = await Promise.all([
+        const [categories, brands, products, totalProducts, cart] = await Promise.all([
             Category.find({ isListed: true }).lean(),
             Brand.find({ isBlocked: false }).lean(),
             Product.find(baseQuery)
@@ -82,29 +82,49 @@ const getProductList = async (req, res) => {
                 .limit(limit)
                 .populate('category', 'name')
                 .populate('brand', 'brandName')
-                
+
                 .lean(),
             Product.countDocuments(baseQuery),
-            Cart.findOne({userId})
+            Cart.findOne({ userId })
         ]);
 
+        // Before processing products, generate signed URLs
+        const productsWithSignedUrls = await Promise.all(
+            products.map(async (product) => {
+                // Generate signed URLs for product images
+                const signedImageUrls = await Promise.all(
+                    (product.productImage || []).map(async (imageUrl) => {
+                        try {
+                            const imageKey = imageUrl.split('/').slice(-2).join('/');
+                            return await getSignedImageUrl(imageKey);
+                        } catch (error) {
+                            console.error(`Error generating signed URL for image: ${imageUrl}`, error);
+                            return imageUrl; // Fallback to original URL if signing fails
+                        }
+                    })
+                );
 
-         // Store products in request for middleware
-         req.products = products;
-        
-         // Calculate prices with offers (middleware will process this)
-         await calculateProductPrices(req, res, () => {});
-         const processedProducts = req.products;
- 
+                return {
+                    ...product,
+                    productImage: signedImageUrls
+                };
+            })
+        );
+        // Process products through middleware for price calculations
+        req.products = productsWithSignedUrls;
+        await new Promise((resolve) => {
+            calculateProductPrices(req, res, resolve);
+        });
 
-       // Add cart status to products
-       const cartProductIds = cart ? cart.items.map(item => item.productId.toString()) : [];
-       const productsWithCartStatus = processedProducts.map(product => ({
-           ...product,
-           isInCart: cartProductIds.includes(product._id.toString())
-       }));
-       
-        
+
+        // Add cart status to products
+        const cartProductIds = cart ? cart.items.map(item => item.productId.toString()) : [];
+        const productsWithCartStatus = productsWithSignedUrls.map(product => ({
+            ...product,
+            isInCart: cartProductIds.includes(product._id.toString())
+        }));
+
+
         // store the search history for user
         if (user) {
             const userId = req.session.user;
@@ -144,7 +164,7 @@ const getProductList = async (req, res) => {
         const hasPrevPage = page > 1;
 
 
-       
+
 
         // Prepare response data
         const responseData = {
@@ -169,7 +189,7 @@ const getProductList = async (req, res) => {
             brands,
             user: userData,
             noProductsMessage,
-            
+
         };
 
         res.render('user/shop', responseData);
@@ -261,11 +281,11 @@ const searchProducts = async (req, res) => {
 // Product detail
 const getProductDetails = async (req, res) => {
     try {
-        
+
         const product = await Product.findById(req.params.id)
-        .populate('brand','brandName')
-        .populate('category','name')
-        .lean()
+            .populate('brand', 'brandName')
+            .populate('category', 'name')
+            .lean()
 
         if (!product) {
             return res.status(404).render('user/404', { message: 'Product not found' });
@@ -274,12 +294,27 @@ const getProductDetails = async (req, res) => {
         if (!product.category) {
             return res.status(404).render('user/404', { message: 'Product category not found' });
         }
+        // Generate signed URLs for the product
+        if (product.productImage && product.productImage.length > 0) {
+            const signedImageUrls = await Promise.all(
+                product.productImage.map(async (imageUrl) => {
+                    try {
+                        const imageKey = imageUrl.split('/').slice(-2).join('/');
+                        return await getSignedImageUrl(imageKey);
+                    } catch (error) {
+                        console.error(`Error generating signed URL for image: ${imageUrl}`, error);
+                        return imageUrl;
+                    }
+                })
+            );
+            product.productImage = signedImageUrls;
+        }
 
         // Store product in request for middleware
         req.products = product;
-        
+
         // Calculate price with offers
-        await calculateProductPrices(req, res, () => {});
+        await calculateProductPrices(req, res, () => { });
         const processedProduct = req.products;
 
         const reviews = await Review.find({ productId: product._id })
@@ -287,17 +322,39 @@ const getProductDetails = async (req, res) => {
 
         const relatedProducts = await Product.find({
             category: product.category,
-            
+
             _id: { $ne: product._id },
-            
-        }).populate('brand','brandName')
-        .limit(4)||[]
-        .lean();
-       
-        // Calculate prices for related products
-        req.products = relatedProducts;
-        await calculateProductPrices(req, res, () => {});
-        const processedRelatedProducts = req.products;
+
+        }).populate('brand', 'brandName')
+            .limit(4) || []
+                .lean();
+
+      
+
+        // Generate signed URLs for related products
+        const relatedProductsWithSignedUrls = await Promise.all(
+            relatedProducts.map(async (relatedProduct) => {
+                if (relatedProduct.productImage && relatedProduct.productImage.length > 0) {
+                    const signedImageUrls = await Promise.all(
+                        relatedProduct.productImage.map(async (imageUrl) => {
+                            try {
+                                const imageKey = imageUrl.split('/').slice(-2).join('/');
+                                return await getSignedImageUrl(imageKey);
+                            } catch (error) {
+                                console.error(`Error generating signed URL for related product image: ${imageUrl}`, error);
+                                return imageUrl;
+                            }
+                        })
+                    );
+                    relatedProduct.productImage = signedImageUrls;
+                }
+                return relatedProduct;
+            })
+        );
+          // Calculate prices for related products
+          req.products = relatedProductsWithSignedUrls;
+          await calculateProductPrices(req, res, () => { });
+          const processedRelatedProducts = req.products;
 
         res.render('user/details', {
             product: processedProduct,
@@ -315,7 +372,5 @@ module.exports = {
     getProductList,
     searchProducts,
     getProductDetails,
-   
-
 
 }
