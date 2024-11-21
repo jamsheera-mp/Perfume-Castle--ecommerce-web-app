@@ -1,5 +1,6 @@
 const Order = require('../../models/orderSchema');
 const Product = require('../../models/productSchema'); 
+const { getSignedImageUrl } = require('../../helpers/uploadToS3')
 
 const listOrders = async (req, res) => {
     try {
@@ -134,6 +135,31 @@ const getOrderDetails = async (req, res) => {
         if (!order) {
             return res.redirect('/admin/orders');
         }
+         // Generate signed URLs for product images
+         const orderedItemsWithSignedUrls = await Promise.all(
+            order.orderedItems.map(async (item) => {
+                // Check if product images exist and generate signed URLs
+                const signedImageUrls = item.product && item.product.productImage 
+                    ? await Promise.all(
+                        item.product.productImage.map(async (imageUrl) => {
+                            // Extract the key from the full S3 URL if needed
+                            const imageKey = imageUrl.split('/').slice(-2).join('/');
+                            return await getSignedImageUrl(imageKey);
+                        })
+                    )
+                    : [];
+
+                return {
+                    ...item,
+                    productImage: signedImageUrls,
+                    product: {
+                        ...item.product,
+                        category: item.product?.category || 'Unknown Category'
+                    }
+                };
+            })
+        );
+
         // Find the correct address from the array
         const deliveryAddress = order.address.parentAddressId.address.find(
             addr => addr._id.toString() === order.address.addressId.toString()
@@ -151,18 +177,9 @@ const getOrderDetails = async (req, res) => {
             ...order,
             deliveryAddress,
             formattedDateTime,
-            orderedItems: order.orderedItems.map(item => ({
-                ...item,
-                productImage: item.image ? [item.image] : [],  // Wrap single image in array
-                productName: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                product: {
-                    ...item.product,
-                    category: item.product?.category || 'Unknown Category'
-                }
-            }))
-        };
+            orderedItems: orderedItemsWithSignedUrls
+        
+        }
 
         res.render('admin/orderDetails', { order: safeOrder });
     } catch (error) {
